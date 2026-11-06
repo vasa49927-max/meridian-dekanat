@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+/* Тёмная тема по классу .dark на <html> (ставится до отрисовки, см. theme-script.tsx) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Дизайн-токены «Меридиан» — направление A «Посольство» (выбрано капитаном на КТ (а)).
+ * Описание и проверка контраста — docs/DESIGN.md. В компонентах — только эти переменные.
+ */
+:root {
+  --bg: #f6f3ec;
+  --surface: #fffdf8;
+  --surface-2: #f0ebdf;
+  --fg: #141b2d;
+  --muted: #565c6b;
+  --line: #e2dbcb;
+  --primary: #14244b;
+  --primary-fg: #f8f4ea;
+  --primary-soft: #e6e9f2;
+  --accent: #b8892f; /* латунь — декоративно (полосы, звезда логотипа) */
+  --accent-text: #7a5a1c; /* латунь для текста — AA на светлом */
+  --hero: #14244b;
+  --hero-fg: #f8f4ea;
+  --hero-muted: #c9c3b4;
+  --hero-2: #2a3a63;
+  --side: #14244b;
+  --side-fg: #f3eee2;
+  --side-on: rgb(255 255 255 / 0.1);
+  --warn: #7a4e00;
+  --warn-bg: #fff6e3;
+  --warn-line: #ebcf92;
+  --danger: #b3261e;
+  --danger-bg: #fbe9e7;
+  --ok: #1e6b3a;
+  --ok-bg: #e5f2e8;
+  --info: #1f4e9c;
+  --info-bg: #e6eefa;
+  --focus: #b8892f;
+  --shadow: 0 1px 2px rgb(20 27 45 / 0.04), 0 6px 20px rgb(20 27 45 / 0.05);
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0b1020;
+  --surface: #121a2e;
+  --surface-2: #1a2440;
+  --fg: #eee9dd;
+  --muted: #a7adbb;
+  --line: #26314d;
+  --primary: #e0b65c;
+  --primary-fg: #14182a;
+  --primary-soft: #1e2a4a;
+  --accent: #e0b65c;
+  --accent-text: #e6c47a;
+  --hero: #1a2850;
+  --hero-fg: #f8f4ea;
+  --hero-muted: #b9bfd0;
+  --hero-2: #2b3c6b;
+  --side: #0e1530;
+  --side-fg: #eee9dd;
+  --side-on: rgb(255 255 255 / 0.08);
+  --warn: #f5c84b;
+  --warn-bg: #2a2410;
+  --warn-line: #5a4b12;
+  --danger: #ff8a80;
+  --danger-bg: #3a1a17;
+  --ok: #7fe3a0;
+  --ok-bg: #15301f;
+  --info: #9cc0ff;
+  --info-bg: #18233a;
+  --focus: #e0b65c;
+  --shadow: none;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-hero: var(--hero);
+  --color-hero-fg: var(--hero-fg);
+  --color-hero-muted: var(--hero-muted);
+  --color-hero-2: var(--hero-2);
+  --color-side: var(--side);
+  --color-side-fg: var(--side-fg);
+  --color-side-on: var(--side-on);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-line: var(--warn-line);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --font-sans: "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "PT Serif", Georgia, serif;
+  --radius-card: 16px;
+  --shadow-card: var(--shadow);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 80px;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+/* Скелетон загрузки */
+@keyframes shimmer { 0% { background-position: -400px 0 } 100% { background-position: 400px 0 } }
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 0, color-mix(in srgb, var(--surface-2) 60%, var(--surface)) 50%, var(--surface-2) 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 10px;
+}
+.tabular { font-variant-numeric: tabular-nums; }
