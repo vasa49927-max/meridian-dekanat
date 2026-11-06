@@ -14,7 +14,8 @@ export default defineConfig({
   globalSetup: "./tests/e2e/global-setup.ts",
   use: { baseURL: `http://localhost:${PORT}`, locale: "ru-RU", timezoneId: "Europe/Moscow", trace: "retain-on-failure" },
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
+    // mobile.spec.ts — только для 360 px (проверки ширины и нижнего таб-бара на desktop не имеют смысла).
+    { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } }, testIgnore: /mobile\.spec\.ts/ },
     { name: "mobile-360", use: { ...devices["Pixel 7"], viewport: { width: 360, height: 800 } }, testMatch: /(flow|mobile)\.spec\.ts/ },
   ],
   webServer: {

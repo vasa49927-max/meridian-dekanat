@@ -5,7 +5,8 @@ set -euo pipefail
 # Под root initdb не запускается — выполняем от служебного пользователя.
 AS=""; if [ "$(id -u)" = "0" ]; then AS="runuser -u ${PGUSER_OS:-postgres} --"; fi
 PGBIN=${PGBIN:-/usr/lib/postgresql/16/bin}
-DATA="$(cd "$(dirname "$0")/.." && pwd)/.pgdata"
+# Данные БД — вне папки проекта, иначе dev-сервер Next следит за файлами WAL и бесконечно перекомпилируется.
+DATA="${PGDATA_DIR:-/var/tmp/meridian-pgdata}"
 PORT=${PGPORT:-5432}
 case "${1:-start}" in
   start)

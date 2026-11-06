@@ -5,6 +5,7 @@ import { db, schema as t } from "@/server/db";
 import type { StudentViewer } from "@/server/auth/guards";
 import type { RequestField } from "@/server/db/schema";
 import { newRequestNumber } from "@/server/documents";
+import { now } from "@/lib/time";
 
 export async function listRequestTypes() {
   return db.select().from(t.requestTypes).orderBy(desc(t.requestTypes.popular), asc(t.requestTypes.title));
@@ -58,7 +59,7 @@ export async function createMyRequest(v: StudentViewer, code: string, raw: Recor
     return { ok: false as const, error: "Проверьте поля формы", fieldErrors };
   }
   const payload = Object.fromEntries(Object.entries(parsed.data).filter(([, val]) => val !== ""));
-  const created = new Date();
+  const created = now();
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const id = await db.transaction(async (tx) => {

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { db, schema as t } from "@/server/db";
 import type { StaffViewer } from "@/server/auth/guards";
 import { buildDocument, newVerifyCode } from "@/server/documents";
-import { fmt } from "@/lib/time";
+import { fmt, now } from "@/lib/time";
 
 /**
  * DAL сотрудника деканата. Каждая функция требует StaffViewer —
@@ -25,7 +25,7 @@ export type QueueFilter = { status?: Status | "active" | "overdue"; type?: strin
 export async function staffQueue(_v: StaffViewer, f: QueueFilter, page = 0, size = 25) {
   const conds = [];
   if (f.status === "active" || !f.status) conds.push(inArray(t.requests.status, ["SUBMITTED", "IN_PROGRESS", "NEEDS_INFO", "READY"]));
-  else if (f.status === "overdue") conds.push(inArray(t.requests.status, ["SUBMITTED", "IN_PROGRESS"]), lt(t.requests.dueAt, new Date()));
+  else if (f.status === "overdue") conds.push(inArray(t.requests.status, ["SUBMITTED", "IN_PROGRESS"]), lt(t.requests.dueAt, now()));
   else conds.push(eq(t.requests.status, f.status));
   if (f.type) conds.push(eq(t.requestTypes.code, f.type));
   if (f.faculty) conds.push(eq(t.faculties.code, f.faculty));
@@ -50,7 +50,7 @@ export async function staffQueue(_v: StaffViewer, f: QueueFilter, page = 0, size
     inProgress: sql<number>`count(*) filter (where ${t.requests.status} = 'IN_PROGRESS')`.mapWith(Number),
     needsInfo: sql<number>`count(*) filter (where ${t.requests.status} = 'NEEDS_INFO')`.mapWith(Number),
     ready: sql<number>`count(*) filter (where ${t.requests.status} = 'READY')`.mapWith(Number),
-    overdue: sql<number>`count(*) filter (where ${t.requests.status} in ('SUBMITTED','IN_PROGRESS') and ${t.requests.dueAt} < now())`.mapWith(Number),
+    overdue: sql<number>`count(*) filter (where ${t.requests.status} in ('SUBMITTED','IN_PROGRESS') and ${t.requests.dueAt} < ${now()})`.mapWith(Number),
   }).from(t.requests);
   return { items: items.slice(0, size), hasMore: items.length > size, stats };
 }
@@ -202,7 +202,7 @@ export async function staffAppointments(v: StaffViewer, from: Date) {
 
 export async function staffCounts() {
   const [r] = await db.select({ n: count() }).from(t.requests).where(eq(t.requests.status, "SUBMITTED"));
-  const [u] = await db.select({ n: count() }).from(t.slots).where(and(eq(t.slots.isBooked, true), gte(t.slots.startsAt, new Date())));
+  const [u] = await db.select({ n: count() }).from(t.slots).where(and(eq(t.slots.isBooked, true), gte(t.slots.startsAt, now())));
   return { newRequests: r?.n ?? 0, upcomingAppointments: u?.n ?? 0 };
 }
 

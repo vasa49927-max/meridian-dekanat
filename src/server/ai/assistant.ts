@@ -102,9 +102,10 @@ const REQUEST_HINTS: Record<string, RegExp> = {
 };
 
 /** Режим без LLM: ответ из пунктов Положения + правила для частых вопросов. Работает всегда (и как запасной вариант). */
-async function offlineAnswer(v: StudentViewer, question: string, points: RegPoint[]): Promise<AssistantReply> {
+async function offlineAnswer(v: StudentViewer, question: string, found: RegPoint[]): Promise<AssistantReply> {
+  let points = found;
   const q = question.toLowerCase();
-  const sources = points.map((p) => ({ id: p.id, section: p.section }));
+  const sourcesOf = (ps: RegPoint[]) => ps.slice(0, 3).map((p) => ({ id: p.id, section: p.section }));
   if (/сесси|балл|оценк|автомат|успеваем|как (у меня )?дела|риск/.test(q)) {
     const g = await getMyGrades(v);
     const auto = g.current.filter((d) => d.summary.auto?.achieved).map((d) => d.short);
@@ -127,9 +128,13 @@ async function offlineAnswer(v: StudentViewer, question: string, points: RegPoin
     ].join(" ");
     return { text, sources: [{ id: "3.1", section: "Расписание" }], action: null, mode: "offline" };
   }
+  // Если вопрос явно про вид заявки (военкомат, виза, выписка…) — этот пункт Положения главный,
+  // даже если поиск по словам поставил его ниже (QA-баг №1: «справка для военкомата» отвечала про ВУЦ).
+  const hinted = Object.entries(REQUEST_HINTS).find(([, re]) => re.test(q))?.[0];
+  const hintedPoint = hinted ? REGULATION.find((p) => p.request === hinted) : undefined;
+  if (hintedPoint) points = [hintedPoint, ...points.filter((p) => p !== hintedPoint)];
   const top = points[0];
-  // Действие — только если вид заявки явно связан с вопросом (совпадает основа ключевого слова).
-  const withReq = points.slice(0, 2).find((p) => p.request && REQUEST_HINTS[p.request]?.test(q));
+  const withReq = hintedPoint;
   if (!top) return { text: "Не нашёл ответа в Положении. Попробуйте спросить иначе — например, «справка для визы», «пересдача», «индивидуальный график» — или запишитесь к методисту: он поможет лично [п. 2.1].", sources: [{ id: "2.1", section: "Приём студентов" }], action: null, mode: "offline" };
   let action: AssistantAction | null = null;
   if (withReq) {
@@ -142,7 +147,7 @@ async function offlineAnswer(v: StudentViewer, question: string, points: RegPoin
     action = await validateAction({ code: withReq.request, fields });
   }
   const text = `${top.text} [п. ${top.id}]${withReq && withReq !== top ? `\n\n${withReq.text} [п. ${withReq.id}]` : ""}`;
-  return { text, sources, action, mode: "offline" };
+  return { text, sources: sourcesOf(points), action, mode: "offline" };
 }
 
 export async function askAssistant(v: StudentViewer, history: ChatMsg[]): Promise<AssistantReply> {
