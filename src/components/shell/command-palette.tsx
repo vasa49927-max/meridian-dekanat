@@ -1,7 +1,7 @@
 "use client";
 import { Command } from "cmdk";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ArrowRight, BookOpen, CalendarPlus, FileText, Moon, Search, Sparkles } from "lucide-react";
 import { STAFF_NAV, STUDENT_NAV } from "./nav";
 
@@ -19,13 +19,6 @@ export type PaletteIndex = {
 export function CommandPalette({ index, open, setOpen }: { index: PaletteIndex; open: boolean; setOpen: (v: boolean) => void }) {
   const router = useRouter();
   const [q, setQ] = useState("");
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setOpen(!open); }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, setOpen]);
   const go = (href: string) => { setOpen(false); setQ(""); router.push(href); };
   const nav = index.role === "STUDENT" ? STUDENT_NAV : STAFF_NAV;
   const item = "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] data-[selected=true]:bg-primary-soft data-[selected=true]:text-primary dark:data-[selected=true]:text-accent-text";

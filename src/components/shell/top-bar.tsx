@@ -1,13 +1,24 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import { Bell, Search } from "lucide-react";
 import { LogoMark } from "@/components/logo";
-import { CommandPalette, type PaletteIndex } from "./command-palette";
+import type { PaletteIndex } from "./command-palette";
+
+// Палитра (cmdk) грузится только при первом открытии — меньше JS на старте страницы.
+const CommandPalette = dynamic(() => import("./command-palette").then((m) => m.CommandPalette), { ssr: false });
 import { ThemeToggle } from "./theme-toggle";
 
 export function TopBar({ unread, index, home = "/" }: { unread: number; index: PaletteIndex; home?: string }) {
   const [open, setOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const show = (v: boolean) => { if (v) setLoaded(true); setOpen(v); };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setLoaded(true); setOpen((o) => !o); } };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none">
       <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-2 px-4 lg:h-20 lg:px-9">
@@ -15,7 +26,7 @@ export function TopBar({ unread, index, home = "/" }: { unread: number; index: P
           <LogoMark className="h-9 w-9" />
           <span className="font-serif text-lg font-bold">Меридиан</span>
         </Link>
-        <button type="button" onClick={() => setOpen(true)} aria-label="Поиск по кабинету (Ctrl+K)"
+        <button type="button" onClick={() => show(true)} aria-label="Поиск по кабинету (Ctrl+K)"
           className="inline-flex h-11 w-11 items-center justify-center gap-3 rounded-xl border border-line bg-surface text-muted hover:bg-surface-2 lg:ml-auto lg:w-80 lg:justify-start lg:px-3.5">
           <Search className="h-5 w-5 shrink-0" aria-hidden />
           <span className="hidden flex-1 text-left text-sm lg:inline">Поиск и действия</span>
@@ -30,7 +41,7 @@ export function TopBar({ unread, index, home = "/" }: { unread: number; index: P
         )}
         <ThemeToggle className="hidden lg:inline-flex" />
       </div>
-      <CommandPalette index={index} open={open} setOpen={setOpen} />
+      {loaded && <CommandPalette index={index} open={open} setOpen={show} />}
     </header>
   );
 }

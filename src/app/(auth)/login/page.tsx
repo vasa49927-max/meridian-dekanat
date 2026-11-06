@@ -16,10 +16,10 @@ const FEATURES = [
   { icon: Sparkles, text: "ИИ-помощник по правилам деканата" },
 ];
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; reset?: string }> }) {
   const v = await getViewer();
   if (v) redirect(v.role === "STAFF" ? "/staff" : "/");
-  const { next } = await searchParams;
+  const { next, reset } = await searchParams;
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1fr_minmax(480px,560px)]">
       <section className="relative hidden overflow-hidden bg-hero p-12 text-hero-fg lg:flex lg:flex-col" aria-label="О сервисе">
@@ -46,6 +46,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div className="mx-auto my-auto w-full max-w-md py-8">
           <h1 className="font-serif text-3xl lg:text-[34px]">Вход в кабинет</h1>
           <p className="mb-6 mt-2 text-muted">Студенты и сотрудники деканата — по логину и паролю.</p>
+          {reset && <p role="status" className="mb-4 rounded-xl bg-ok-bg px-3.5 py-2.5 text-sm font-medium text-ok">Демо-данные пересозданы. Войдите снова.</p>}
           <LoginForm next={next} />
         </div>
         <Disclaimer className="mx-auto w-full max-w-md" />

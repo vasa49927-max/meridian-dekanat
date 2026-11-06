@@ -29,7 +29,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         <Logo className="px-2 [&_svg]:h-9 [&_svg]:w-9" />
         <SideNav role="STUDENT" unread={unread} />
         <div className="flex items-center gap-3 rounded-2xl bg-side-on p-3">
-          <Avatar name={name} hue={220} size={40} />
+          <Avatar name={name} hue={v.avatarHue} size={40} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{name}</p>
             <p className="truncate text-xs opacity-75">{v.course} курс · студент</p>

@@ -89,7 +89,7 @@ export default async function TodayPage() {
                 const done = l.endsAt < at;
                 const live = l.startsAt <= at && l.endsAt > at;
                 return (
-                  <li key={l.id} className={cn("flex gap-3 py-2.5", done && "opacity-55")}>
+                  <li key={l.id} className={cn("flex gap-3 py-2.5", done && "text-muted [&_p]:text-muted")}>
                     <time className={cn("w-12 shrink-0 font-semibold tabular", live && "text-primary dark:text-accent-text")} dateTime={l.startsAt.toISOString()}>{fmt.time(l.startsAt)}</time>
                     <div className="min-w-0">
                       <p className={cn("font-semibold leading-snug", live && "text-primary dark:text-accent-text", l.status === "CANCELLED" && "line-through decoration-warn")}>{l.title}</p>

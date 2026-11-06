@@ -20,7 +20,7 @@ export function ChangeBanner({ changes }: { changes: LessonView[] }) {
                 {c.status === "CANCELLED" ? (
                   <><Ban className="inline h-3.5 w-3.5" aria-hidden /> {fmt.shortDay(c.startsAt)}, {fmt.time(c.startsAt)} — <b>отменена</b></>
                 ) : (
-                  <><s className="opacity-80">{fmt.shortDay(prev)}, {fmt.time(prev)}, ауд. {c.prevRoom}</s>{" → "}<b>{fmt.shortDay(c.startsAt)}, {fmt.time(c.startsAt)}, ауд. {c.room}</b></>
+                  <><s>{fmt.shortDay(prev)}, {fmt.time(prev)}, ауд. {c.prevRoom}</s>{" → "}<b>{fmt.shortDay(c.startsAt)}, {fmt.time(c.startsAt)}, ауд. {c.room}</b></>
                 )}
               </Link>
             </li>

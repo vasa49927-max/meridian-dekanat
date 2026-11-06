@@ -14,7 +14,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file=.env scripts/migrate.mjs",
     "db:seed": "node --env-file=.env --conditions=react-server --import tsx scripts/seed.mts",
-    "check:bundle": "node scripts/check-bundle.mjs"
+    "check:bundle": "node --env-file-if-exists=.env scripts/check-bundle.mjs"
   },
   "dependencies": {
     "@fontsource/golos-text": "^5.3.0",

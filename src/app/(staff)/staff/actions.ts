@@ -1,0 +1,56 @@
+"use server";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { requireStaff } from "@/server/auth/guards";
+import { announcementSchema, moveSchema, staffChangeLesson, staffChangeStatus, staffPublishAnnouncement, statusChangeSchema } from "@/server/dal/staff";
+import { db } from "@/server/db";
+import { env } from "@/server/env";
+import { seedDemo } from "@/server/seed/seed";
+import { msk } from "@/lib/time";
+
+export type StaffState = { error?: string; ok?: string };
+
+/** Каждое действие сотрудника начинается с requireStaff(): роль проверяется на сервере, а не в интерфейсе. */
+export async function changeStatusAction(_: StaffState, form: FormData): Promise<StaffState> {
+  const v = await requireStaff();
+  const p = statusChangeSchema.safeParse({ id: form.get("id"), status: form.get("status"), comment: String(form.get("comment") ?? "").trim() || undefined });
+  if (!p.success) return { error: "Проверьте данные формы" };
+  const r = await staffChangeStatus(v, p.data);
+  if (!r.ok) return { error: r.error };
+  revalidatePath("/staff", "layout");
+  return { ok: "Статус обновлён — студент уже получил уведомление." };
+}
+
+export async function publishAnnouncementAction(_: StaffState, form: FormData): Promise<StaffState> {
+  const v = await requireStaff();
+  const raw = Object.fromEntries([...form.entries()].filter(([, val]) => val !== ""));
+  const p = announcementSchema.safeParse({ ...raw, important: form.get("important") === "on" });
+  if (!p.success) return { error: p.error.issues[0].message };
+  const r = await staffPublishAnnouncement(v, p.data);
+  if (!r.ok) return { error: r.error };
+  revalidatePath("/staff/announcements");
+  return { ok: `Опубликовано. Уведомление получили студентов: ${r.recipients}.` };
+}
+
+export async function changeLessonAction(_: StaffState, form: FormData): Promise<StaffState> {
+  const v = await requireStaff();
+  const raw = Object.fromEntries([...form.entries()].filter(([, val]) => val !== ""));
+  const p = moveSchema.safeParse(raw);
+  if (!p.success) return { error: p.error.issues[0].message };
+  const r = await staffChangeLesson(v, p.data, (date, time) => {
+    const [y, m, d] = date.split("-").map(Number);
+    const [hh, mm] = time.split(":").map(Number);
+    return msk(y, m, d, hh, mm);
+  });
+  if (!r.ok) return { error: r.error };
+  revalidatePath("/staff/schedule");
+  return { ok: `Сохранено. Уведомление получили студентов: ${r.recipients}.` };
+}
+
+export async function resetDemoAction() {
+  await requireStaff();
+  if (env.DEMO_RESET_ENABLED !== "true") return;
+  await seedDemo(db);
+  // Сид удаляет все сессии — в том числе текущую. Возвращаемся на вход.
+  redirect("/login?reset=1");
+}

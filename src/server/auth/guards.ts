@@ -13,7 +13,7 @@ import { getSession } from "./session";
  */
 export type StudentViewer = {
   role: "STUDENT"; userId: string; studentId: string; groupId: string; subgroup: number; militaryTraining: boolean;
-  facultyId: string; course: number; firstName: string; lastName: string; middleName: string | null;
+  facultyId: string; course: number; avatarHue: number; firstName: string; lastName: string; middleName: string | null;
 };
 export type StaffViewer = { role: "STAFF"; userId: string; staffId: string; firstName: string; lastName: string; middleName: string | null; position: string };
 export type Viewer = StudentViewer | StaffViewer;
@@ -23,7 +23,7 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
   if (!s) return null;
   if (s.role === "STUDENT") {
     const [r] = await db.select({
-      studentId: schema.students.id, groupId: schema.students.groupId, subgroup: schema.students.subgroup, militaryTraining: schema.students.militaryTraining,
+      studentId: schema.students.id, groupId: schema.students.groupId, subgroup: schema.students.subgroup, militaryTraining: schema.students.militaryTraining, avatarHue: schema.students.avatarHue,
       firstName: schema.students.firstName, lastName: schema.students.lastName, middleName: schema.students.middleName,
       facultyId: schema.groups.facultyId, course: schema.groups.course,
     }).from(schema.students).innerJoin(schema.groups, eq(schema.groups.id, schema.students.groupId))
