@@ -1,0 +1,15 @@
+/* A — «Посольство»: слоновая кость, глубокий синий, латунь; антиква в заголовках */
+.v-a{--bg:#F6F3EC;--card:#FFFDF8;--fg:#141B2D;--muted:#5F6573;--line:#E4DED0;--r:14px;
+--brand:#14244B;--accent:#B8892F;--accent-strong:#14244B;--head:'PT Serif';
+--side-bg:#14244B;--side-fg:#F3EEE2;--side-on:rgba(255,255,255,.10);
+--ava-bg:#E8DCC0;--ava-fg:#14244B;--bar-bg:#EAE3D2;--bar:#B8892F;
+--warn-bg:#FFF6E3;--warn-line:#EBCF92;--warn-fg:#7A4E00;--danger:#B3261E;--danger-bg:#FBE9E7;
+--ok:#1E6B3A;--ok-bg:#E5F2E8;--info:#1F4E9C;--info-bg:#E6EEFA;--chip:#F0EBDF}
+.v-a .side .logo{color:#F3EEE2}
+.v-a .hero{background:#14244B;color:#F8F4EA;border-color:#14244B}
+.v-a .hero .meta2,.v-a .hero small{color:#C9C3B4}
+.v-a .hero .pill{background:#B8892F;color:#14244B}
+.v-a .hero .ava{background:#2A3A63;color:#F3EEE2}
+.v-a .hero .bar{background:#2A3A63}
+.v-a .card h3{font-family:'Golos Text';color:#8A6A2A}
+.v-a .score b{color:#14244B}

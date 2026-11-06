@@ -1,0 +1,15 @@
+/* C — «Ночная библиотека»: тёмная тема по умолчанию, графит + лаймовый акцент, дисплейный Unbounded */
+.v-c{--bg:#0E0F12;--card:#17191E;--fg:#ECEEF2;--muted:#9AA0AC;--line:#262931;--r:16px;
+--brand:#ECEEF2;--accent:#C6F432;--accent-strong:#C6F432;--head:'Unbounded';
+--side-bg:#0E0F12;--side-fg:#ECEEF2;--side-on:#1D2026;--tab-bg:#121418;
+--ava-bg:#262931;--ava-fg:#C6F432;--bar-bg:#262931;--bar:#C6F432;
+--warn-bg:#2A2410;--warn-line:#5A4B12;--warn-fg:#F5C84B;--danger:#FF6B5E;--danger-bg:#3A1A17;
+--ok:#7FE3A0;--ok-bg:#15301F;--info:#8AB4FF;--info-bg:#18233A;--chip:#22252C}
+.v-c .hello h1,.v-c .hero h2{font-weight:600;letter-spacing:-.02em}
+.v-c .hello h1{font-size:19px}
+.v-c .hero{border-color:#C6F432}
+.v-c .hero .pill{background:#C6F432;color:#0E0F12}
+.v-c .count b{color:#C6F432}
+.v-c .score b{color:#C6F432;font-size:36px}
+.v-c .dot{border-color:#0E0F12}
+@media (min-width:1024px){.v-c .hello h1{font-size:26px}}

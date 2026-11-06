@@ -1,0 +1,18 @@
+/* B — «Кампус»: светлый модульный «bento», кобальт + мягкие статусные цвета, крупные скругления */
+.v-b{--bg:#F1F3F8;--card:#FFFFFF;--fg:#0F172A;--muted:#5B6476;--line:#E3E7EF;--r:22px;
+--brand:#2347D5;--accent:#FF7A45;--accent-strong:#2347D5;
+--side-bg:#FFFFFF;--side-fg:#0F172A;--side-on:#EAF0FF;
+--ava-bg:#DDE6FF;--ava-fg:#2347D5;--bar-bg:rgba(255,255,255,.25);--bar:#fff;
+--warn-bg:#FFF4E5;--warn-line:#FFD8A8;--warn-fg:#9A4A00;--danger:#D92D20;--danger-bg:#FEECEB;
+--ok:#067647;--ok-bg:#E3F8EC;--info:#2347D5;--info-bg:#EAF0FF;--chip:#F1F3F8}
+.v-b .card{border:0;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.04)}
+.v-b .hero{background:linear-gradient(135deg,#2347D5 0%,#4F6BFF 60%,#6F7DFF 100%);color:#fff}
+.v-b .hero .meta2{color:#DCE3FF}
+.v-b .hero .pill{background:rgba(255,255,255,.18);color:#fff}
+.v-b .hero .ava{background:rgba(255,255,255,.2);color:#fff}
+.v-b .hero .count b{font-size:22px}
+.v-b .card h3{text-transform:none;letter-spacing:0;font-size:16px;color:var(--fg);font-weight:700}
+.v-b .side nav a.on{color:#2347D5}
+.v-b .ask{background:#F1F3F8;border:0}
+.v-b .ai{background:#0F172A;color:#fff}.v-b .ai .ai-h{color:#9DB2FF}.v-b .ai .ask{background:#1E293B;color:#94A3B8}
+.v-b .tabs a.on{background:#EAF0FF}
