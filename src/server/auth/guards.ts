@@ -65,8 +65,8 @@ export async function apiViewer<R extends Viewer["role"]>(role: R) {
 export async function assertSameOrigin(): Promise<Response | null> {
   const h = await headers();
   const origin = h.get("origin");
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  const allowed = new Set([new URL(env.APP_URL).host, host].filter(Boolean));
+  // В production доверяем только APP_URL (X-Forwarded-Host приходит от клиента — находка I-2).
+  const allowed = new Set([new URL(env.APP_URL).host, ...(env.NODE_ENV === "production" ? [] : [h.get("host")])].filter(Boolean));
   if (!origin) return Response.json({ error: "Запрос отклонён" }, { status: 403 });
   try {
     if (!allowed.has(new URL(origin).host)) return Response.json({ error: "Запрос отклонён" }, { status: 403 });

@@ -35,24 +35,24 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
         </div>
       </section>
       <div className="mb-3 flex items-center gap-2">
-        <div role="tablist" aria-label="Фильтр заявок" className="inline-flex rounded-xl border border-line bg-surface p-1">
-          <Link role="tab" aria-selected={!all} href="/requests" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", !all ? "bg-primary text-primary-fg" : "text-muted")}>Активные · {active.length}</Link>
-          <Link role="tab" aria-selected={!!all} href="/requests?all=1" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", all ? "bg-primary text-primary-fg" : "text-muted")}>Вся история · {items.length}</Link>
-        </div>
+        <nav aria-label="Фильтр заявок" className="inline-flex rounded-xl border border-line bg-surface p-1">
+          <Link aria-current={!all ? "page" : undefined} href="/requests" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", !all ? "bg-primary text-primary-fg" : "text-muted")}>Активные · {active.length}</Link>
+          <Link aria-current={all ? "page" : undefined} href="/requests?all=1" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", all ? "bg-primary text-primary-fg" : "text-muted")}>Вся история · {items.length}</Link>
+        </nav>
       </div>
       {shown.length ? (
-        <ul className="grid gap-2.5">
+        <ul className="grid grid-cols-[minmax(0,1fr)] gap-2.5">
           {shown.map((r) => (
             <li key={r.id}>
               <Link href={`/requests/${r.id}`} className="block">
-                <Card as="div" className="flex items-start gap-3 transition-colors hover:border-primary">
+                <Card as="div" className="flex flex-wrap items-start gap-3 transition-colors hover:border-primary sm:flex-nowrap">
                   <RequestIcon name={r.icon} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold leading-snug">{r.title}</h3>{r.documentId && <span className="inline-flex items-center gap-1 text-xs text-ok"><QrCode className="h-3.5 w-3.5" aria-hidden />электронный документ</span>}</div>
                     <p className="text-[13px] text-muted">{r.number} · подана {fmt.dayMonthShort(r.createdAt)}{["SUBMITTED", "IN_PROGRESS"].includes(r.status) ? ` · срок до ${fmt.dayMonthShort(r.dueAt)}` : ""}</p>
                     {r.staffComment && ["NEEDS_INFO", "REJECTED"].includes(r.status) && <p className="mt-1 line-clamp-2 text-[13px] text-warn">{r.staffComment}</p>}
                   </div>
-                  <StatusBadge status={r.status} />
+                  <StatusBadge status={r.status} className="ml-[52px] sm:ml-0" />
                 </Card>
               </Link>
             </li>

@@ -37,26 +37,26 @@ export function CommandPalette({ index, open, setOpen }: { index: PaletteIndex; 
           <Command.Group heading="Быстрые действия" className={group}>
             {index.requestTypes.slice(0, 4).map((t) => (
               <Command.Item key={t.code} value={`заказать ${t.title}`} onSelect={() => go(`/requests/new/${t.code}`)} className={item}>
-                <FileText className="h-4 w-4" aria-hidden /> Заказать: {t.title}
+                <FileText className="h-4 w-4 shrink-0" aria-hidden /> Заказать: {t.title}
               </Command.Item>
             ))}
-            <Command.Item value="записаться к методисту приём" onSelect={() => go("/appointments")} className={item}><CalendarPlus className="h-4 w-4" aria-hidden /> Записаться к методисту</Command.Item>
-            <Command.Item value="спросить помощника ии" onSelect={() => go(`/assistant${q ? `?q=${encodeURIComponent(q)}` : ""}`)} className={item}><Sparkles className="h-4 w-4" aria-hidden /> Спросить помощника{q ? `: «${q}»` : ""}</Command.Item>
-            <Command.Item value="скачать расписание ics календарь" onSelect={() => { setOpen(false); window.location.href = "/api/schedule.ics"; }} className={item}><CalendarPlus className="h-4 w-4" aria-hidden /> Скачать расписание в календарь (.ics)</Command.Item>
+            <Command.Item value="записаться к методисту приём" onSelect={() => go("/appointments")} className={item}><CalendarPlus className="h-4 w-4 shrink-0" aria-hidden /> Записаться к методисту</Command.Item>
+            <Command.Item value="спросить помощника ии" onSelect={() => go(`/assistant${q ? `?q=${encodeURIComponent(q)}` : ""}`)} className={item}><Sparkles className="h-4 w-4 shrink-0" aria-hidden /> Спросить помощника{q ? `: «${q}»` : ""}</Command.Item>
+            <Command.Item value="скачать расписание ics календарь" onSelect={() => { setOpen(false); window.location.href = "/api/schedule.ics"; }} className={item}><CalendarPlus className="h-4 w-4 shrink-0" aria-hidden /> Скачать расписание в календарь (.ics)</Command.Item>
           </Command.Group>
         )}
         <Command.Group heading="Разделы" className={group}>
-          {nav.map((n) => <Command.Item key={n.href} value={`раздел ${n.label}`} onSelect={() => go(n.href)} className={item}><n.icon className="h-4 w-4" aria-hidden /> {n.label}</Command.Item>)}
-          <Command.Item value="тёмная светлая тема" onSelect={() => { const d = !document.documentElement.classList.contains("dark"); document.documentElement.classList.toggle("dark", d); try { localStorage.setItem("theme", d ? "dark" : "light"); } catch {} setOpen(false); }} className={item}><Moon className="h-4 w-4" aria-hidden /> Переключить тему</Command.Item>
+          {nav.map((n) => <Command.Item key={n.href} value={`раздел ${n.label}`} onSelect={() => go(n.href)} className={item}><n.icon className="h-4 w-4 shrink-0" aria-hidden /> {n.label}</Command.Item>)}
+          <Command.Item value="тёмная светлая тема" onSelect={() => { const d = !document.documentElement.classList.contains("dark"); document.documentElement.classList.toggle("dark", d); try { localStorage.setItem("theme", d ? "dark" : "light"); } catch {} setOpen(false); }} className={item}><Moon className="h-4 w-4 shrink-0" aria-hidden /> Переключить тему</Command.Item>
         </Command.Group>
         {index.disciplines.length > 0 && (
           <Command.Group heading="Мои дисциплины" className={group}>
-            {index.disciplines.map((d) => <Command.Item key={d.name} value={`дисциплина ${d.name} ${d.teacher}`} onSelect={() => go(`/grades#${encodeURIComponent(d.name)}`)} className={item}><BookOpen className="h-4 w-4" aria-hidden /> <span className="min-w-0 flex-1 truncate">{d.name}</span><span className="hidden text-xs text-muted sm:inline">{d.teacher}</span></Command.Item>)}
+            {index.disciplines.map((d) => <Command.Item key={d.name} value={`дисциплина ${d.name} ${d.teacher}`} onSelect={() => go(`/grades#${encodeURIComponent(d.name)}`)} className={item}><BookOpen className="h-4 w-4 shrink-0" aria-hidden /> <span className="min-w-0 flex-1 truncate">{d.name}</span><span className="hidden text-xs text-muted sm:inline">{d.teacher}</span></Command.Item>)}
           </Command.Group>
         )}
         {index.requests.length > 0 && (
           <Command.Group heading={index.role === "STUDENT" ? "Мои заявки" : "Последние заявки"} className={group}>
-            {index.requests.map((r) => <Command.Item key={r.id} value={`заявка ${r.number} ${r.title} ${r.status}`} onSelect={() => go(index.role === "STUDENT" ? `/requests/${r.id}` : `/staff/requests/${r.id}`)} className={item}><ArrowRight className="h-4 w-4" aria-hidden /> <span className="min-w-0 flex-1 truncate">{r.title}</span><span className="text-xs text-muted">{r.number} · {r.status}</span></Command.Item>)}
+            {index.requests.map((r) => <Command.Item key={r.id} value={`заявка ${r.number} ${r.title} ${r.status}`} onSelect={() => go(index.role === "STUDENT" ? `/requests/${r.id}` : `/staff/requests/${r.id}`)} className={item}><ArrowRight className="h-4 w-4 shrink-0" aria-hidden /> <span className="min-w-0 flex-1 truncate">{r.title}</span><span className="text-xs text-muted">{r.number} · {r.status}</span></Command.Item>)}
           </Command.Group>
         )}
       </Command.List>

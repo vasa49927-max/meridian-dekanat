@@ -23,7 +23,7 @@ export function SideNav({ role, unread = 0 }: { role: "STUDENT" | "STAFF"; unrea
             className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-side-fg/85 transition-colors hover:bg-side-on hover:text-side-fg", active && "bg-side-on font-semibold text-side-fg")}>
             <Icon className={cn("h-5 w-5", active && "text-accent")} aria-hidden />
             <span>{it.label}</span>
-            {badge && <span className="ml-auto rounded-full bg-danger px-2 py-0.5 text-[11px] font-bold text-white" aria-label={`${badge} непрочитанных`}>{badge}</span>}
+            {badge && <span className="ml-auto rounded-full bg-danger-solid px-2 py-0.5 text-[11px] font-bold text-white" aria-label={`${badge} непрочитанных`}>{badge}</span>}
           </Link>
         );
       })}

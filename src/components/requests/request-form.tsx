@@ -1,5 +1,5 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import type { RequestField } from "@/server/db/schema";
 import { createRequestAction, type FormState } from "@/app/(student)/requests/actions";
@@ -8,9 +8,12 @@ import { FieldHint, Input, Label, Select, Textarea } from "@/components/ui/field
 
 export function RequestForm({ code, fields, defaults }: { code: string; fields: RequestField[]; defaults: Record<string, string> }) {
   const [state, action, pending] = useActionState<FormState, FormData>(createRequestAction.bind(null, code), {});
+  const formRef = useRef<HTMLFormElement>(null);
+  // После ошибки — фокус на первое неверное поле (UX-ревью №10).
+  useEffect(() => { formRef.current?.querySelector<HTMLElement>("[aria-invalid=true]")?.focus(); }, [state]);
   const val = (n: string) => state.values?.[n] ?? defaults[n] ?? "";
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form ref={formRef} action={action} className="space-y-4" noValidate>
       {fields.map((f) => {
         const err = state.fieldErrors?.[f.name];
         const describedBy = [f.hint ? `${f.name}-hint` : "", err ? `${f.name}-err` : ""].filter(Boolean).join(" ") || undefined;

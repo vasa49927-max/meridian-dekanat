@@ -20,6 +20,8 @@ export async function POST(req: Request) {
     return Response.json({ error: "Слишком много вопросов за час. Попробуйте позже или запишитесь к методисту." }, { status: 429 });
   }
   await record(bucket);
-  const reply = await askAssistant(auth.viewer, parsed.data.messages);
+  // История приходит от клиента — убираем служебную метку действия, чтобы её нельзя было подсунуть модели (находка L-3).
+  const messages = parsed.data.messages.map((m) => ({ ...m, content: m.content.replace(/ДЕЙСТВИЕ\s*:/gi, "действие -") }));
+  const reply = await askAssistant(auth.viewer, messages);
   return Response.json(reply, { headers: { "Cache-Control": "no-store" } });
 }

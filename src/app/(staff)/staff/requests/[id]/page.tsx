@@ -21,7 +21,7 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
   const next = STATUS_FLOW[r.status];
   return (
     <div className="pt-2 lg:pt-0">
-      <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/staff" className="text-muted hover:text-fg">← Очередь</Link></nav>
+      <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/staff" className="tap text-muted hover:text-fg">← Очередь</Link></nav>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div><h1 className="font-serif text-[26px] leading-tight">{r.type.title}</h1><p className="mt-1 text-sm text-muted">{r.number} · подана {fmt.dateTime(r.createdAt)} · срок до {fmt.dayMonth(r.dueAt)}</p></div>
         <StatusBadge status={r.status} className="text-sm" />

@@ -43,10 +43,10 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
         <Card className={cn("p-4", risks.length && "border-danger/40")}><p className="text-xs font-semibold uppercase tracking-wider text-muted">Риски</p><p className={cn("mt-1 font-serif text-3xl tabular", risks.length ? "text-danger" : "text-ok")}>{risks.length}</p><p className="text-xs text-muted">{risks.length ? risks.map((r) => r.short).join(", ") : "всё под контролем"}</p></Card>
       </div>
 
-      <div role="tablist" aria-label="Период" className="mb-4 inline-flex rounded-xl border border-line bg-surface p-1">
-        <Link role="tab" aria-selected={!isPast} href="/grades" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", !isPast ? "bg-primary text-primary-fg" : "text-muted")}>Текущий семестр</Link>
-        <Link role="tab" aria-selected={isPast} href="/grades?tab=record" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", isPast ? "bg-primary text-primary-fg" : "text-muted")}>Зачётка</Link>
-      </div>
+      <nav aria-label="Период" className="mb-4 inline-flex rounded-xl border border-line bg-surface p-1">
+        <Link aria-current={!isPast ? "page" : undefined} href="/grades" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", !isPast ? "bg-primary text-primary-fg" : "text-muted")}>Текущий семестр</Link>
+        <Link aria-current={isPast ? "page" : undefined} href="/grades?tab=record" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", isPast ? "bg-primary text-primary-fg" : "text-muted")}>Зачётка</Link>
+      </nav>
 
       {!isPast ? (
         <>
@@ -61,7 +61,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
             <p className="mt-2 text-xs text-muted">Положение вымышленное — составлено для концепта на основе открытых описаний БРС.</p>
           </details>
           <div className="grid gap-3 xl:grid-cols-2">
-            {current.map((d) => {
+            {[...current].sort((a, b) => (a.summary.risk === "none" ? 1 : 0) - (b.summary.risk === "none" ? 1 : 0)).map((d) => {
               const s = d.summary;
               const need3 = neededOnFinal(s.projectedCurrent, 60);
               const need4 = neededOnFinal(s.projectedCurrent, 75);
@@ -78,16 +78,16 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
                     </div>
                     <Badge tone={d.control === "EXAM" ? "primary" : "neutral"}>{CONTROL[d.control]}</Badge>
                   </div>
-                  <div className="mt-3 flex items-baseline justify-between">
+                  <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-3">
                     <p><b className="font-serif text-2xl tabular">{s.earned}</b><span className="text-muted"> / {BRS.currentMax} текущий контроль</span></p>
-                    <p className="text-sm text-muted">проверено на {s.gradedMax} б.</p>
+                    <p className="text-sm text-muted">проверено на {s.gradedMax}&nbsp;б.</p>
                   </div>
                   <CurrentBar earned={s.earned} gradedMax={s.gradedMax} control={d.control} />
                   <div className="mt-3 space-y-1.5 text-sm">
                     {s.auto?.achieved ? (
                       <p className="flex items-center gap-2 font-semibold text-ok"><CheckCircle2 className="h-4 w-4" aria-hidden />{s.auto.kind === "credit" ? "Зачёт автоматом уже есть" : "Можно получить «отлично» автоматом"}</p>
                     ) : s.auto?.possible ? (
-                      <p className="flex items-center gap-2"><Target className="h-4 w-4 text-accent-text" aria-hidden />До {s.auto.kind === "credit" ? "зачёта автоматом" : "«отлично» автоматом"}: <b>{s.auto.need} б.</b> из {s.remainingMax} оставшихся</p>
+                      <p className="flex items-start gap-2"><Target className="mt-0.5 h-4 w-4 shrink-0 text-accent-text" aria-hidden /><span>До {s.auto.kind === "credit" ? "зачёта автоматом" : "«отлично» автоматом"}: <b>{s.auto.need}&nbsp;б.</b> из&nbsp;{s.remainingMax} оставшихся</span></p>
                     ) : (
                       <p className="flex items-center gap-2 text-muted"><Target className="h-4 w-4" aria-hidden />Автомат уже недоступен — {d.control === "CREDIT" ? "сдаём зачёт" : examHint}</p>
                     )}
@@ -121,7 +121,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
             const list = past.filter((p) => p.semester === sem);
             return (
               <Card key={sem} aria-label={semTitle(sem)}>
-                <h2 className="mb-3 flex items-baseline justify-between font-semibold"><span>{semTitle(sem)}</span><span className="text-sm font-normal text-muted">средний {averagePoints(list.map((l) => l.points))?.toLocaleString("ru-RU")}</span></h2>
+                <h2 className="mb-3 flex items-baseline justify-between font-semibold"><span>{semTitle(sem)}</span><span className="text-sm font-normal text-muted"> · средний {averagePoints(list.map((l) => l.points))?.toLocaleString("ru-RU")}</span></h2>
                 <ul className="divide-y divide-line">
                   {list.map((g) => (
                     <li key={g.id} className="flex items-center justify-between gap-3 py-2">

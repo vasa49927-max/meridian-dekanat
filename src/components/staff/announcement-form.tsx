@@ -9,7 +9,7 @@ export function AnnouncementForm({ faculties, groups }: { faculties: { id: strin
   const [state, action, pending] = useActionState<StaffState, FormData>(publishAnnouncementAction, {});
   const [aud, setAud] = useState("ALL");
   return (
-    <form action={action} className="space-y-3" key={state.ok}>
+    <form action={action} className="space-y-3" key={state.ok} noValidate>
       <div><Label htmlFor="a-title">Заголовок</Label><Input id="a-title" name="title" required maxLength={140} placeholder="Например: перенос консультации по статистике" /></div>
       <div><Label htmlFor="a-body">Текст</Label><Textarea id="a-body" name="body" required maxLength={2000} /></div>
       <div className="grid gap-3 sm:grid-cols-2">

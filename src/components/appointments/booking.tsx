@@ -3,7 +3,7 @@ import { useActionState, useState } from "react";
 import { CheckCircle2, MapPin } from "lucide-react";
 import { bookAction, type BookState } from "@/app/(student)/appointments/actions";
 import { Button } from "@/components/ui/button";
-import { FieldHint, Label, Select, Textarea } from "@/components/ui/field";
+import { Label, Select, Textarea } from "@/components/ui/field";
 import { cn } from "@/lib/cn";
 
 const TOPICS = ["Справки и документы", "Индивидуальный график", "Пересдача / академическая разница", "Перевод, восстановление, академический отпуск", "Оформление темы ВКР", "Другое"];
@@ -15,7 +15,7 @@ export function Booking({ days, staff, location }: { days: Day[]; staff: string;
   const [day, setDay] = useState(days[0]?.key);
   const [slot, setSlot] = useState<string | null>(null);
   const current = days.find((d) => d.key === day);
-  if (state.ok) return <p role="status" className="flex items-center gap-2 rounded-xl bg-ok-bg px-4 py-3 font-medium text-ok"><CheckCircle2 className="h-5 w-5" aria-hidden />Готово! Запись появилась выше, напоминание придёт в уведомления.</p>;
+  if (state.ok) return <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl bg-ok-bg px-4 py-3 font-medium text-ok"><CheckCircle2 className="h-5 w-5" aria-hidden />Готово! Запись появилась выше, напоминание придёт в уведомления.<a href="/appointments" className="ml-auto underline">Записаться ещё</a></div>;
   return (
     <form action={action} className="space-y-4">
       <p className="text-sm text-muted">{staff}<br /><span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" aria-hidden />{location}</span></p>
@@ -48,7 +48,7 @@ export function Booking({ days, staff, location }: { days: Day[]; staff: string;
         <Label htmlFor="ap-comment">Что взять с собой / подробности</Label>
         <Textarea id="ap-comment" name="comment" maxLength={500} className="min-h-20" placeholder="Необязательно" />
       </div>
-      {state.error && <FieldHint error>{state.error}</FieldHint>}
+      {state.error && <p role="alert" className="text-sm font-medium text-danger">{state.error}</p>}
       <Button type="submit" disabled={!slot || pending}>{pending ? "Записываем…" : slot ? "Записаться" : "Выберите время"}</Button>
     </form>
   );

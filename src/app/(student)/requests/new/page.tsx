@@ -17,7 +17,7 @@ export default async function NewRequestPage() {
   ];
   return (
     <div className="pt-2 lg:pt-0">
-      <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/requests" className="text-muted hover:text-fg">← Заявки</Link></nav>
+      <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/requests" className="tap text-muted hover:text-fg">← Заявки</Link></nav>
       <PageHeader title="Что нужно оформить?" subtitle="Выберите документ — форма займёт меньше минуты" />
       <div className="space-y-6">
         {groups.map((g) => (

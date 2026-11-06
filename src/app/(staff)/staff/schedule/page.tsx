@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { requireStaff } from "@/server/auth/guards";
 import { staffAudienceOptions, staffListLessons } from "@/server/dal/staff";
-import { addDays, dayKey, fmt, isSameDay, now, parseDayKey, startOfWeek } from "@/lib/time";
+import { addDays, dayKey, fmt, isSameDay, mskParts, now, parseDayKey, startOfWeek } from "@/lib/time";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Select } from "@/components/ui/field";
@@ -18,7 +18,9 @@ export default async function StaffSchedulePage({ searchParams }: { searchParams
   const sp = await searchParams;
   const { groups } = await staffAudienceOptions();
   const group = groups.find((g) => g.id === sp.g) ?? groups[0];
-  const week = startOfWeek(parseDayKey(sp.w) ?? now());
+  const at = now();
+  // В воскресенье сразу показываем следующую учебную неделю.
+  const week = startOfWeek(parseDayKey(sp.w) ?? (mskParts(at).weekday === 7 ? addDays(at, 1) : at));
   const lessons = group ? await staffListLessons(group.id, week, addDays(week, 7)) : [];
   const days = Array.from({ length: 6 }, (_, i) => addDays(week, i));
   const link = (w: Date) => `/staff/schedule?g=${group?.id}&w=${dayKey(w)}`;
@@ -45,7 +47,7 @@ export default async function StaffSchedulePage({ searchParams }: { searchParams
                 <ul className="divide-y divide-line">
                   {list.map((l) => (
                     <li key={l.id} className="py-2.5">
-                      <LessonEditor lesson={{ id: l.id, title: l.title, time: fmt.time(l.startsAt), date: dayKey(l.startsAt), room: l.room, building: l.building, type: LESSON_TYPE[l.type], status: l.status, subgroup: l.subgroup, prev: l.prevStartsAt ? `${fmt.shortDay(l.prevStartsAt)} ${fmt.time(l.prevStartsAt)}, ауд. ${l.prevRoom}` : null }} />
+                      <LessonEditor lesson={{ id: l.id, title: l.title, time: fmt.time(l.startsAt), date: dayKey(l.startsAt), room: l.room, building: l.building, type: LESSON_TYPE[l.type], status: l.status, subgroup: l.subgroup, past: l.endsAt < at, prev: l.prevStartsAt ? `${fmt.shortDay(l.prevStartsAt)} ${fmt.time(l.prevStartsAt)}, ауд. ${l.prevRoom}` : null }} />
                     </li>
                   ))}
                 </ul>

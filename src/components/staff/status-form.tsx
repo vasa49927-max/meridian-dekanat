@@ -15,7 +15,7 @@ const HINT: Record<string, string> = {
 
 export function StatusForm({ id, options, producesDocument }: { id: string; options: { value: string; label: string }[]; producesDocument: boolean }) {
   const [state, action, pending] = useActionState<StaffState, FormData>(changeStatusAction, {});
-  const [sel, setSel] = useState(options[0].value);
+  const [sel, setSel] = useState<string | null>(null);
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="id" value={id} />
@@ -28,15 +28,15 @@ export function StatusForm({ id, options, producesDocument }: { id: string; opti
             </label>
           ))}
         </div>
-        <FieldHint>{sel === "READY" && !producesDocument ? "Заявление рассмотрено положительно." : HINT[sel]}</FieldHint>
+        <FieldHint>{!sel ? "Выберите, что сделать с заявкой." : sel === "READY" && !producesDocument ? "Заявление рассмотрено положительно." : HINT[sel]}</FieldHint>
       </fieldset>
       <div>
-        <Label htmlFor="st-comment">Комментарий для студента{["NEEDS_INFO", "REJECTED"].includes(sel) && <span className="text-danger"> *</span>}</Label>
+        <Label htmlFor="st-comment">Комментарий для студента{sel && ["NEEDS_INFO", "REJECTED"].includes(sel) && <span className="text-danger"> *</span>}</Label>
         <Textarea id="st-comment" name="comment" maxLength={800} className="min-h-24" placeholder={sel === "REJECTED" ? "Причина отказа" : "Необязательно"} />
       </div>
       {state.error && <p role="alert" className="rounded-xl bg-danger-bg px-3 py-2 text-sm text-danger">{state.error}</p>}
       {state.ok && <p role="status" className="rounded-xl bg-ok-bg px-3 py-2 text-sm text-ok">{state.ok}</p>}
-      <Button type="submit" disabled={pending} className="w-full">{pending ? "Сохраняем…" : "Сохранить и уведомить студента"}</Button>
+      <Button type="submit" disabled={pending || !sel} className="w-full">{pending ? "Сохраняем…" : "Сохранить и уведомить студента"}</Button>
     </form>
   );
 }

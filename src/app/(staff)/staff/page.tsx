@@ -64,7 +64,7 @@ export default async function StaffQueuePage({ searchParams }: { searchParams: P
                 return (
                   <tr key={r.id} className="block px-4 py-3 hover:bg-surface-2/60 md:table-row md:p-0">
                     <td className="block md:table-cell md:px-4 md:py-3"><Link href={`/staff/requests/${r.id}`} className="font-semibold hover:underline">{r.title}</Link><span className="block text-xs text-muted">{r.number} · {fmt.dateTime(r.createdAt)}</span></td>
-                    <td className="block md:table-cell md:px-4 md:py-3">{r.lastName} {r.firstName[0]}. {r.middleName?.[0]}.<span className="block text-xs text-muted">{r.faculty} · {r.course} курс · гр. {r.group}</span></td>
+                    <td className="block md:table-cell md:px-4 md:py-3">{r.lastName} {r.firstName[0]}.{r.middleName ? ` ${r.middleName[0]}.` : ""}<span className="block text-xs text-muted">{r.faculty} · {r.course} курс · гр. {r.group}</span></td>
                     <td className="inline-block pr-3 md:table-cell md:px-4 md:py-3">{overdue ? <Badge tone="danger">просрочена · {fmt.dayMonthShort(r.dueAt)}</Badge> : <span className="tabular">{fmt.dayMonthShort(r.dueAt)}</span>}</td>
                     <td className="inline-block md:table-cell md:px-4 md:py-3"><StatusBadge status={r.status} /></td>
                   </tr>

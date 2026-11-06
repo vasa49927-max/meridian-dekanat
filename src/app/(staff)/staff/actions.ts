@@ -7,6 +7,7 @@ import { db } from "@/server/db";
 import { env } from "@/server/env";
 import { seedDemo } from "@/server/seed/seed";
 import { msk } from "@/lib/time";
+import { LIMITS, countRecent, record } from "@/server/auth/rate-limit";
 
 export type StaffState = { error?: string; ok?: string };
 
@@ -47,10 +48,13 @@ export async function changeLessonAction(_: StaffState, form: FormData): Promise
   return { ok: `Сохранено. Уведомление получили студентов: ${r.recipients}.` };
 }
 
-export async function resetDemoAction() {
+export async function resetDemoAction(_: StaffState): Promise<StaffState> {
   await requireStaff();
-  if (env.DEMO_RESET_ENABLED !== "true") return;
+  if (env.DEMO_RESET_ENABLED !== "true") return { error: "Сброс отключён" };
+  // Не чаще раза в 30 минут: один член жюри не выбросит из кабинета других посреди проверки (находка M-2).
+  if ((await countRecent("demo-reset", LIMITS.demoReset.windowMs)) >= LIMITS.demoReset.max) return { error: "Демо-данные уже сбрасывали в последние 30 минут. Попробуйте позже." };
   await seedDemo(db);
+  await record("demo-reset");
   // Сид удаляет все сессии — в том числе текущую. Возвращаемся на вход.
   redirect("/login?reset=1");
 }

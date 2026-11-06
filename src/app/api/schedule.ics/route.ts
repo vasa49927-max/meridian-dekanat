@@ -4,7 +4,7 @@ import { addDays, now, startOfWeek } from "@/lib/time";
 import { LESSON_TYPE } from "@/components/schedule/lesson-meta";
 
 /** Экспорт личного расписания в календарь (iCalendar, RFC 5545). Только своё — по сессии. */
-const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 const dt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 const fold = (line: string) => line.match(/.{1,70}/g)?.join("\r\n ") ?? line;
 

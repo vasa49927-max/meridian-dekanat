@@ -27,7 +27,7 @@ export default async function MorePage() {
             <Link href={it.href} className="flex items-center gap-3 px-4 py-3.5 hover:bg-surface-2">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary-soft text-primary dark:text-accent-text" aria-hidden><it.icon className="h-5 w-5" /></span>
               <span className="min-w-0 flex-1"><span className="block font-semibold">{it.label}</span><span className="block text-sm text-muted">{it.hint}</span></span>
-              {it.badge ? <span className="rounded-full bg-danger px-2 py-0.5 text-xs font-bold text-white">{it.badge}</span> : null}
+              {it.badge ? <span className="rounded-full bg-danger-solid px-2 py-0.5 text-xs font-bold text-white">{it.badge}</span> : null}
               <ChevronRight className="h-5 w-5 text-muted" aria-hidden />
             </Link>
           </li>

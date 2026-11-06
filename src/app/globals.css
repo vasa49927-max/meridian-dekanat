@@ -31,6 +31,7 @@
   --warn-line: #ebcf92;
   --danger: #b3261e;
   --danger-bg: #fbe9e7;
+  --danger-solid: #c62828; /* фон счётчиков с белым текстом (5.6:1) в обеих темах */
   --ok: #1e6b3a;
   --ok-bg: #e5f2e8;
   --info: #1f4e9c;
@@ -97,6 +98,7 @@
   --color-warn-line: var(--warn-line);
   --color-danger: var(--danger);
   --color-danger-bg: var(--danger-bg);
+  --color-danger-solid: var(--danger-solid);
   --color-ok: var(--ok);
   --color-ok-bg: var(--ok-bg);
   --color-info: var(--info);
@@ -137,3 +139,6 @@ body {
   border-radius: 10px;
 }
 .tabular { font-variant-numeric: tabular-nums; }
+/* Увеличенная область касания для маленьких текстовых ссылок (≥ 44px, WCAG 2.5.8) */
+.tap { position: relative; }
+.tap::after { content: ""; position: absolute; inset: -12px -8px; }

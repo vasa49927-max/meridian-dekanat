@@ -18,11 +18,11 @@ export function WhatIf({ earned, remainingMax, control }: { earned: number; rema
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor={`${id}-a`} className="flex justify-between text-sm"><span>за оставшиеся работы</span><b className="tabular">{extra} из {remainingMax}</b></label>
-          <input id={`${id}-a`} type="range" min={0} max={remainingMax} value={extra} onChange={(e) => setExtra(+e.target.value)} disabled={!remainingMax} className="mt-2 w-full accent-[var(--primary)]" />
+          <input id={`${id}-a`} type="range" min={0} max={remainingMax} value={extra} onChange={(e) => setExtra(+e.target.value)} disabled={!remainingMax} className="mt-1 h-10 w-full cursor-pointer accent-[var(--primary)]" />
         </div>
         <div>
           <label htmlFor={`${id}-b`} className="flex justify-between text-sm"><span>{control === "CREDIT" ? "на зачёте" : "на экзамене"}</span><b className="tabular">{autoReached && control === "CREDIT" ? "не нужен" : `${fin} из ${BRS.finalMax}`}</b></label>
-          <input id={`${id}-b`} type="range" min={0} max={BRS.finalMax} value={fin} onChange={(e) => setFin(+e.target.value)} disabled={autoReached && control === "CREDIT"} className="mt-2 w-full accent-[var(--primary)]" />
+          <input id={`${id}-b`} type="range" min={0} max={BRS.finalMax} value={fin} onChange={(e) => setFin(+e.target.value)} disabled={autoReached && control === "CREDIT"} className="mt-1 h-10 w-full cursor-pointer accent-[var(--primary)]" />
         </div>
       </div>
       <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-1" aria-live="polite">

@@ -47,7 +47,7 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
   const qr = doc ? await qrSvg(doc.verifyCode) : null;
   return (
     <div className="mx-auto max-w-3xl pt-2 lg:pt-0">
-      <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/requests" className="text-muted hover:text-fg">← Мои заявки</Link></nav>
+      <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/requests" className="tap text-muted hover:text-fg">← Мои заявки</Link></nav>
       {created && <p role="status" className="mb-4 flex items-center gap-2 rounded-xl bg-ok-bg px-4 py-3 font-medium text-ok"><CheckCircle2 className="h-5 w-5" aria-hidden />Заявка отправлена. Статус будет меняться здесь и в уведомлениях.</p>}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div><h1 className="font-serif text-[26px] leading-tight">{r.type.title}</h1><p className="mt-1 text-sm text-muted">{r.number} · подана {fmt.dateTime(r.createdAt)}</p></div>

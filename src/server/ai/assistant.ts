@@ -90,6 +90,17 @@ async function validateAction(raw: unknown): Promise<AssistantAction | null> {
   return { code: t.code, title: t.title, fields: partial.success ? clean : {} };
 }
 
+const REQUEST_HINTS: Record<string, RegExp> = {
+  STUDY_CERT: /справк.*(обучени|учёб|учеб|мест[ао] требован)|работодат|банк/,
+  STUDY_CERT_EN: /виз|посольств|консульств|англ|за ?рубеж|обмен|стажировк.*(за|в )/,
+  MILITARY_CERT: /военкомат|воинск|призыв|отсрочк|комиссариат/,
+  STIPEND_CERT: /стипенди.*справк|справк.*стипенди|вычет/,
+  RECORD_EXTRACT: /выписк|зачётк|зачетк|transcript/,
+  INDIVIDUAL_PLAN: /индивидуальн|свободн.*посещ|график обучени/,
+  CREDIT_TRANSFER: /перезач/,
+  STUDENT_ID_DUP: /студенческ.*билет|студбилет|дубликат/,
+};
+
 /** Режим без LLM: ответ из пунктов Положения + правила для частых вопросов. Работает всегда (и как запасной вариант). */
 async function offlineAnswer(v: StudentViewer, question: string, points: RegPoint[]): Promise<AssistantReply> {
   const q = question.toLowerCase();
@@ -116,9 +127,10 @@ async function offlineAnswer(v: StudentViewer, question: string, points: RegPoin
     ].join(" ");
     return { text, sources: [{ id: "3.1", section: "Расписание" }], action: null, mode: "offline" };
   }
-  const withReq = points.find((p) => p.request);
   const top = points[0];
-  if (!top) return { text: "Не нашёл ответа в Положении. Запишитесь к методисту в разделе «Запись к методисту» — он поможет лично [п. 2.1].", sources: [{ id: "2.1", section: "Приём студентов" }], action: null, mode: "offline" };
+  // Действие — только если вид заявки явно связан с вопросом (совпадает основа ключевого слова).
+  const withReq = points.slice(0, 2).find((p) => p.request && REQUEST_HINTS[p.request]?.test(q));
+  if (!top) return { text: "Не нашёл ответа в Положении. Попробуйте спросить иначе — например, «справка для визы», «пересдача», «индивидуальный график» — или запишитесь к методисту: он поможет лично [п. 2.1].", sources: [{ id: "2.1", section: "Приём студентов" }], action: null, mode: "offline" };
   let action: AssistantAction | null = null;
   if (withReq) {
     const fields: Record<string, string> = {};
@@ -135,7 +147,8 @@ async function offlineAnswer(v: StudentViewer, question: string, points: RegPoin
 
 export async function askAssistant(v: StudentViewer, history: ChatMsg[]): Promise<AssistantReply> {
   const question = history[history.length - 1].content;
-  const points = searchRegulation(history.filter((m) => m.role === "user").slice(-2).map((m) => m.content).join(" "), 5);
+  // Ищем по последнему вопросу (UX-ревью №3: раньше к ответу «прилипал» прошлый вопрос).
+  const points = searchRegulation(question, 5);
   if (!env.GIGACHAT_AUTH_KEY) return offlineAnswer(v, question, points);
   try {
     const types = await listRequestTypes();

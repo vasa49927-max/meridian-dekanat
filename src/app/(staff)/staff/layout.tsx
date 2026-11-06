@@ -24,7 +24,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
         <p className="rounded-xl bg-side-on px-3 py-2 text-xs">Новых заявок: <b>{counts.newRequests}</b> · записей на приём: <b>{counts.upcomingAppointments}</b></p>
         <div className="flex items-center gap-3 rounded-2xl bg-side-on p-3">
           <Avatar name={`${v.firstName} ${v.lastName}`} hue={30} size={40} />
-          <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{v.firstName} {v.middleName} {v.lastName}</p><p className="truncate text-xs opacity-75">{v.position}</p></div>
+          <div className="min-w-0 flex-1"><p className="text-sm font-semibold leading-snug">{v.firstName} {v.middleName} {v.lastName}</p><p className="truncate text-xs opacity-75">{v.position}</p></div>
           <form action={logoutAction}><button className="grid h-9 w-9 place-items-center rounded-lg hover:bg-side-on" aria-label="Выйти"><LogOut className="h-5 w-5" aria-hidden /></button></form>
         </div>
       </aside>

@@ -33,6 +33,11 @@ export default async function TodayPage() {
     getNextLesson(v, at), listMyLessons(v, dayStart, addDays(dayStart, 1)), listMyUpcomingChanges(v, at), listMyDeadlines(v, at, 4),
     listMyRequests(v, null, 10), getMyGrades(v), listMyNotifications(v, "ANNOUNCEMENT", null, 3),
   ]);
+  // Сегодня пар нет (вечер/выходной) — показываем день ближайшей пары, а не пустую карточку (UX-ревью №11).
+  const todayActive = today.filter((l) => l.status !== "CANCELLED");
+  const showNextDay = !todayActive.length && next;
+  const dayList = showNextDay ? await listMyLessons(v, startOfDay(next.startsAt), addDays(startOfDay(next.startsAt), 1)) : today;
+  const dayTitle = showNextDay ? `${relativeDay(next.startsAt, at).replace(/^./, (c) => c.toUpperCase())}` : "Сегодня";
   const activeReqs = reqs.items.filter((r) => r.status !== "ISSUED" && r.status !== "REJECTED").slice(0, 3);
   const pastAvg = averagePoints(grades.past.map((g) => g.points));
   const autoDone = grades.current.filter((d) => d.summary.auto?.achieved).length;
@@ -63,7 +68,7 @@ export default async function TodayPage() {
         </div>
 
         <Card aria-labelledby="grades-h" className="lg:row-span-1">
-          <CardTitle id="grades-h" action={<Link href="/grades" className="text-sm font-semibold text-primary hover:underline dark:text-accent-text">Подробнее</Link>}>Как дела с учёбой</CardTitle>
+          <CardTitle id="grades-h" action={<Link href="/grades" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Подробнее</Link>}>Как дела с учёбой</CardTitle>
           <div className="flex items-end gap-3">
             <p className="font-serif text-[44px] leading-none tabular">{pace !== null ? `${pace}%` : "—"}</p>
             <p className="pb-1 text-sm leading-tight text-muted">баллов от возможного<br />в этом семестре</p>
@@ -80,12 +85,13 @@ export default async function TodayPage() {
         <div className="lg:col-span-3"><ChangeBanner changes={changes} /></div>
 
         <Card aria-labelledby="day-h" className="lg:row-span-2">
-          <CardTitle id="day-h" action={<Link href="/schedule" className="text-sm font-semibold text-primary hover:underline dark:text-accent-text">Неделя</Link>}>
-            Сегодня · {today.filter((l) => l.status !== "CANCELLED").length ? `${today.filter((l) => l.status !== "CANCELLED").length} пар${today.filter((l) => l.status !== "CANCELLED").length < 5 ? "ы" : ""}` : "без пар"}
+          <CardTitle id="day-h" action={<Link href="/schedule" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Неделя</Link>}>
+            {dayTitle} · {(() => { const n = dayList.filter((l) => l.status !== "CANCELLED").length; return n ? `${n} ${n === 1 ? "пара" : n < 5 ? "пары" : "пар"}` : "без пар"; })()}
           </CardTitle>
-          {today.length ? (
+          {showNextDay && <p className="-mt-1 mb-1 text-[13px] text-muted">Сегодня пар нет — вот ближайший учебный день.</p>}
+          {dayList.length ? (
             <ol className="divide-y divide-dashed divide-line">
-              {today.map((l) => {
+              {dayList.map((l) => {
                 const done = l.endsAt < at;
                 const live = l.startsAt <= at && l.endsAt > at;
                 return (
@@ -123,7 +129,7 @@ export default async function TodayPage() {
         </Card>
 
         <Card aria-labelledby="rq-h">
-          <CardTitle id="rq-h" action={<Link href="/requests" className="text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все</Link>}>Мои заявки</CardTitle>
+          <CardTitle id="rq-h" action={<Link href="/requests" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все</Link>}>Мои заявки</CardTitle>
           {activeReqs.length ? (
             <ul className="divide-y divide-line">
               {activeReqs.map((r) => (
@@ -150,7 +156,7 @@ export default async function TodayPage() {
         </Card>
 
         <Card aria-labelledby="news-h" className="lg:col-span-1">
-          <CardTitle id="news-h" action={<Link href="/notifications?f=ANNOUNCEMENT" className="text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все</Link>}>Объявления</CardTitle>
+          <CardTitle id="news-h" action={<Link href="/notifications?f=ANNOUNCEMENT" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все</Link>}>Объявления</CardTitle>
           {news.items.length ? (
             <ul className="divide-y divide-line">
               {news.items.map((n) => (

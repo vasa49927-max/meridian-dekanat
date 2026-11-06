@@ -27,7 +27,7 @@ export default async function NewRequestForm({ params, searchParams }: { params:
   const fromAssistant = sp.from === "assistant";
   return (
     <div className="mx-auto max-w-2xl pt-2 lg:pt-0">
-      <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/requests/new" className="text-muted hover:text-fg">← Все виды заявок</Link></nav>
+      <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/requests/new" className="tap text-muted hover:text-fg">← Все виды заявок</Link></nav>
       <div className="mb-5 flex items-start gap-3">
         <RequestIcon name={type.icon} className="h-12 w-12" />
         <div><h1 className="font-serif text-[26px] leading-tight">{type.title}</h1><p className="mt-1 text-muted">{type.description}</p></div>
@@ -37,6 +37,7 @@ export default async function NewRequestForm({ params, searchParams }: { params:
         {type.producesDocument && <li className="flex items-center gap-2 rounded-xl bg-surface-2 px-3 py-1.5"><QrCode className="h-4 w-4 text-accent-text" aria-hidden />электронный, с QR</li>}
         <li className="flex items-center gap-2 rounded-xl bg-surface-2 px-3 py-1.5"><UserCheck className="h-4 w-4 text-accent-text" aria-hidden />{type.regulationRef} Положения</li>
       </ul>
+      {!fromAssistant && Object.keys(defaults).length > 0 && <p className="mb-4 rounded-xl border border-warn-line bg-warn-bg px-3.5 py-2.5 text-sm text-warn">Часть полей подставлена из ссылки — проверьте их перед отправкой.</p>}
       {fromAssistant && <p className="mb-4 rounded-xl border border-info/30 bg-info-bg px-3.5 py-2.5 text-sm text-info">Поля заполнил помощник по вашему вопросу — проверьте их перед отправкой.</p>}
       <Card>
         <div className="mb-4 rounded-xl bg-bg p-3 text-sm">
