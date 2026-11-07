@@ -9,7 +9,7 @@
 
 ## Шаг 1. GitHub (5 минут)
 1. GitHub Desktop → File → **Add local repository** → выберите папку `meridian`.
-2. Вкладка Changes: появится `certs/russian_trusted_root_ca.pem` → внизу Summary: «Сертификат для GigaChat» → **Commit to main**.
+2. Вкладка Changes: появятся файлы `certs/*.cer` → внизу Summary: «Сертификат для GigaChat» → **Commit to main**.
 3. **Publish repository** → имя `meridian-dekanat` → **снимите галочку «Keep this code private»** → Publish.
 4. Пришлите мне ссылку на репозиторий.
 
