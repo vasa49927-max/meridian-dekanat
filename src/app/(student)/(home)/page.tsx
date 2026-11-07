@@ -10,7 +10,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty";
 import { NextLessonCard } from "@/components/today/next-lesson";
-import { ChangeBanner } from "@/components/schedule/change-banner";
+import { ChangeBanner, ChangeChip, changeKind } from "@/components/schedule/change-banner";
 import { LESSON_TYPE, teacherShort } from "@/components/schedule/lesson-meta";
 import { StatusBadge } from "@/components/requests/status";
 import { cn } from "@/lib/cn";
@@ -45,12 +45,23 @@ export default async function TodayPage() {
   const gradedMax = grades.current.reduce((s, d) => s + d.summary.gradedMax, 0);
   const earned = grades.current.reduce((s, d) => s + d.summary.earned, 0);
   const pace = gradedMax ? Math.round((earned / gradedMax) * 100) : null;
+  // Идея из опроса однокурсников: «рейтинг по предметам, которые сегодня в расписании».
+  const todayNames = new Set(dayList.filter((l) => l.status !== "CANCELLED").map((l) => l.title));
+  const todayGrades = grades.current.filter((d) => todayNames.has(d.name)).slice(0, 3);
 
   return (
     <div className="pt-2 lg:pt-0">
-      <div className="mb-5">
-        <p className="text-sm text-muted">{fmt.longDay(at)}</p>
-        <h1 className="font-serif text-[26px] leading-tight lg:text-[34px]">{greeting(at)}, {v.firstName}</h1>
+      {/* Правка капитана №2a: день недели и дата — крупно, «листком календаря». */}
+      <div className="mb-5 flex items-center gap-3.5">
+        <div className="w-[68px] shrink-0 overflow-hidden rounded-2xl border border-line bg-surface text-center shadow-[var(--shadow-card)]" aria-hidden>
+          <p className="bg-hero py-0.5 text-[11px] font-bold uppercase tracking-wider text-accent">{fmt.weekdayShort(at)}</p>
+          <p className="pt-1 font-serif text-[30px] font-bold leading-none tabular">{mskParts(at).d}</p>
+          <p className="pb-1.5 text-[11px] font-medium text-muted">{fmt.dayMonth(at).split(" ")[1]}</p>
+        </div>
+        <div className="min-w-0">
+          <p className="text-lg font-semibold leading-tight lg:text-xl">{fmt.longDay(at)}</p>
+          <h1 className="font-serif text-[24px] leading-tight lg:text-[32px]">{greeting(at)}, {v.firstName}</h1>
+        </div>
       </div>
 
       <div className="grid gap-3 lg:grid-cols-3 lg:gap-4">
@@ -73,6 +84,22 @@ export default async function TodayPage() {
             <p className="font-serif text-[44px] leading-none tabular">{pace !== null ? `${pace}%` : "—"}</p>
             <p className="pb-1 text-sm leading-tight text-muted">баллов от возможного<br />в этом семестре</p>
           </div>
+          {todayGrades.length > 0 && (
+            <div className="mt-3 rounded-xl bg-surface-2/70 p-2.5">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">{showNextDay ? "Баллы по предметам этого дня" : "Баллы по сегодняшним предметам"}</p>
+              <ul className="space-y-1">
+                {todayGrades.map((d) => (
+                  <li key={d.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="min-w-0 truncate">{d.short}</span>
+                    <span className="flex shrink-0 items-center gap-1.5">
+                      <b className="tabular">{d.summary.earned}<span className="font-normal text-muted">/60</span></b>
+                      {d.summary.auto?.achieved ? <Badge tone="ok">автомат</Badge> : d.summary.risk !== "none" ? <Badge tone="danger">риск</Badge> : d.summary.auto?.possible ? <Badge title="столько баллов не хватает до автомата">до автомата {d.summary.auto.need}</Badge> : null}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <ul className="mt-3 space-y-1.5 text-sm">
             <li>Автомат уже есть: <b>{autoDone} из {grades.current.length}</b></li>
             {pastAvg !== null && <li>Средний балл зачётки: <b className="tabular">{pastAvg.toLocaleString("ru-RU")}</b></li>}
@@ -94,13 +121,15 @@ export default async function TodayPage() {
               {dayList.map((l) => {
                 const done = l.endsAt < at;
                 const live = l.startsAt <= at && l.endsAt > at;
+                const kind = changeKind(l);
                 return (
-                  <li key={l.id} className={cn("flex gap-3 py-2.5", done && "text-muted [&_p]:text-muted")}>
-                    <time className={cn("w-12 shrink-0 font-semibold tabular", live && "text-primary dark:text-accent-text")} dateTime={l.startsAt.toISOString()}>{fmt.time(l.startsAt)}</time>
+                  <li key={l.id} className={cn("flex gap-3 py-2.5", done && !kind && "text-muted [&_p]:text-muted", kind === "cancel" && "-mx-2 rounded-xl bg-danger-bg/70 px-2")}>
+                    <time className={cn("w-12 shrink-0 font-semibold tabular", live && "text-primary dark:text-accent-text", kind === "cancel" && "text-danger")} dateTime={l.startsAt.toISOString()}>{fmt.time(l.startsAt)}</time>
                     <div className="min-w-0">
-                      <p className={cn("font-semibold leading-snug", live && "text-primary dark:text-accent-text", l.status === "CANCELLED" && "line-through decoration-warn")}>{l.title}</p>
-                      <p className={cn("text-[13px] text-muted", l.status !== "SCHEDULED" && "font-semibold text-warn")}>
-                        {l.status === "CANCELLED" ? "Отменена" : l.status === "MOVED" ? `Изменение: ауд. ${l.room}` : `${LESSON_TYPE[l.type]} · ауд. ${l.room}, корп. ${l.buildingCode}`}
+                      <p className={cn("font-semibold leading-snug", live && "text-primary dark:text-accent-text")}>{l.title}</p>
+                      {kind && <ChangeChip kind={kind} className="mt-1" />}
+                      <p className="mt-0.5 text-[13px] text-muted">
+                        {kind === "cancel" ? (l.changeNote ?? "Пары не будет") : kind === "room" ? `Теперь ауд. ${l.room} (вместо ${l.prevRoom})` : kind === "move" ? `Перенесена сюда · ауд. ${l.room}` : `${LESSON_TYPE[l.type]} · ауд. ${l.room}, корп. ${l.buildingCode}`}
                       </p>
                     </div>
                   </li>
@@ -134,9 +163,13 @@ export default async function TodayPage() {
             <ul className="divide-y divide-line">
               {activeReqs.map((r) => (
                 <li key={r.id}>
-                  <Link href={`/requests/${r.id}`} className="flex items-start gap-3 rounded-lg py-2.5 hover:bg-surface-2/60">
-                    <StatusBadge status={r.status} className="mt-0.5" />
-                    <div className="min-w-0"><p className="text-sm font-semibold leading-snug">{r.title}</p><p className="text-[13px] text-muted">{r.status === "NEEDS_INFO" ? "Деканат просит дополнить" : r.status === "READY" ? "Документ готов — откройте" : `Срок — до ${fmt.dayMonthShort(r.dueAt)}`}</p></div>
+                  {/* Правка капитана №2d: статус — под названием, а не отдельной широкой колонкой. */}
+                  <Link href={`/requests/${r.id}`} className="block rounded-lg py-2.5 hover:bg-surface-2/60">
+                    <p className="text-sm font-semibold leading-snug">{r.title}</p>
+                    <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted">
+                      <StatusBadge status={r.status} />
+                      <span>{r.status === "NEEDS_INFO" ? "ответьте деканату" : r.status === "READY" ? "откройте документ" : `до ${fmt.dayMonthShort(r.dueAt)}`}</span>
+                    </p>
                   </Link>
                 </li>
               ))}

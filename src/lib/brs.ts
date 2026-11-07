@@ -91,3 +91,37 @@ export function averagePoints(points: number[]) {
   if (!points.length) return null;
   return round1(points.reduce((s, p) => s + p, 0) / points.length);
 }
+
+export type Plan = {
+  tone: "ok" | "goal" | "exam" | "risk";
+  headline: string;
+  detail: string;
+  /** Средний % от максимума, который нужен за оставшиеся работы, чтобы выйти на автомат. */
+  needPct: number | null;
+};
+
+/**
+ * «Что мне делать» по дисциплине — одной фразой (переработка раздела по правке капитана №4).
+ * Порядок проверок: риск → автомат уже есть → автомат достижим → только экзамен/зачёт.
+ */
+export function planFor(control: Control, s: DisciplineSummary): Plan {
+  const isCredit = control === "CREDIT";
+  const autoName = isCredit ? "зачёт без сдачи" : "«отлично» без экзамена";
+  if (s.risk === "high") {
+    return { tone: "risk", headline: "Есть риск не сдать", detail: `${s.riskReason ?? ""}. Запишитесь к методисту или к преподавателю на консультацию.`, needPct: null };
+  }
+  if (s.auto?.achieved) {
+    return { tone: "ok", headline: isCredit ? "Зачёт уже ваш" : "«Отлично» без экзамена — уже можно", detail: isCredit ? `Набрано ${s.earned} из 60 — больше ${BRS.autoCredit}, зачёт ставится автоматически.` : `Набрано ${s.earned} из 60 — больше ${BRS.autoExcellent}. Можно не сдавать экзамен и получить «отлично».`, needPct: null };
+  }
+  if (s.auto?.possible && s.remainingMax > 0) {
+    const pct = Math.min(100, Math.ceil((s.auto.need / s.remainingMax) * 100));
+    return { tone: s.risk === "watch" ? "risk" : "goal", headline: `До «${isCredit ? "автомата" : "отлично» автоматом"}${isCredit ? "»" : ""}: ещё ${s.auto.need} б.`, detail: `Осталось работ на ${s.remainingMax} б. Набирайте в среднем ${pct}% за каждую — и получите ${autoName}.`, needPct: pct };
+  }
+  if (isCredit) {
+    const need = neededOnFinal(s.projectedCurrent, BRS.passTotal);
+    return { tone: s.risk === "watch" ? "risk" : "exam", headline: s.risk === "watch" ? `Нужно подтянуть баллы: темп ${s.pacePct}%` : "Нужно сдавать зачёт", detail: need.feasible ? `При нынешнем темпе на зачёте нужно набрать около ${need.need} из 40.` : "Даже максимум на зачёте не даст 60 — срочно к методисту.", needPct: null };
+  }
+  const n5 = neededOnFinal(s.projectedCurrent, 90), n4 = neededOnFinal(s.projectedCurrent, 75), n3 = neededOnFinal(s.projectedCurrent, 60);
+  const parts = [n5.feasible && `«отлично» — ~${n5.need}`, n4.feasible && `«хорошо» — ~${n4.need}`, n3.feasible && `«удовл.» — ~${n3.need}`].filter(Boolean);
+  return { tone: s.risk === "watch" ? "risk" : "exam", headline: s.risk === "watch" ? `Нужно подтянуть баллы: темп ${s.pacePct}%` : "Готовимся к экзамену", detail: parts.length ? `Сколько нужно на экзамене (из 40) при нынешнем темпе: ${parts.slice(0, 2).join(", ")}.` : "Даже максимум на экзамене не даст 60 — срочно к методисту.", needPct: null };
+}

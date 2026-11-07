@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   devIndicators: false,
+  // Вложения к заявкам: до 3 файлов по 5 МБ за одну отправку формы.
+  experimental: { serverActions: { bodySizeLimit: "16mb" } },
   serverExternalPackages: ["@node-rs/argon2"],
   turbopack: {
     rules: {

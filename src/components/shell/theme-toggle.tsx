@@ -1,16 +1,21 @@
 "use client";
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { cn } from "@/lib/cn";
 
+// Тема живёт в классе .dark на <html>; подписываемся на его изменения.
+const subscribe = (cb: () => void) => {
+  const mo = new MutationObserver(cb);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => mo.disconnect();
+};
+
 export function useTheme() {
-  const [dark, setDark] = useState<boolean | null>(null);
-  useEffect(() => setDark(document.documentElement.classList.contains("dark")), []);
+  const dark = useSyncExternalStore(subscribe, () => document.documentElement.classList.contains("dark"), () => null);
   const toggle = () => {
     const next = !document.documentElement.classList.contains("dark");
     document.documentElement.classList.toggle("dark", next);
     try { localStorage.setItem("theme", next ? "dark" : "light"); } catch {}
-    setDark(next);
   };
   return { dark, toggle };
 }

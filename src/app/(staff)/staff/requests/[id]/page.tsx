@@ -8,6 +8,8 @@ import { fmt } from "@/lib/time";
 import { Card, CardTitle } from "@/components/ui/card";
 import { StatusBadge, STATUS_LABEL } from "@/components/requests/status";
 import { DocumentView } from "@/components/requests/document-view";
+import { AttachmentsList } from "@/components/requests/attachments-list";
+import { listAttachmentsMeta } from "@/server/attachments";
 import { StatusForm } from "@/components/staff/status-form";
 
 export const metadata: Metadata = { title: "Заявка — деканат" };
@@ -19,6 +21,7 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
   if (!r) notFound();
   const st = r.student;
   const next = STATUS_FLOW[r.status];
+  const files = await listAttachmentsMeta(r.id);
   return (
     <div className="pt-2 lg:pt-0">
       <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/staff" className="tap text-muted hover:text-fg">← Очередь</Link></nav>
@@ -40,6 +43,7 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
               {r.type.fields.map((f) => r.payload[f.name] ? <div key={f.name}><dt className="text-muted">{f.label}</dt><dd className="font-medium">{r.payload[f.name]}</dd></div> : null)}
               {r.studentComment && <div><dt className="text-muted">Комментарий студента</dt><dd className="font-medium">{r.studentComment}</dd></div>}
             </dl>
+            {files.length > 0 && <div className="mt-3"><p className="mb-1.5 text-sm text-muted">Вложения студента</p><AttachmentsList items={files} viewer="STAFF" /></div>}
           </Card>
           {r.document && <DocumentView title={r.document.title} lines={r.document.body.lines} issuedAt={r.document.issuedAt} validUntil={r.document.validUntil} verifyCode={r.document.verifyCode} qr={await qrSvg(r.document.verifyCode)} verifyUrl={verifyUrl(r.document.verifyCode)} number={r.number} revoked={r.document.revoked} />}
         </div>

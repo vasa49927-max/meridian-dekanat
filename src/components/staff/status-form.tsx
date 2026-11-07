@@ -1,7 +1,8 @@
 "use client";
 import { useActionState, useState } from "react";
 import { changeStatusAction, type StaffState } from "@/app/(staff)/staff/actions";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ConfirmSubmit } from "@/components/ui/confirm";
 import { FieldHint, Label, Textarea } from "@/components/ui/field";
 import { cn } from "@/lib/cn";
 
@@ -36,7 +37,11 @@ export function StatusForm({ id, options, producesDocument }: { id: string; opti
       </div>
       {state.error && <p role="alert" className="rounded-xl bg-danger-bg px-3 py-2 text-sm text-danger">{state.error}</p>}
       {state.ok && <p role="status" className="rounded-xl bg-ok-bg px-3 py-2 text-sm text-ok">{state.ok}</p>}
-      <Button type="submit" disabled={pending || !sel} className="w-full">{pending ? "Сохраняем…" : "Сохранить и уведомить студента"}</Button>
+      {sel === "REJECTED" ? (
+        <ConfirmSubmit className={buttonVariants({ variant: "danger", className: "w-full" })} disabled={pending} title="Отклонить заявку?" description="Студент получит уведомление с вашей причиной. Вернуть заявку в работу после отказа нельзя — студенту придётся подать новую." confirmLabel="Да, отклонить">
+          {pending ? "Сохраняем…" : "Отклонить и уведомить студента"}
+        </ConfirmSubmit>
+      ) : <Button type="submit" disabled={pending || !sel} className="w-full">{pending ? "Сохраняем…" : "Сохранить и уведомить студента"}</Button>}
     </form>
   );
 }

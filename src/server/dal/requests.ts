@@ -6,6 +6,7 @@ import { db, schema as t } from "@/server/db";
 import type { StudentViewer } from "@/server/auth/guards";
 import type { RequestField } from "@/server/db/schema";
 import { newRequestNumber } from "@/server/documents";
+import { saveAttachments, type ReadyFile } from "@/server/attachments";
 import { now } from "@/lib/time";
 
 export const listRequestTypes = cache(async () =>
@@ -49,7 +50,7 @@ export function schemaForFields(fields: RequestField[]) {
   return z.object(shape).strict();
 }
 
-export async function createMyRequest(v: StudentViewer, code: string, raw: Record<string, unknown>, comment: string | null) {
+export async function createMyRequest(v: StudentViewer, code: string, raw: Record<string, unknown>, comment: string | null, files: ReadyFile[] = []) {
   const type = await getRequestType(code);
   if (!type) return { ok: false as const, error: "Такого вида заявки нет" };
   const parsed = schemaForFields(type.fields).safeParse(raw);
@@ -67,7 +68,8 @@ export async function createMyRequest(v: StudentViewer, code: string, raw: Recor
           number: newRequestNumber(), studentId: v.studentId, typeId: type.id, payload, studentComment: comment?.slice(0, 500) || null,
           dueAt: new Date(+created + type.slaDays * 86400000),
         }).returning({ id: t.requests.id, number: t.requests.number });
-        await tx.insert(t.requestEvents).values({ requestId: r.id, status: "SUBMITTED", actor: "Студент", comment: comment?.slice(0, 500) || null });
+        await tx.insert(t.requestEvents).values({ requestId: r.id, status: "SUBMITTED", actor: "Студент", comment: [comment?.slice(0, 500), files.length ? `Приложено файлов: ${files.length}` : null].filter(Boolean).join(" · ") || null });
+        await saveAttachments(tx, r.id, "STUDENT", files);
         await tx.insert(t.notifications).values({ userId: v.userId, kind: "REQUEST", title: `${type.title}: подана`, body: `Заявка ${r.number} принята. Срок — ${type.slaDays} ${type.slaDays === 1 ? "рабочий день" : "рабочих дня"}. Статус будет обновляться здесь.`, link: `/requests/${r.id}`, readAt: new Date() });
         return r.id;
       });
@@ -80,13 +82,14 @@ export async function createMyRequest(v: StudentViewer, code: string, raw: Recor
 }
 
 /** Студент отвечает на «нужно дополнить» или отзывает заявку. Только свою и только в допустимом статусе. */
-export async function replyToMyRequest(v: StudentViewer, id: string, comment: string) {
+export async function replyToMyRequest(v: StudentViewer, id: string, comment: string, files: ReadyFile[] = []) {
   const r = await getMyRequest(v, id);
   if (!r) return { ok: false as const, notFound: true };
   if (r.status !== "NEEDS_INFO") return { ok: false as const, error: "Ответить можно, когда деканат просит дополнить заявку" };
   await db.transaction(async (tx) => {
     await tx.update(t.requests).set({ status: "SUBMITTED", studentComment: comment, updatedAt: new Date() }).where(and(eq(t.requests.id, id), eq(t.requests.studentId, v.studentId)));
-    await tx.insert(t.requestEvents).values({ requestId: id, status: "SUBMITTED", actor: "Студент", comment });
+    await tx.insert(t.requestEvents).values({ requestId: id, status: "SUBMITTED", actor: "Студент", comment: files.length ? `${comment} · приложено файлов: ${files.length}` : comment });
+    await saveAttachments(tx, id, "STUDENT", files);
   });
   return { ok: true as const };
 }

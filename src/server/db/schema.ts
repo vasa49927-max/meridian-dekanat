@@ -4,8 +4,10 @@
  */
 import { relations, sql } from "drizzle-orm";
 import {
-  boolean, index, integer, jsonb, pgEnum, pgTable, real, smallint, text, timestamp, uniqueIndex, uuid,
+  boolean, customType, index, integer, jsonb, pgEnum, pgTable, real, smallint, text, timestamp, uniqueIndex, uuid,
 } from "drizzle-orm/pg-core";
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => "bytea" });
 
 const ts = (name: string) => timestamp(name, { withTimezone: true, mode: "date" });
 const createdAt = () => ts("created_at").notNull().defaultNow();
@@ -271,6 +273,21 @@ export const documents = pgTable("documents", {
   validUntil: ts("valid_until"),
   revoked: boolean("revoked").notNull().default(false),
 }, (t) => [index("documents_student_idx").on(t.studentId)]);
+
+/**
+ * Вложения к заявкам (правка капитана №5). Для прототипа файлы хранятся в БД (bytea):
+ * не нужен отдельный том на хостинге, бэкапы БД включают файлы. Лимиты — в src/server/attachments.ts.
+ */
+export const attachments = pgTable("attachments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  requestId: uuid("request_id").notNull().references(() => requests.id, { onDelete: "cascade" }),
+  uploaderRole: text("uploader_role").$type<"STUDENT" | "STAFF">().notNull(),
+  fileName: text("file_name").notNull(),
+  mime: text("mime").notNull(),
+  size: integer("size").notNull(),
+  data: bytea("data").notNull(),
+  createdAt: createdAt(),
+}, (t) => [index("attachments_request_idx").on(t.requestId)]);
 
 // ───────────── Уведомления и объявления ─────────────
 export const notificationKindEnum = pgEnum("notification_kind", ["SCHEDULE", "REQUEST", "ANNOUNCEMENT", "DEADLINE", "APPOINTMENT", "GRADE"]);

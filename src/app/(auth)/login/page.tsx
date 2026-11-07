@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { CalendarDays, FileCheck2, GraduationCap, Sparkles } from "lucide-react";
 import { getViewer } from "@/server/auth/guards";
 import { LogoMark } from "@/components/logo";
 import { Disclaimer } from "@/components/shell/disclaimer";
@@ -9,12 +8,6 @@ import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = { title: "Вход" };
 
-const FEATURES = [
-  { icon: CalendarDays, text: "Расписание с переносами «было → стало»" },
-  { icon: GraduationCap, text: "Баллы БРС и путь к «автомату»" },
-  { icon: FileCheck2, text: "Справки онлайн с QR-проверкой" },
-  { icon: Sparkles, text: "ИИ-помощник по правилам деканата" },
-];
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; reset?: string }> }) {
   const v = await getViewer();
@@ -31,11 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <div className="mt-auto max-w-lg">
           <p className="mb-3 text-sm font-semibold uppercase tracking-[0.14em] text-accent">Цифровой деканат будущего</p>
           <h1 className="font-serif text-5xl leading-[1.08]">Вся учёба — в одном месте и за пару касаний</h1>
-          <ul className="mt-10 grid gap-4">
-            {FEATURES.map((f) => (
-              <li key={f.text} className="flex items-center gap-3 text-lg text-hero-fg/90"><span className="grid h-10 w-10 place-items-center rounded-xl bg-hero-2"><f.icon className="h-5 w-5 text-accent" aria-hidden /></span>{f.text}</li>
-            ))}
-          </ul>
+          <p className="mt-5 max-w-md text-lg text-hero-muted">Личный кабинет студента: расписание, баллы, справки и связь с деканатом.</p>
         </div>
       </section>
       <main className="flex flex-col px-5 py-6 sm:px-10">

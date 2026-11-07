@@ -34,7 +34,7 @@ export function Chat({ firstName, initialQuestion, llm }: { firstName: string; i
       setBusy(false);
     }
   }
-  useEffect(() => { if (initialQuestion && !sentInitial.current) { sentInitial.current = true; void send(initialQuestion); } }); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (initialQuestion && !sentInitial.current) { sentInitial.current = true; void send(initialQuestion); } });
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [msgs, busy]);
 
   const href = (a: NonNullable<Msg["action"]>) => `/requests/new/${a.code}?${new URLSearchParams({ ...a.fields, from: "assistant" })}`;

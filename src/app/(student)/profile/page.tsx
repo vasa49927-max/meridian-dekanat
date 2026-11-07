@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { logoutAction } from "../../(auth)/login/actions";
+import { PasswordRow } from "@/components/profile/password-row";
+import { DEMO_LOGINS } from "@/server/auth/change-password";
 
 export const metadata: Metadata = { title: "Профиль" };
 
@@ -45,6 +47,7 @@ export default async function ProfilePage() {
           <dl className="divide-y divide-line text-sm">
             {rows.map(([k, val]) => <div key={k} className="grid gap-0.5 py-2 sm:grid-cols-[180px_1fr] sm:gap-3"><dt className="text-muted">{k}</dt><dd className="font-medium break-words">{val}</dd></div>)}
           </dl>
+          <div className="border-t border-line"><PasswordRow demo={DEMO_LOGINS.has(p.login)} /></div>
           <p className="mt-3 text-xs text-muted">Нашли ошибку в данных? Напишите в «Помощник» или запишитесь к методисту — исправление вносит деканат.</p>
         </Card>
         <div className="space-y-4">

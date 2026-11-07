@@ -5,6 +5,7 @@ import type { RequestField } from "@/server/db/schema";
 import { createRequestAction, type FormState } from "@/app/(student)/requests/actions";
 import { Button } from "@/components/ui/button";
 import { FieldHint, Input, Label, Select, Textarea } from "@/components/ui/field";
+import { FileField } from "./file-field";
 
 export function RequestForm({ code, fields, defaults }: { code: string; fields: RequestField[]; defaults: Record<string, string> }) {
   const [state, action, pending] = useActionState<FormState, FormData>(createRequestAction.bind(null, code), {});
@@ -36,6 +37,7 @@ export function RequestForm({ code, fields, defaults }: { code: string; fields: 
         <Label htmlFor="comment">Комментарий для деканата</Label>
         <Textarea id="comment" name="comment" placeholder="Необязательно. Например, к какому сроку нужен документ" maxLength={500} defaultValue={state.values?.comment ?? ""} className="min-h-20" />
       </div>
+      <FileField label="Вложения (необязательно)" hint="Например, письмо работодателя или скан документа · PDF, JPG, PNG, DOCX · до 3 файлов по 5 МБ" error={state.fieldErrors?.files} />
       {state.error && <p role="alert" className="rounded-xl bg-danger-bg px-3.5 py-2.5 text-sm font-medium text-danger">{state.error}</p>}
       <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={pending}><Send className="h-5 w-5" aria-hidden />{pending ? "Отправляем…" : "Отправить заявку"}</Button>
     </form>

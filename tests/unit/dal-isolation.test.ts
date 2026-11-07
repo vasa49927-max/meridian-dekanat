@@ -74,3 +74,20 @@ describe("DAL: студент не видит и не меняет чужое", 
     expect(cols).not.toContain("token");
   });
 });
+
+import { changePassword } from "@/server/auth/change-password";
+import { hashPassword, verifyPassword } from "@/server/auth/password";
+describe("Смена пароля (обычный, не демо-аккаунт)", () => {
+  it("проверяет текущий, пишет новый хэш и завершает другие сессии", async () => {
+    const [u] = await db.insert(t.users).values({ login: "pwtest", passwordHash: await hashPassword("Old-pass-123"), role: "STUDENT" }).returning();
+    const [s1] = await db.insert(t.sessions).values({ tokenHash: "h1-" + Date.now(), userId: u.id, expiresAt: new Date(Date.now() + 1e7) }).returning();
+    await db.insert(t.sessions).values({ tokenHash: "h2-" + Date.now(), userId: u.id, expiresAt: new Date(Date.now() + 1e7) });
+    expect(await changePassword(u.id, s1.id, "wrong", "New-pass-456")).toMatchObject({ ok: false, field: "current" });
+    expect(await changePassword(u.id, s1.id, "Old-pass-123", "short1")).toMatchObject({ ok: false, field: "next" });
+    expect(await changePassword(u.id, s1.id, "Old-pass-123", "New-pass-456")).toMatchObject({ ok: true });
+    const [after] = await db.select().from(t.users).where(eq(t.users.id, u.id));
+    expect(await verifyPassword(after.passwordHash, "New-pass-456")).toBe(true);
+    const left = await db.select().from(t.sessions).where(eq(t.sessions.userId, u.id));
+    expect(left.map((x) => x.id)).toEqual([s1.id]);
+  });
+});

@@ -48,7 +48,7 @@ export async function changeLessonAction(_: StaffState, form: FormData): Promise
   return { ok: `Сохранено. Уведомление получили студентов: ${r.recipients}.` };
 }
 
-export async function resetDemoAction(_: StaffState): Promise<StaffState> {
+export async function resetDemoAction(): Promise<StaffState> {
   await requireStaff();
   if (env.DEMO_RESET_ENABLED !== "true") return { error: "Сброс отключён" };
   // Не чаще раза в 30 минут: один член жюри не выбросит из кабинета других посреди проверки (находка M-2).

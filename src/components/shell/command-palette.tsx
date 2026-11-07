@@ -42,6 +42,8 @@ export function CommandPalette({ index, open, setOpen }: { index: PaletteIndex; 
             ))}
             <Command.Item value="записаться к методисту приём" onSelect={() => go("/appointments")} className={item}><CalendarPlus className="h-4 w-4 shrink-0" aria-hidden /> Записаться к методисту</Command.Item>
             <Command.Item value="спросить помощника ии" onSelect={() => go(`/assistant${q ? `?q=${encodeURIComponent(q)}` : ""}`)} className={item}><Sparkles className="h-4 w-4 shrink-0" aria-hidden /> Спросить помощника{q ? `: «${q}»` : ""}</Command.Item>
+            {/* .ics — файл из route handler, а не страница: полноценный переход браузера здесь и нужен */}
+            {/* eslint-disable-next-line @next/next/no-location-assign-relative-destination */}
             <Command.Item value="скачать расписание ics календарь" onSelect={() => { setOpen(false); window.location.href = "/api/schedule.ics"; }} className={item}><CalendarPlus className="h-4 w-4 shrink-0" aria-hidden /> Скачать расписание в календарь (.ics)</Command.Item>
           </Command.Group>
         )}

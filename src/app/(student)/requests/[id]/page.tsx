@@ -10,6 +10,8 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
 import { StatusBadge, STATUS_LABEL, TRACK, type ReqStatus } from "@/components/requests/status";
 import { DocumentView } from "@/components/requests/document-view";
+import { AttachmentsList } from "@/components/requests/attachments-list";
+import { listAttachmentsMeta } from "@/server/attachments";
 import { ReplyForm, WithdrawButton } from "@/components/requests/request-actions";
 import { cn } from "@/lib/cn";
 
@@ -45,6 +47,7 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
   if (!r) notFound(); // чужая или несуществующая заявка — одинаковый ответ 404
   const doc = r.document;
   const qr = doc ? await qrSvg(doc.verifyCode) : null;
+  const files = await listAttachmentsMeta(r.id); // доступ к заявке уже проверен выше
   return (
     <div className="mx-auto max-w-3xl pt-2 lg:pt-0">
       <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/requests" className="tap text-muted hover:text-fg">← Мои заявки</Link></nav>
@@ -79,6 +82,7 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
             {r.type.fields.map((f) => r.payload[f.name] ? <div key={f.name}><dt className="text-muted">{f.label}</dt><dd className="font-medium">{r.payload[f.name]}</dd></div> : null)}
             {r.studentComment && <div><dt className="text-muted">Ваш комментарий</dt><dd className="font-medium">{r.studentComment}</dd></div>}
           </dl>
+          {files.length > 0 && <div className="mt-3"><p className="mb-1.5 text-sm text-muted">Вложения</p><AttachmentsList items={files} viewer="STUDENT" /></div>}
         </Card>
         <Card>
           <CardTitle>История</CardTitle>

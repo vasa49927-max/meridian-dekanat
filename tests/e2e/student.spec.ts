@@ -25,20 +25,26 @@ test.describe("Сегодня", () => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Доброе утро, Анна");
 
-    const next = page.getByRole("region", { name: "Следующая пара" });
+    // Правка капитана №2b: предмет, день, время начала и аудитория — крупными плитками
+    const next = page.getByRole("region", { name: /^Следующая пара/ });
     await expect(next.getByRole("heading", { name: "Международные финансовые рынки" })).toBeVisible();
     await expect(next).toContainText(/через \d+ мин/);
-    await expect(next).toContainText("10:40–12:00 · Семинар · ауд. 3047");
+    await expect(next.getByRole("definition").filter({ hasText: /^Сегодня$/ })).toBeVisible();
+    await expect(next.getByRole("definition").filter({ hasText: /^10:40$/ })).toBeVisible();
+    await expect(next.getByRole("definition").filter({ hasText: /^3047$/ })).toBeVisible();
+    await expect(next).toContainText("Семинар");
 
     const banner = page.getByRole("region", { name: "Изменения в расписании" });
     await expect(banner.getByRole("heading")).toContainText("Изменени");
-    // Перенос: зачёркнутое «было» → жирное «стало»
+    // Правка капитана №2c: тип изменения ярлыком, «теперь» — крупно, «вместо» — мелко, без зачёркиваний
     const moved = banner.getByRole("listitem").filter({ hasText: "Испанский язык (второй иностранный)" });
-    await expect(moved).toContainText("ср, 18 нояб., 14:30, ауд. 506 → чт, 19 нояб., 17:40, ауд. 1018");
-    await expect(moved.locator("s")).toHaveText("ср, 18 нояб., 14:30, ауд. 506");
+    await expect(moved).toContainText("Перенос");
+    await expect(moved).toContainText("Теперь: чт, 19 нояб. · 17:40 · ауд. 1018");
+    await expect(moved).toContainText("вместо ср, 18 нояб. · 14:30 · ауд. 506");
+    await expect(banner.locator("s")).toHaveCount(0);
     // Отмена тоже в баннере
     // (staff.spec может добавить ещё один перенос «Макроэкономики» — поэтому фильтр по дате)
-    await expect(banner.getByRole("listitem").filter({ hasText: /Макроэкономика:\s+пн, 16 нояб\., 09:00/ })).toContainText("отменена");
+    await expect(banner.getByRole("listitem").filter({ hasText: "Макроэкономика" }).filter({ hasText: "пн, 16 нояб. · 09:00" })).toContainText("пары не будет");
 
     const study = page.getByRole("region", { name: "Как дела с учёбой" });
     await expect(study.getByText("Риск:")).toBeVisible();
@@ -52,22 +58,27 @@ test.describe("Расписание", () => {
     await page.goto("/schedule");
     const views = page.getByRole("navigation", { name: "Вид расписания" });
     await expect(views.getByRole("link", { name: "День" })).toHaveAttribute("aria-current", "page");
-    await expect(page.getByRole("heading", { name: "Пятница, 13 ноября · сегодня" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Пятница, 13 ноября\s*сегодня/ })).toBeVisible();
     await expect(page.getByRole("article", { name: "10:40 Международные финансовые рынки" })).toBeVisible();
 
     // Неделя: перенос выделен цветом и бейджем «перенос», видно «было»
     await views.getByRole("link", { name: "Неделя" }).click();
     await expect(page).toHaveURL(/view=week/);
     await expect(views.getByRole("link", { name: "Неделя" })).toHaveAttribute("aria-current", "page");
-    const movedCard = page.getByRole("article", { name: "17:40 Статистика, изменение" });
+    const movedCard = page.getByRole("article", { name: "17:40 Статистика, перенос" });
     await expect(movedCard).toBeVisible();
-    await expect(movedCard.getByText("перенос", { exact: true })).toBeVisible();
+    await expect(movedCard.getByText("Перенос", { exact: true })).toBeVisible();
     await expect(movedCard).toHaveClass(/border-warn-line/);
-    await expect(movedCard.locator("s")).toHaveText("вт, 10 нояб., 09:00, ауд. 1018");
-    // Замена аудитории тоже выделена, с отдельным бейджем
-    const roomCard = page.getByRole("region", { name: "Среда, 11 ноября" }).getByRole("article", { name: "10:40 Макроэкономика, изменение" });
-    await expect(roomCard.getByText("новая аудитория", { exact: true })).toBeVisible();
-    await expect(roomCard.locator("s")).toHaveText("ср, 11 нояб., 10:40, ауд. 3015");
+    await expect(movedCard).toContainText("вместо вт, 10 нояб. · 09:00 · ауд. 1018");
+    await expect(movedCard.locator("s")).toHaveCount(0);
+    // Смена аудитории — свой ярлык
+    const roomCard = page.getByRole("region", { name: "Среда, 11 ноября" }).getByRole("article", { name: "10:40 Макроэкономика, другая аудитория" });
+    await expect(roomCard.getByText("Другая аудитория", { exact: true })).toBeVisible();
+    await expect(roomCard).toContainText("вместо ауд. 3015");
+    // Правка капитана №3b: отмена — красная полоса «Пара отменена»
+    await page.goto("/schedule?d=2026-11-16&view=week");
+    await expect(page.getByRole("article", { name: "09:00 Макроэкономика, пара отменена" }).getByText("Пара отменена")).toBeVisible();
+    await page.goto("/schedule?view=week");
 
     // Обратно в день, следующий день → суббота без пар → «Показать пн, 16 нояб. →»
     await views.getByRole("link", { name: "День" }).click();
@@ -83,7 +94,7 @@ test.describe("Расписание", () => {
 
     // «Сегодня» возвращает к текущему дню
     await page.getByRole("link", { name: "Сегодня", exact: true }).last().click();
-    await expect(page.getByRole("heading", { name: "Пятница, 13 ноября · сегодня" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^Пятница, 13 ноября\s*сегодня/ })).toBeVisible();
   });
 
   test(".ics скачивается и содержит VEVENT", async ({ page }) => {
@@ -103,12 +114,16 @@ test.describe("Расписание", () => {
 });
 
 test.describe("Успеваемость", () => {
-  test("«Контрольные точки и «что, если»»: ползунок меняет итог", async ({ page }) => {
+  test("карточка отвечает «что делать», калькулятор итога меняет оценку", async ({ page }) => {
     await page.goto("/grades");
+    // Правка капитана №4: сначала — что делать, потом — где я, потом — следующая работа
+    const hist = page.getByRole("article", { name: "История международных отношений", exact: true });
+    await expect(hist).toContainText("Зачёт уже ваш");
     const card = page.getByRole("article", { name: "Статистика", exact: true });
-    const summary = card.getByText("Контрольные точки и «что, если»");
-    await summary.click();
-    await expect(card.getByRole("table", { name: "Контрольные точки: Статистика" })).toBeVisible();
+    await expect(card).toContainText("Нужно подтянуть баллы");
+    await expect(card).toContainText("Следующая работа: Коллоквиум 2");
+    await card.getByText("Все работы и калькулятор итога").click();
+    await expect(card.getByText("Коллоквиум 1")).toBeVisible();
 
     const result = card.locator("p", { hasText: "Итог:" });
     await expect(result).toBeVisible();
@@ -183,7 +198,14 @@ test.describe("Запись к методисту", () => {
     await expect(row).toBeVisible();
     await expect(row).toContainText("Справки и документы");
 
+    // Правка капитана №6: отмена — только после подтверждения
     await row.getByRole("button", { name: "Отменить" }).click();
+    const dlg = page.getByRole("alertdialog", { name: "Отменить запись?" });
+    await expect(dlg).toBeVisible();
+    await dlg.getByRole("button", { name: "Нет, оставить" }).click();
+    await expect(row).toBeVisible();
+    await row.getByRole("button", { name: "Отменить" }).click();
+    await page.getByRole("alertdialog").getByRole("button", { name: "Да, отменить запись" }).click();
     await expect(page.getByRole("heading", { name: "Мои записи" })).toHaveCount(0);
     await page.getByText("Прошлые и отменённые записи").click();
     await expect(page.getByText(`${dayDate}, ${time} — Справки и документы · отменена`)).toBeVisible();

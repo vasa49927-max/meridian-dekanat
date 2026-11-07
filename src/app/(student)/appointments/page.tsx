@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty";
 import { Booking } from "@/components/appointments/booking";
 import { cancelAppointmentAction } from "./actions";
+import { ConfirmForm } from "@/components/ui/confirm";
 
 export const metadata: Metadata = { title: "Запись к методисту" };
 
@@ -36,7 +37,8 @@ export default async function AppointmentsPage() {
                   <p className="text-sm">{a.topic}</p>
                   <p className="flex items-center gap-1 text-[13px] text-muted"><MapPin className="h-3.5 w-3.5" aria-hidden />{a.location} · {a.staffLast} {a.staffFirst[0]}. {a.staffMiddle?.[0]}.</p>
                 </div>
-                <form action={cancelAppointmentAction}><input type="hidden" name="id" value={a.id} /><button className="h-9 rounded-lg px-3 text-sm font-medium text-danger hover:bg-danger-bg">Отменить</button></form>
+                <ConfirmForm action={cancelAppointmentAction} hidden={{ id: a.id }} trigger="Отменить" triggerClassName="h-10 rounded-lg px-3 text-sm font-medium text-danger hover:bg-danger-bg"
+                  title="Отменить запись?" description={`${fmt.shortDay(a.startsAt)}, ${fmt.time(a.startsAt)} — «${a.topic}». Время освободится, и его может занять другой студент.`} confirmLabel="Да, отменить запись" />
               </li>
             ))}
           </ul>

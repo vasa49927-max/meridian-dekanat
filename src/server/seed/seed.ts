@@ -29,7 +29,7 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
   const rand = rng(20261106);
 
   await db.transaction(async (tx) => {
-    await tx.execute(sql`TRUNCATE TABLE appointments, slots, notifications, announcements, documents, request_events, requests, request_types,
+    await tx.execute(sql`TRUNCATE TABLE attachments, appointments, slots, notifications, announcements, documents, request_events, requests, request_types,
       deadlines, final_grades, scores, assessments, lessons, course_offerings, disciplines, teachers, staff, students, groups, buildings,
       programs, faculties, rate_events, sessions, users RESTART IDENTITY CASCADE`);
 
@@ -252,7 +252,9 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
     const [anna, timur, mei] = studentsAll;
     await addRequest(anna, "STUDY_CERT_EN", { country: "Испания", purpose: "Стажировка", dates: "С 11.01.2027 по 05.02.2027" }, [["SUBMITTED", 30], ["IN_PROGRESS", 20, "Взяла в работу, будет готова к концу недели."]]);
     await addRequest(anna, "STUDY_CERT", { purpose: "ПАО «Условный банк» — для оформления карты", copies: "1" }, [["SUBMITTED", 480], ["IN_PROGRESS", 470], ["READY", 460], ["ISSUED", 300]]);
-    await addRequest(anna, "CREDIT_TRANSFER", { discipline: "Экономическая история", source: "Летняя школа другого вуза, 36 часов, оценка «отлично»" }, [["SUBMITTED", 900], ["IN_PROGRESS", 880], ["REJECTED", 850, "Объём курса (36 ч) меньше требуемого по учебному плану (72 ч). Можно подать повторно с курсом большего объёма."]]);
+    const transfer = await addRequest(anna, "CREDIT_TRANSFER", { discipline: "Экономическая история", source: "Летняя школа другого вуза, 36 часов, оценка «отлично»" }, [["SUBMITTED", 900], ["IN_PROGRESS", 880], ["REJECTED", 850, "Объём курса (36 ч) меньше требуемого по учебному плану (72 ч). Можно подать повторно с курсом большего объёма."]]);
+    const pdf = demoPdf("Summer school certificate (fictional, Meridian demo)");
+    await tx.insert(s.attachments).values({ requestId: transfer.id, uploaderRole: "STUDENT", fileName: "Сертификат летней школы.pdf", mime: "application/pdf", size: pdf.length, data: pdf, createdAt: hoursAgo(900) });
     await addRequest(timur, "MILITARY_CERT", { commissariat: "Военный комиссариат Гагаринского района г. Москвы" }, [["SUBMITTED", 52], ["IN_PROGRESS", 40], ["READY", 5, "Справка готова в электронном виде. Бумажный экземпляр с печатью — в студенческом офисе, ауд. 1012."]]);
     await addRequest(timur, "STIPEND_CERT", { period: "Календарный год", purpose: "ИФНС — налоговый вычет" }, [["SUBMITTED", 3]]);
     await addRequest(timur, "INDIVIDUAL_PLAN", { reason: "Стажировка / работа по профилю", period: "С 01.12.2026 по 28.02.2027", details: "Стажировка в юридической фирме (вымышленной), 3 дня в неделю. Контрольные точки сдаю по графику." }, [["SUBMITTED", 70], ["NEEDS_INFO", 26, "Приложите письмо-подтверждение от работодателя с графиком стажировки — ответьте в комментарии к заявке."]]);
@@ -330,6 +332,19 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
     }
     log("запись к методисту");
   });
+}
+
+/** Крошечный валидный PDF для демо-вложения (текст латиницей, вымышленный). */
+function demoPdf(text: string) {
+  const content = `BT /F1 14 Tf 72 760 Td (${text}) Tj ET`;
+  const objs = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+    `<< /Length ${content.length} >>\nstream\n${content}\nendstream`, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"];
+  let out = "%PDF-1.4\n"; const offs: number[] = [];
+  objs.forEach((o, i) => { offs.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
+  const xref = out.length;
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n${offs.map((o) => `${String(o).padStart(10, "0")} 00000 n \n`).join("")}trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  return Buffer.from(out, "latin1");
 }
 
 function dayKeyOf(d: Date) {

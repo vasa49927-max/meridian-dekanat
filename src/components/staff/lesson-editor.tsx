@@ -2,7 +2,8 @@
 import { useActionState, useState } from "react";
 import { changeLessonAction, type StaffState } from "@/app/(staff)/staff/actions";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ConfirmSubmit } from "@/components/ui/confirm";
 import { Input, Label, Select } from "@/components/ui/field";
 
 type L = { id: string; title: string; time: string; date: string; room: string; building: string; type: string; status: string; subgroup: number | null; prev: string | null; past: boolean };
@@ -38,7 +39,11 @@ export function LessonEditor({ lesson: l }: { lesson: L }) {
           <div><Label htmlFor={`n-${l.id}`}>Причина (увидят студенты)</Label><Input id={`n-${l.id}`} name="note" required maxLength={300} placeholder="Например: преподаватель на конференции" /></div>
           {state.error && <p role="alert" className="text-sm text-danger">{state.error}</p>}
           {state.ok && <p role="status" className="text-sm text-ok">{state.ok}</p>}
-          <Button type="submit" size="sm" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить и уведомить группу"}</Button>
+          {mode === "cancel" ? (
+            <ConfirmSubmit className={buttonVariants({ variant: "danger", size: "sm" })} disabled={pending} title="Отменить пару?" description={`«${l.title}», ${l.date.split("-").reverse().join(".")} в ${l.time}. Все студенты группы сразу получат уведомление об отмене.`} confirmLabel="Да, отменить пару">
+              {pending ? "Сохраняем…" : "Отменить пару и уведомить группу"}
+            </ConfirmSubmit>
+          ) : <Button type="submit" size="sm" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить и уведомить группу"}</Button>}
         </form>
       )}
     </div>

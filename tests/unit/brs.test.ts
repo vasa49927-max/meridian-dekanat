@@ -55,3 +55,23 @@ describe("БРС", () => {
     expect(whatIf(55, 20, 50).total).toBe(BRS.currentMax + BRS.finalMax);
   });
 });
+
+import { planFor } from "@/lib/brs";
+describe("«Что мне делать» по дисциплине", () => {
+  it("автомат уже есть", () => {
+    expect(planFor("CREDIT", summarize("CREDIT", [a(20, 18), a(20, 16), a(20, 9)])).tone).toBe("ok");
+  });
+  it("цель достижима — считает средний % за оставшиеся работы", () => {
+    const p = planFor("EXAM", summarize("EXAM", [a(15, 14), a(15, 15), a(30, null)]));
+    expect(p.tone).toBe("goal");
+    expect(p.needPct).toBe(84); // нужно 25 из 30
+  });
+  it("только экзамен — подсказывает нужные баллы, не больше 40", () => {
+    const p = planFor("EXAM", summarize("EXAM", [a(30, 20), a(30, null)]));
+    expect(p.tone).toBe("exam");
+    expect(p.detail).toMatch(/экзамене/);
+  });
+  it("высокий риск", () => {
+    expect(planFor("EXAM", summarize("EXAM", [a(30, 5), a(30, 10)])).tone).toBe("risk");
+  });
+});
