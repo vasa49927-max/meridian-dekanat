@@ -16,7 +16,7 @@ RUN npm run build && node scripts/check-bundle.mjs
 FROM node:22-bookworm-slim AS run
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0 \
-    NODE_EXTRA_CA_CERTS=/app/certs/russian_trusted_root_ca.pem TRUSTED_PROXY_HOPS=1
+    TRUSTED_PROXY_HOPS=1
 RUN useradd --system --uid 1001 meridian
 COPY --from=build --chown=meridian /app/.next/standalone ./
 COPY --from=build --chown=meridian /app/.next/static ./.next/static

@@ -62,5 +62,5 @@ Service worker кэширует только статику и экран `/offl
 ### D-019 — Rate limiting: «логин+IP» / логин / IP, IP от доверенного прокси · ИИ по отчёту аудитора (07.11)
 См. находки M-1, M-3 в `PROCESS_LOG.md`, этап 10.
 
-### D-020 — Сертификат НУЦ Минцифры через `NODE_EXTRA_CA_CERTS`, без отключения TLS · ИИ (07.11)
-Официальный README пакета gigachat предлагает `rejectUnauthorized: false` — отказались. Сертификат кладётся в `certs/` (ручной шаг капитана).
+### D-020 — Сертификаты НУЦ Минцифры из `certs/`, без отключения TLS · ИИ (07.11)
+Официальный README пакета gigachat предлагает `rejectUnauthorized: false` — отказались. Сначала план был `NODE_EXTRA_CA_CERTS` (нужен PEM), но с Госуслуг капитан скачал двоичные `.cer` → загрузчик `src/server/certs.ts` принимает DER и PEM и добавляет их через `tls.setDefaultCACertificates` (проверено тестом с самоподписанным HTTPS-сервером: до — DEPTH_ZERO_SELF_SIGNED_CERT, после — ok).
