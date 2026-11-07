@@ -1,0 +1,16 @@
+# Локальный запуск «всё в одном»: docker compose up --build → http://localhost:3000
+services:
+  db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: meridian, POSTGRES_PASSWORD: meridian, POSTGRES_DB: meridian }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD", "pg_isready", "-U", "meridian"], interval: 5s, retries: 10 }
+  app:
+    build: .
+    ports: ["3000:3000"]
+    environment:
+      DATABASE_URL: postgresql://meridian:meridian@db:5432/meridian
+      APP_URL: http://localhost:3000
+      GIGACHAT_AUTH_KEY: ${GIGACHAT_AUTH_KEY:-}
+    depends_on: { db: { condition: service_healthy } }
+volumes: { pgdata: {} }

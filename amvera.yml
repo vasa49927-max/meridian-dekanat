@@ -1,0 +1,9 @@
+# Конфигурация Amvera (docs.amvera.ru/applications/configuration/docker.html)
+meta:
+  environment: docker
+  toolchain:
+    name: docker
+build:
+  dockerfile: Dockerfile
+run:
+  containerPort: 3000

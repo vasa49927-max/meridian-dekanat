@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+docs/screenshots
+docs/lighthouse
+design/node_modules
+playwright-report
+test-results
+*.log
