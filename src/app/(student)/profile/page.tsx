@@ -13,11 +13,14 @@ import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { logoutAction } from "../../(auth)/login/actions";
 import { PasswordRow } from "@/components/profile/password-row";
 import { DEMO_LOGINS } from "@/server/auth/change-password";
+import { getSession } from "@/server/auth/session";
+import { deviceLabel } from "@/lib/device";
 
 export const metadata: Metadata = { title: "Профиль" };
 
 export default async function ProfilePage() {
   const v = await requireStudent();
+  const current = await getSession();
   const p = await getMyProfile(v);
   const s = p.student;
   const sessions = await db.select({ id: t.sessions.id, createdAt: t.sessions.createdAt, lastSeenAt: t.sessions.lastSeenAt, userAgent: t.sessions.userAgent })
@@ -61,7 +64,7 @@ export default async function ProfilePage() {
             <CardTitle>Безопасность</CardTitle>
             <p className="mb-2 flex items-center gap-2 text-sm"><ShieldCheck className="h-4 w-4 text-ok" aria-hidden />Активные сессии: {sessions.length}</p>
             <ul className="mb-3 space-y-1.5 text-xs text-muted">
-              {sessions.map((x) => <li key={x.id}>{(x.userAgent ?? "Неизвестное устройство").replace(/\(.*?\)/g, "").slice(0, 48)} · вход {fmt.dateTime(x.createdAt)}</li>)}
+              {sessions.map((x) => <li key={x.id}><span className="font-medium text-fg">{deviceLabel(x.userAgent)}</span>{x.id === current?.sessionId && <span className="ml-1.5 rounded bg-ok-bg px-1.5 py-0.5 font-semibold text-ok">это устройство</span>} · вход {fmt.dateTime(x.createdAt)}</li>)}
             </ul>
             <div className="flex flex-wrap gap-2">
               <ThemeToggle withLabel />

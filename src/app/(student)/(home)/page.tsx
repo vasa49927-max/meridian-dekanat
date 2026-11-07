@@ -4,7 +4,7 @@ import { ArrowRight, CalendarCheck2, Coffee, FileText, Megaphone, Sparkles } fro
 import { requireStudent } from "@/server/auth/guards";
 import { getMyGrades, getNextLesson, listMyDeadlines, listMyLessons, listMyNotifications, listMyUpcomingChanges } from "@/server/dal/student";
 import { listMyRequests } from "@/server/dal/requests";
-import { addDays, fmt, mskParts, now, relativeDay, startOfDay } from "@/lib/time";
+import { addDays, fmt, mskParts, nearDay, now, relativeDay, startOfDay } from "@/lib/time";
 import { averagePoints } from "@/lib/brs";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,7 @@ export default async function TodayPage() {
   const todayActive = today.filter((l) => l.status !== "CANCELLED");
   const showNextDay = !todayActive.length && next;
   const dayList = showNextDay ? await listMyLessons(v, startOfDay(next.startsAt), addDays(startOfDay(next.startsAt), 1)) : today;
-  const dayTitle = showNextDay ? `${relativeDay(next.startsAt, at).replace(/^./, (c) => c.toUpperCase())}` : "Сегодня";
+  const dayTitle = showNextDay ? (nearDay(next.startsAt, at) === "завтра" ? `Завтра, ${fmt.dayMonth(next.startsAt)}` : fmt.longDay(next.startsAt)) : "Сегодня";
   const activeReqs = reqs.items.filter((r) => r.status !== "ISSUED" && r.status !== "REJECTED").slice(0, 3);
   const pastAvg = averagePoints(grades.past.map((g) => g.points));
   const autoDone = grades.current.filter((d) => d.summary.auto?.achieved).length;
@@ -78,7 +78,7 @@ export default async function TodayPage() {
           )}
         </div>
 
-        <Card aria-labelledby="grades-h" className="lg:row-span-1">
+        <Card aria-labelledby="grades-h" className="max-lg:order-1 lg:row-span-1">
           <CardTitle id="grades-h" action={<Link href="/grades" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Подробнее</Link>}>Как дела с учёбой</CardTitle>
           <div className="flex items-end gap-3">
             <p className="font-serif text-[44px] leading-none tabular">{pace !== null ? `${pace}%` : "—"}</p>
@@ -109,9 +109,10 @@ export default async function TodayPage() {
           </ul>
         </Card>
 
+        {/* Обзор раунда 2: изменения — боль №1 по опросу (11 из 11), на телефоне показываем их сразу после карточки пары */}
         <div className="lg:col-span-3"><ChangeBanner changes={changes} /></div>
 
-        <Card aria-labelledby="day-h" className="lg:row-span-2">
+        <Card aria-labelledby="day-h" className="max-lg:order-2 lg:row-span-2">
           <CardTitle id="day-h" action={<Link href="/schedule" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Неделя</Link>}>
             {dayTitle} · {(() => { const n = dayList.filter((l) => l.status !== "CANCELLED").length; return n ? `${n} ${n === 1 ? "пара" : n < 5 ? "пары" : "пар"}` : "без пар"; })()}
           </CardTitle>
@@ -139,7 +140,7 @@ export default async function TodayPage() {
           ) : <EmptyState icon={<CalendarCheck2 />} title="Сегодня пар нет" className="py-6">{next ? `Ближайшая — ${relativeDay(next.startsAt, at)} в ${fmt.time(next.startsAt)}.` : null}</EmptyState>}
         </Card>
 
-        <Card aria-labelledby="dl-h">
+        <Card aria-labelledby="dl-h" className="max-lg:order-2">
           <CardTitle id="dl-h">Ближайшие сроки</CardTitle>
           {deadlines.length ? (
             <ul className="divide-y divide-line">
@@ -157,7 +158,7 @@ export default async function TodayPage() {
           ) : <EmptyState title="Сроков на горизонте нет" className="py-6" />}
         </Card>
 
-        <Card aria-labelledby="rq-h">
+        <Card aria-labelledby="rq-h" className="max-lg:order-2">
           <CardTitle id="rq-h" action={<Link href="/requests" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все</Link>}>Мои заявки</CardTitle>
           {activeReqs.length ? (
             <ul className="divide-y divide-line">
@@ -178,17 +179,17 @@ export default async function TodayPage() {
           <Link href="/requests/new" className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline dark:text-accent-text"><FileText className="h-4 w-4" aria-hidden />Заказать справку</Link>
         </Card>
 
-        <Card aria-labelledby="ai-h" className="lg:col-span-1">
+        <Card aria-labelledby="ai-h" className="max-lg:order-2 lg:col-span-1">
           <CardTitle id="ai-h">Помощник деканата</CardTitle>
           <p className="text-sm text-muted">Отвечает по Положению и вашим данным, умеет заполнить заявку.</p>
           <form action="/assistant" className="mt-3 flex gap-2">
             <label htmlFor="ai-q" className="sr-only">Вопрос помощнику</label>
-            <input id="ai-q" name="q" placeholder="Какую справку взять для визы?" className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-bg px-3.5 text-[15px] placeholder:text-muted/80 focus:border-primary focus:outline-none" />
+            <input id="ai-q" name="q" placeholder="Ваш вопрос деканату" className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-bg px-3.5 text-[15px] placeholder:text-muted/80 focus:border-primary focus:outline-none" />
             <button className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-fg" aria-label="Спросить"><Sparkles className="h-5 w-5" aria-hidden /></button>
           </form>
         </Card>
 
-        <Card aria-labelledby="news-h" className="lg:col-span-1">
+        <Card aria-labelledby="news-h" className="max-lg:order-2 lg:col-span-1">
           <CardTitle id="news-h" action={<Link href="/notifications?f=ANNOUNCEMENT" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все</Link>}>Объявления</CardTitle>
           {news.items.length ? (
             <ul className="divide-y divide-line">

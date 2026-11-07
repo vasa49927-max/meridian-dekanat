@@ -223,7 +223,17 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
       const p = Object.values(prog).find((x) => x.id === g.programId)!;
       return { lastName: st.lastName, firstName: st.firstName, middleName: st.middleName, gender: st.gender, course: g.course, facultyName: f.name, programCode: p.code, programName: p.name, basis: st.basis, enrollmentYear: st.enrollmentYear, recordBook: st.recordBook };
     };
-    const hoursAgo = (h: number) => new Date(+NOW - h * 3600 * 1000);
+    // Деканат не работает ночью: время 21:00–09:00 монотонно «сжимаем» в 20:00–21:00 того же вечера.
+    // Порядок событий сохраняется, время только сдвигается в прошлое (обзор раунда 2: «отклонена в 00:15» выглядело странно).
+    const hoursAgo = (h: number) => {
+      const t = new Date(+NOW - h * 3600 * 1000);
+      const p = mskParts(t);
+      const mins = p.hh * 60 + p.mm;
+      if (mins >= 9 * 60 && mins < 21 * 60) return t;
+      const since21 = (mins >= 21 * 60 ? mins - 21 * 60 : mins + 3 * 60) * 60000; // сколько прошло с 21:00
+      const evening21 = new Date(+t - since21);
+      return new Date(+evening21 - 3600000 + since21 / 12);
+    };
     type Ev = [status: (typeof s.requestStatusEnum.enumValues)[number], hoursAgo: number, comment?: string];
     const notifRows: (typeof s.notifications.$inferInsert)[] = [];
     const statusText: Record<string, string> = { SUBMITTED: "подана", IN_PROGRESS: "в работе", NEEDS_INFO: "нужно дополнить", READY: "готова", ISSUED: "выдана", REJECTED: "отклонена" };

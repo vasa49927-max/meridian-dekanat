@@ -21,12 +21,22 @@ describe("московское время", () => {
     const from = msk(2026, 11, 6, 9);
     expect(relativeDay(msk(2026, 11, 6, 18), from)).toBe("сегодня");
     expect(relativeDay(msk(2026, 11, 7, 9), from)).toBe("завтра");
-    expect(relativeDay(msk(2026, 11, 9, 9), from)).toBe("в понедельник");
-    expect(relativeDay(msk(2026, 11, 10, 9), from)).toBe("во вторник");
+    expect(relativeDay(msk(2026, 11, 9, 9), from)).toBe("9 ноября");
+    expect(relativeDay(msk(2026, 11, 10, 9), from)).toBe("10 ноября");
   });
   it("обратный отсчёт", () => {
     expect(untilText(25 * 60000)).toBe("25 мин");
     expect(untilText(130 * 60000)).toBe("2 ч 10 мин");
     expect(untilText(50 * 3600000)).toBe("2 дня");
+  });
+});
+
+import { deviceLabel } from "@/lib/device";
+describe("deviceLabel", () => {
+  it("человеческое имя устройства вместо строки User-Agent", () => {
+    expect(deviceLabel("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36")).toBe("Chrome · Windows");
+    expect(deviceLabel("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1")).toBe("Safari · iPhone/iPad");
+    expect(deviceLabel("Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 YaBrowser/25.8 Mobile Safari/537.36")).toBe("Яндекс Браузер · Android");
+    expect(deviceLabel(null)).toBe("Неизвестное устройство");
   });
 });

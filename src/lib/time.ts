@@ -80,19 +80,22 @@ export const fmt = {
   shortDay: (d: Date) => `${fWeekdayShort.format(d)}, ${fDayMonthShort.format(d)}`,
 };
 
-/** «сегодня», «завтра», «в понедельник», «12 ноября». */
+/**
+ * «сегодня», «завтра», «вчера», иначе дата «12 ноября».
+ * Правка капитана (раунд 2): дни недели словами («во вторник») не используем — везде число, день недели — подписью ниже.
+ */
 export function relativeDay(target: Date, from: Date = now()): string {
   const diff = Math.round((startOfDay(target).getTime() - startOfDay(from).getTime()) / DAY);
   if (diff === 0) return "сегодня";
   if (diff === 1) return "завтра";
   if (diff === -1) return "вчера";
-  if (diff > 1 && diff < 7) {
-    const w = fWeekday.format(target);
-    const pre = w === "вторник" ? "во" : "в";
-    const acc: Record<string, string> = { среда: "среду", пятница: "пятницу", суббота: "субботу" };
-    return `${pre} ${acc[w] ?? w}`;
-  }
   return fDayMonth.format(target);
+}
+
+/** «сегодня»/«завтра» или null — для подписи рядом с датой. */
+export function nearDay(target: Date, from: Date = now()): "сегодня" | "завтра" | null {
+  const r = relativeDay(target, from);
+  return r === "сегодня" || r === "завтра" ? r : null;
 }
 
 /** «через 25 мин», «через 2 ч 10 мин», «идёт ещё 40 мин». */

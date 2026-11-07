@@ -29,7 +29,9 @@ test.describe("Сегодня", () => {
     const next = page.getByRole("region", { name: /^Следующая пара/ });
     await expect(next.getByRole("heading", { name: "Международные финансовые рынки" })).toBeVisible();
     await expect(next).toContainText(/через \d+ мин/);
-    await expect(next.getByRole("definition").filter({ hasText: /^Сегодня$/ })).toBeVisible();
+    // Раунд 2: в плитке «День» — дата числом, «сегодня, пятница» — подписью
+    await expect(next.getByRole("definition").filter({ hasText: /^13 ноября$/ })).toBeVisible();
+    await expect(next.getByRole("definition").filter({ hasText: /^сегодня, пятница$/ })).toBeVisible();
     await expect(next.getByRole("definition").filter({ hasText: /^10:40$/ })).toBeVisible();
     await expect(next.getByRole("definition").filter({ hasText: /^3047$/ })).toBeVisible();
     await expect(next).toContainText("Семинар");
@@ -184,7 +186,7 @@ test.describe("Запись к методисту", () => {
 
     const day = page.getByRole("group", { name: "День" }).getByRole("button").first();
     await expect(day).toHaveAttribute("aria-pressed", "true");
-    const dayDate = (await day.locator("span").nth(1).textContent())!.split(" · ")[0]; // «вт, 17 нояб.»
+    const dayDate = (await day.locator("span").first().textContent())!.trim(); // «17 ноября» — раунд 2: даты числом
     const slot = page.getByRole("group", { name: "Время (20 минут)" }).locator("label").first();
     const time = (await slot.textContent())!.trim();
     await slot.click();

@@ -5,6 +5,7 @@ import { bookAction, type BookState } from "@/app/(student)/appointments/actions
 import { Button } from "@/components/ui/button";
 import { Label, Select, Textarea } from "@/components/ui/field";
 import { cn } from "@/lib/cn";
+import { plural } from "@/lib/time";
 
 const TOPICS = ["Справки и документы", "Индивидуальный график", "Пересдача / академическая разница", "Перевод, восстановление, академический отпуск", "Оформление темы ВКР", "Другое"];
 
@@ -24,8 +25,8 @@ export function Booking({ days, staff, location }: { days: Day[]; staff: string;
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
           {days.map((d) => (
             <button key={d.key} type="button" onClick={() => { setDay(d.key); setSlot(null); }} aria-pressed={d.key === day}
-              className={cn("min-w-[104px] rounded-xl border px-3 py-2 text-left", d.key === day ? "border-primary bg-primary text-primary-fg" : "border-line bg-surface hover:bg-surface-2")}>
-              <span className="block text-sm font-semibold first-letter:uppercase">{d.label}</span><span className="block text-xs opacity-80">{d.date} · {d.slots.length} окон</span>
+              className={cn("min-w-[120px] shrink-0 whitespace-nowrap rounded-xl border px-3 py-2 text-left", d.key === day ? "border-primary bg-primary text-primary-fg" : "border-line bg-surface hover:bg-surface-2")}>
+              <span className="block text-[15px] font-semibold tabular">{d.label}</span><span className="block text-xs opacity-80">{d.date} · {d.slots.length} {plural(d.slots.length, "окно", "окна", "окон")}</span>
             </button>
           ))}
         </div>

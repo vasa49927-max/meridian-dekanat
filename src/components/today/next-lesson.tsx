@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ArrowLeftRight, MapPin } from "lucide-react";
-import { untilText, fmt, relativeDay } from "@/lib/time";
+import { untilText, fmt, nearDay } from "@/lib/time";
 
 type Props = {
   title: string; type: string; startsAt: string; endsAt: string; room: string; building: string; address: string; hint: string | null;
@@ -23,19 +23,20 @@ export function NextLessonCard(p: Props) {
   const start = new Date(p.startsAt);
   const end = new Date(p.endsAt);
   const ongoing = nowMs >= +start && nowMs < +end;
-  const rel = relativeDay(start, new Date(nowMs));
+  const near = nearDay(start, new Date(nowMs));
   const soon = +start - nowMs < 12 * 3600 * 1000;
   const label = ongoing ? "Идёт сейчас" : "Следующая пара";
   const countdown = ongoing ? `ещё ${untilText(+end - nowMs)}` : soon ? `через ${untilText(+start - nowMs)}` : null;
   const progress = ongoing ? Math.min(100, ((nowMs - +start) / (+end - +start)) * 100) : null;
-  const dayTop = rel === "сегодня" || rel === "завтра" ? rel[0].toUpperCase() + rel.slice(1) : fmt.weekday(start).replace(/^./, (c) => c.toUpperCase());
+  // Правка капитана (раунд 2): в плитке «День» — дата числом (не переносится), день недели — подписью ниже.
+  const weekday = fmt.weekday(start);
   const tiles: [string, string, string][] = [
-    ["День", dayTop, rel === "сегодня" || rel === "завтра" ? `${fmt.weekdayShort(start)}, ${fmt.dayMonth(start)}` : fmt.dayMonth(start)],
+    ["День", fmt.dayMonth(start), near ? `${near}, ${weekday}` : weekday],
     ["Начало", fmt.time(start), `до ${fmt.time(end)}`],
     ["Аудитория", p.room, p.building],
   ];
   return (
-    <section aria-label={`${label}: ${p.title}, ${dayTop.toLowerCase()} в ${fmt.time(start)}, аудитория ${p.room}`} className="relative overflow-hidden rounded-[var(--radius-card)] bg-hero p-4 text-hero-fg sm:p-5 lg:p-6">
+    <section aria-label={`${label}: ${p.title}, ${near ? `${near}, ` : ""}${weekday}, ${fmt.dayMonth(start)}, в ${fmt.time(start)}, аудитория ${p.room}`} className="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-hero p-4 text-hero-fg sm:p-5 lg:p-6">
       <svg className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 opacity-[0.07]" viewBox="0 0 40 40" aria-hidden>
         <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" strokeWidth=".6" /><path d="M20 3c-6.5 4.5-9.5 10.2-9.5 17s3 12.5 9.5 17M20 3c6.5 4.5 9.5 10.2 9.5 17s-3 12.5-9.5 17M5 26h30M5 14h30" fill="none" stroke="currentColor" strokeWidth=".6" />
       </svg>
@@ -45,13 +46,13 @@ export function NextLessonCard(p: Props) {
       </div>
       <h2 className="font-serif text-[26px] leading-[1.15] lg:text-[32px]">{p.title}</h2>
 
-      {/* На 360 px плитка ≈ 90 px: значение 17 px и перенос подписи вместо обрезки «Сег…» (найдено на скриншоте 07-after-anna-360) */}
-      <dl className="mt-4 grid grid-cols-3 gap-1.5 sm:gap-3">
+      {/* Плитка «День» шире остальных: дата «28 сентября» должна влезать без переноса посреди слова */}
+      <dl className="mt-4 grid grid-cols-[1.4fr_1fr_1fr] gap-1.5 sm:grid-cols-3 sm:gap-3">
         {tiles.map(([k, val, sub]) => (
           <div key={k} className="min-w-0 rounded-xl bg-hero-2/70 px-2.5 py-2.5 sm:px-3">
             <dt className="text-[10px] font-semibold uppercase tracking-wider text-hero-muted sm:text-[11px]">{k}</dt>
-            <dd className="mt-0.5 break-words text-[17px] font-bold leading-tight tabular min-[400px]:text-xl sm:text-[26px]">{val}</dd>
-            <dd className="mt-0.5 break-words text-xs leading-snug text-hero-muted sm:text-[13px]">{sub}</dd>
+            <dd className="mt-0.5 text-[17px] font-bold leading-tight tabular min-[420px]:text-xl sm:whitespace-nowrap sm:text-[26px]">{val}</dd>
+            <dd className="mt-0.5 text-xs leading-snug text-hero-muted sm:text-[13px]">{sub}</dd>
           </div>
         ))}
       </dl>
@@ -63,7 +64,7 @@ export function NextLessonCard(p: Props) {
         </p>
       )}
 
-      <p className="mt-3 flex items-start gap-1.5 text-[13px] text-hero-muted">
+      <p className="mt-3 flex items-start gap-1.5 text-[13px] text-hero-muted lg:mt-auto lg:pt-3">
         <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
         <span>{p.type}{p.teacher ? ` · ${p.teacher}` : ""} · {p.address}{p.hint && <span className="hidden sm:inline"> · {p.hint}</span>}</span>
       </p>

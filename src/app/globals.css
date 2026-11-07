@@ -31,6 +31,7 @@
   --warn-line: #ebcf92;
   --danger: #b3261e;
   --danger-bg: #fbe9e7;
+  --danger-line: #efc6c0; /* мягкая рамка/полоса для отмен (правка капитана: «слишком едкий красный») */
   --danger-solid: #c62828; /* фон счётчиков с белым текстом (5.6:1) в обеих темах */
   --ok: #1e6b3a;
   --ok-bg: #e5f2e8;
@@ -64,7 +65,8 @@
   --warn-bg: #2a2410;
   --warn-line: #5a4b12;
   --danger: #ff8a80;
-  --danger-bg: #3a1a17;
+  --danger-bg: #2c1a19;
+  --danger-line: #5a2f2b;
   --ok: #7fe3a0;
   --ok-bg: #15301f;
   --info: #9cc0ff;
@@ -98,6 +100,7 @@
   --color-warn-line: var(--warn-line);
   --color-danger: var(--danger);
   --color-danger-bg: var(--danger-bg);
+  --color-danger-line: var(--danger-line);
   --color-danger-solid: var(--danger-solid);
   --color-ok: var(--ok);
   --color-ok-bg: var(--ok-bg);

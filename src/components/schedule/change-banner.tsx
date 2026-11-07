@@ -14,7 +14,7 @@ export function changeKind(l: Pick<LessonView, "status" | "startsAt" | "prevStar
 }
 
 export const CHANGE_META: Record<ChangeKind, { label: string; icon: typeof Ban; chip: string }> = {
-  cancel: { label: "Отмена", icon: Ban, chip: "bg-danger-solid text-white" },
+  cancel: { label: "Отмена", icon: Ban, chip: "bg-danger-bg text-danger ring-1 ring-danger-line" },
   move: { label: "Перенос", icon: ArrowLeftRight, chip: "bg-warn-bg text-warn ring-1 ring-warn-line" },
   room: { label: "Другая аудитория", icon: DoorOpen, chip: "bg-info-bg text-info" },
 };

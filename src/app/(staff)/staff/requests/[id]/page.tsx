@@ -29,7 +29,7 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
         <div><h1 className="font-serif text-[26px] leading-tight">{r.type.title}</h1><p className="mt-1 text-sm text-muted">{r.number} · подана {fmt.dateTime(r.createdAt)} · срок до {fmt.dayMonth(r.dueAt)}</p></div>
         <StatusBadge status={r.status} className="text-sm" />
       </div>
-      <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr] [&>*]:min-w-0">
         <div className="space-y-4">
           <Card>
             <CardTitle>Студент</CardTitle>

@@ -37,6 +37,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <p className="mb-6 mt-2 text-muted">Студенты и сотрудники деканата — по логину и паролю.</p>
           {reset && <p role="status" className="mb-4 rounded-xl bg-ok-bg px-3.5 py-2.5 text-sm font-medium text-ok">Демо-данные пересозданы. Войдите снова.</p>}
           <LoginForm next={next} />
+          {/* Обзор раунда 2: не было подсказки, что делать, если пароль забыт */}
+          <p className="mt-4 text-sm text-muted">Забыли пароль? Новый выдают в студенческом офисе (ауд. 1012, корпус А) по студенческому билету.</p>
         </div>
         <Disclaimer className="mx-auto w-full max-w-md" />
       </main>

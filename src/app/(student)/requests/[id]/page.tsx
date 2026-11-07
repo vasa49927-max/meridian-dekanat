@@ -75,7 +75,7 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
         </section>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 [&>*]:min-w-0">
         <Card>
           <CardTitle>Данные заявки</CardTitle>
           <dl className="space-y-2 text-sm">

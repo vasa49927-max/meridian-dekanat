@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CalendarClock } from "lucide-react";
 import { requireStaff } from "@/server/auth/guards";
 import { staffAppointments } from "@/server/dal/staff";
-import { fmt, now, relativeDay } from "@/lib/time";
+import { fmt, now, nearDay } from "@/lib/time";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty";
@@ -21,7 +21,7 @@ export default async function StaffAppointmentsPage() {
           <ul className="divide-y divide-line">
             {list.map((a) => (
               <li key={a.id} className="flex flex-wrap items-start gap-3 px-4 py-3">
-                <div className="w-28 shrink-0"><p className="font-semibold tabular">{fmt.time(a.startsAt)}</p><p className="text-xs text-muted">{relativeDay(a.startsAt, at)}, {fmt.dayMonthShort(a.startsAt)}</p></div>
+                <div className="w-28 shrink-0"><p className="font-semibold tabular">{fmt.time(a.startsAt)}</p><p className="text-xs text-muted">{fmt.dayMonthShort(a.startsAt)}, {nearDay(a.startsAt, at) ?? fmt.weekdayShort(a.startsAt)}</p></div>
                 <div className="min-w-0 flex-1"><p className="font-medium">{a.lastName} {a.firstName} · {a.faculty}, гр. {a.group}</p><p className="text-sm text-muted">{a.topic}{a.comment ? ` — ${a.comment}` : ""}</p></div>
               </li>
             ))}

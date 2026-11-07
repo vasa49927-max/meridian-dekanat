@@ -19,10 +19,11 @@ const DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 function LessonCard({ l, at, compact }: { l: LessonView; at: Date; compact?: boolean }) {
   const kind = changeKind(l);
   const live = l.startsAt <= at && l.endsAt > at && l.status !== "CANCELLED";
-  // Правка капитана №3b: отменённая пара — красная полоса «ПАРА ОТМЕНЕНА» на всю ширину карточки, детали приглушены.
+  // Правка капитана №3b: отменённая пара — полоса «Пара отменена» на всю ширину карточки, детали приглушены.
+  // Раунд 2: цвет мягче — розоватая полоса с красным текстом вместо сплошной красной заливки.
   if (kind === "cancel") return (
-    <article className="min-w-0 overflow-hidden rounded-2xl border-2 border-danger/50 bg-danger-bg/60" aria-label={`${fmt.time(l.startsAt)} ${l.title}, пара отменена`}>
-      <p className="flex items-center gap-2 bg-danger-solid px-3.5 py-1.5 text-sm font-bold uppercase tracking-wide text-white"><Ban className="h-4 w-4" aria-hidden />Пара отменена</p>
+    <article className="min-w-0 overflow-hidden rounded-2xl border border-danger-line bg-danger-bg/50" aria-label={`${fmt.time(l.startsAt)} ${l.title}, пара отменена`}>
+      <p className="flex items-center gap-2 border-b border-danger-line bg-danger-bg px-3.5 py-1.5 text-sm font-bold uppercase tracking-wide text-danger"><Ban className="h-4 w-4" aria-hidden />Пара отменена</p>
       <div className="p-3.5">
         <p className="text-sm font-semibold tabular text-muted">{fmt.time(l.startsAt)}–{fmt.time(l.endsAt)} · {LESSON_TYPE[l.type]}</p>
         <h3 className="mt-0.5 font-semibold leading-snug text-muted">{l.title}</h3>

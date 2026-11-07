@@ -34,6 +34,10 @@ const STUDENT_PAGES = [
 test("студент: на 360 px у ключевых страниц нет горизонтального скролла", async ({ page }) => {
   await login(page, "anna");
   for (const path of STUDENT_PAGES) await expectNoHorizontalScroll(page, path);
+  // Заявка с вложением: длинное имя файла раньше распирало карточку до 380 px (найдено при обзоре раунда 2)
+  await page.goto("/requests?all=1");
+  const href = await page.locator("main a[href^='/requests/']").filter({ hasText: "Перезачёт дисциплины" }).first().getAttribute("href");
+  await expectNoHorizontalScroll(page, href!);
 });
 
 test("деканат: на 360 px у ключевых страниц нет горизонтального скролла", async ({ page }) => {
