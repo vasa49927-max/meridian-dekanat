@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { and, asc, desc, eq, lt, or } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema as t } from "@/server/db";
@@ -7,9 +8,8 @@ import type { RequestField } from "@/server/db/schema";
 import { newRequestNumber } from "@/server/documents";
 import { now } from "@/lib/time";
 
-export async function listRequestTypes() {
-  return db.select().from(t.requestTypes).orderBy(desc(t.requestTypes.popular), asc(t.requestTypes.title));
-}
+export const listRequestTypes = cache(async () =>
+  db.select().from(t.requestTypes).orderBy(desc(t.requestTypes.popular), asc(t.requestTypes.title)));
 export async function getRequestType(code: string) {
   const [r] = await db.select().from(t.requestTypes).where(eq(t.requestTypes.code, code)).limit(1);
   return r ?? null;

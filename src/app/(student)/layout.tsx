@@ -42,7 +42,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       <div className="min-w-0">
         <OfflineBanner />
         <TopBar unread={unread} index={index} />
-        <main id="main" tabIndex={-1} className="mx-auto max-w-[1240px] px-4 pb-6 outline-none lg:px-9">{children}</main>
+        <main id="main" tabIndex={-1} className="mx-auto min-h-dvh max-w-[1240px] px-4 pb-6 outline-none lg:px-9">{children}</main>
         <footer className="mx-auto max-w-[1240px] px-4 pb-28 pt-4 lg:px-9 lg:pb-8"><Disclaimer /></footer>
       </div>
       <TabBar unread={unread} />

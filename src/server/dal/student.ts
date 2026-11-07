@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { and, asc, count, desc, eq, gt, gte, inArray, isNull, lt, lte, or, sql } from "drizzle-orm";
 import { db, schema as t } from "@/server/db";
 import type { StudentViewer } from "@/server/auth/guards";
@@ -68,7 +69,8 @@ export async function listMyUpcomingChanges(v: StudentViewer, at: Date, days = 7
 }
 
 // ───────── Успеваемость
-export async function getMyGrades(v: StudentViewer) {
+/** cache(): layout (индекс палитры) и страница в одном запросе не считают оценки дважды. */
+export const getMyGrades = cache(async (v: StudentViewer) => {
   const offerings = await db.select({ id: t.courseOfferings.id, name: t.disciplines.name, short: t.disciplines.shortName, credits: t.disciplines.credits, control: t.disciplines.control, teacherLast: t.teachers.lastName, teacherFirst: t.teachers.firstName, teacherMiddle: t.teachers.middleName, teacherTitle: t.teachers.title })
     .from(t.courseOfferings)
     .innerJoin(t.disciplines, eq(t.disciplines.id, t.courseOfferings.disciplineId))
@@ -88,7 +90,7 @@ export async function getMyGrades(v: StudentViewer) {
   });
   const past = await db.select().from(t.finalGrades).where(eq(t.finalGrades.studentId, v.studentId)).orderBy(asc(t.finalGrades.semester));
   return { current, past };
-}
+});
 
 // ───────── Сроки
 export async function listMyDeadlines(v: StudentViewer, at: Date, limit = 6) {

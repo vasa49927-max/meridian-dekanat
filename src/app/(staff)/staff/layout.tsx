@@ -34,7 +34,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           {STAFF_NAV.map((n) => <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-sm font-medium">{n.label}</Link>)}
           <form action={logoutAction}><button className="whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-sm font-medium text-danger">Выйти</button></form>
         </nav>
-        <main id="main" tabIndex={-1} className="mx-auto max-w-[1240px] px-4 pb-6 outline-none lg:px-9">{children}</main>
+        <main id="main" tabIndex={-1} className="mx-auto min-h-dvh max-w-[1240px] px-4 pb-6 outline-none lg:px-9">{children}</main>
         <footer className="mx-auto max-w-[1240px] px-4 pb-8 lg:px-9"><Disclaimer /></footer>
       </div>
     </div>
