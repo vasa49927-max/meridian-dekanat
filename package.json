@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "db:up": "scripts/pg-local.sh start",
+    "db:up": "bash scripts/pg-local.sh start",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file=.env scripts/migrate.mjs",
     "db:seed": "node --env-file=.env --conditions=react-server --import tsx scripts/seed.mts",
