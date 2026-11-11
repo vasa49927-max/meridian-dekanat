@@ -57,6 +57,10 @@ describe("БРС", () => {
 });
 
 import { planFor } from "@/lib/brs";
+import { buildI18n } from "@/i18n";
+import { DICTS } from "@/i18n/dict";
+import { DATA } from "@/i18n/data";
+import { planText } from "@/i18n/brs";
 describe("«Что мне делать» по дисциплине", () => {
   it("автомат уже есть", () => {
     expect(planFor("CREDIT", summarize("CREDIT", [a(20, 18), a(20, 16), a(20, 9)])).tone).toBe("ok");
@@ -67,9 +71,15 @@ describe("«Что мне делать» по дисциплине", () => {
     expect(p.needPct).toBe(84); // нужно 25 из 30
   });
   it("только экзамен — подсказывает нужные баллы, не больше 40", () => {
-    const p = planFor("EXAM", summarize("EXAM", [a(30, 20), a(30, null)]));
+    const sum = summarize("EXAM", [a(30, 20), a(30, null)]);
+    const p = planFor("EXAM", sum);
     expect(p.tone).toBe("exam");
-    expect(p.detail).toMatch(/экзамене/);
+    expect(p.detail).toBe("examNeed");
+    for (const [, n] of p.parts) expect(n).toBeLessThanOrEqual(40);
+    // текст на русском и английском собирается из словаря
+    const ru = buildI18n("ru", DICTS.ru, DICTS.ru, null), en = buildI18n("en", DICTS.en, DICTS.ru, DATA.en);
+    expect(planText(p, sum, ru.t).detail).toMatch(/^Сколько нужно на экзамене \(из 40\) при нынешнем темпе: «(отлично|хорошо|удовл\.)» — ~[\d.]+/);
+    expect(planText(p, sum, en.t).detail).toMatch(/^What you need on the exam \(of 40\)/);
   });
   it("высокий риск", () => {
     expect(planFor("EXAM", summarize("EXAM", [a(30, 5), a(30, 10)])).tone).toBe("risk");

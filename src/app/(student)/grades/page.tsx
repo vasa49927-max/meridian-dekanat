@@ -5,6 +5,8 @@ import { requireStudent } from "@/server/auth/guards";
 import { getMyGrades } from "@/server/dal/student";
 import { BRS, averagePoints, markFor, planFor } from "@/lib/brs";
 import { fmt, now } from "@/lib/time";
+import { getI18n } from "@/i18n/server";
+import { planText } from "@/i18n/brs";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,11 +35,12 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
   const v = await requireStudent();
   const { tab } = await searchParams;
   const at = now();
+  const { t } = await getI18n();
   const { current, past } = await getMyGrades(v);
   const cards = current.map((d) => {
     const plan = planFor(d.control, d.summary);
     const next = d.items.find((a) => a.kind !== "FINAL" && a.points === null && a.dueAt && a.dueAt > at);
-    return { d, plan, next };
+    return { d, plan, next, text: planText(plan, d.summary, t) };
   }).sort((x, y) => ORDER[x.plan.tone] - ORDER[y.plan.tone]);
   const autos = cards.filter((c) => c.plan.tone === "ok");
   const risks = cards.filter((c) => c.plan.tone === "risk");
@@ -105,7 +108,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
           )}
 
           <div className="grid gap-3 xl:grid-cols-2">
-            {cards.map(({ d, plan, next }) => {
+            {cards.map(({ d, plan, next, text }) => {
               const s = d.summary;
               const T = TONE[plan.tone];
               const target = d.control === "CREDIT" ? BRS.autoCredit : BRS.autoExcellent;
@@ -121,8 +124,8 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
 
                   {/* 1. Что мне делать — главное в карточке */}
                   <div className={cn("mt-3 rounded-xl border p-3", T.box)}>
-                    <p className={cn("flex items-center gap-2 font-semibold", T.text)}><T.icon className="h-5 w-5 shrink-0" aria-hidden />{plan.headline}</p>
-                    <p className="mt-1 text-sm">{plan.detail}</p>
+                    <p className={cn("flex items-center gap-2 font-semibold", T.text)}><T.icon className="h-5 w-5 shrink-0" aria-hidden />{text.headline}</p>
+                    <p className="mt-1 text-sm">{text.detail}</p>
                   </div>
 
                   {/* 2. Где я сейчас */}
@@ -180,7 +183,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
   );
 }
 
-type FocusCard = { d: { name: string; short: string }; plan: { tone: "ok" | "goal" | "exam" | "risk"; headline: string; needPct: number | null }; next?: { title: string; dueAt: Date | null; maxPoints: number } };
+type FocusCard = { d: { name: string; short: string }; text: { headline: string }; plan: { tone: "ok" | "goal" | "exam" | "risk"; needPct: number | null }; next?: { title: string; dueAt: Date | null; maxPoints: number } };
 
 /**
  * До трёх шагов «с чего начать»: 1) предмет с риском, 2) ближайшая работа с целью в баллах,
@@ -191,7 +194,7 @@ function focusSteps(cards: FocusCard[]) {
   const used = new Set<string>();
   const risk = cards.find((c) => c.plan.tone === "risk");
   if (risk) {
-    out.push({ anchor: risk.d.name, lead: `${risk.d.short}:`, text: `${risk.plan.headline.toLowerCase()} — разберитесь с этим предметом первым, запишитесь на консультацию.` });
+    out.push({ anchor: risk.d.name, lead: `${risk.d.short}:`, text: `${risk.text.headline.toLowerCase()} — разберитесь с этим предметом первым, запишитесь на консультацию.` });
     used.add(risk.d.name);
   }
   const soon = cards.filter((c) => c.next?.dueAt && !used.has(c.d.name)).sort((a, b) => +a.next!.dueAt! - +b.next!.dueAt!)[0];

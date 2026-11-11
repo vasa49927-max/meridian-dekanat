@@ -3,13 +3,14 @@ import { AlertDialog } from "radix-ui";
 import { useRef, useState } from "react";
 import { buttonVariants } from "./button";
 import { cn } from "@/lib/cn";
+import { useI18n } from "@/i18n/client";
 
 /**
  * Подтверждение необратимых действий (правка капитана №6): отмена записи, отзыв заявки, отмена пары, сброс.
  * Доступный диалог (Radix AlertDialog): фокус внутри, Esc закрывает, по умолчанию фокус на «Нет».
  */
 export function ConfirmForm({
-  action, hidden, trigger, title, description, confirmLabel = "Да", cancelLabel = "Нет, оставить", triggerClassName, danger = true,
+  action, hidden, trigger, title, description, confirmLabel, cancelLabel, triggerClassName, danger = true,
 }: {
   action: (form: FormData) => void | Promise<void>;
   hidden: Record<string, string>;
@@ -23,6 +24,7 @@ export function ConfirmForm({
 }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
   return (
     <form ref={formRef} action={action}>
       {Object.entries(hidden).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
@@ -36,8 +38,8 @@ export function ConfirmForm({
             <AlertDialog.Title className="font-serif text-xl">{title}</AlertDialog.Title>
             <AlertDialog.Description className="mt-2 text-sm text-muted">{description}</AlertDialog.Description>
             <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <AlertDialog.Cancel className={buttonVariants({ variant: "secondary" })}>{cancelLabel}</AlertDialog.Cancel>
-              <AlertDialog.Action className={cn(buttonVariants({ variant: danger ? "danger" : "primary" }))} onClick={() => formRef.current?.requestSubmit()}>{confirmLabel}</AlertDialog.Action>
+              <AlertDialog.Cancel className={buttonVariants({ variant: "secondary" })}>{cancelLabel ?? t("common.confirm.keep")}</AlertDialog.Cancel>
+              <AlertDialog.Action className={cn(buttonVariants({ variant: danger ? "danger" : "primary" }))} onClick={() => formRef.current?.requestSubmit()}>{confirmLabel ?? t("common.confirm.yes")}</AlertDialog.Action>
             </div>
           </AlertDialog.Content>
         </AlertDialog.Portal>
@@ -47,10 +49,11 @@ export function ConfirmForm({
 }
 
 /** Кнопка отправки формы с подтверждением — для форм с полями (отмена пары, отказ по заявке). */
-export function ConfirmSubmit({ children, title, description, confirmLabel = "Да", className, disabled }: {
+export function ConfirmSubmit({ children, title, description, confirmLabel, className, disabled }: {
   children: React.ReactNode; title: string; description: string; confirmLabel?: string; className?: string; disabled?: boolean;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
+  const { t } = useI18n();
   return (
     <AlertDialog.Root>
       <AlertDialog.Trigger asChild>
@@ -62,8 +65,8 @@ export function ConfirmSubmit({ children, title, description, confirmLabel = "Д
           <AlertDialog.Title className="font-serif text-xl">{title}</AlertDialog.Title>
           <AlertDialog.Description className="mt-2 text-sm text-muted">{description}</AlertDialog.Description>
           <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <AlertDialog.Cancel className={buttonVariants({ variant: "secondary" })}>Нет, вернуться</AlertDialog.Cancel>
-            <AlertDialog.Action className={buttonVariants({ variant: "danger" })} onClick={() => ref.current?.form?.requestSubmit()}>{confirmLabel}</AlertDialog.Action>
+            <AlertDialog.Cancel className={buttonVariants({ variant: "secondary" })}>{t("common.confirm.back")}</AlertDialog.Cancel>
+            <AlertDialog.Action className={buttonVariants({ variant: "danger" })} onClick={() => ref.current?.form?.requestSubmit()}>{confirmLabel ?? t("common.confirm.yes")}</AlertDialog.Action>
           </div>
         </AlertDialog.Content>
       </AlertDialog.Portal>

@@ -8,12 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty";
 import { teacherShort } from "./lesson-meta";
 import { cn } from "@/lib/cn";
+import { getI18n } from "@/i18n/server";
+import { planText } from "@/i18n/brs";
 
 /**
  * Вкладка «Сессия» (раунд 3): зачёты и экзамены с консультациями одним списком.
  * У каждого — связь с «Успеваемостью»: если автомат уже есть, так и пишем «можно не сдавать».
  */
 export async function SessionView({ v, at }: { v: StudentViewer; at: Date }) {
+  const { t } = await getI18n();
   const p = mskParts(at);
   // Ближайшая сессия: зимняя (декабрь–январь) или летняя (июнь–июль).
   const from = p.m >= 8 || p.m === 1 ? msk(p.m === 1 ? p.y - 1 : p.y, 12, 1) : msk(p.y, 6, 1);
@@ -32,7 +35,7 @@ export async function SessionView({ v, at }: { v: StudentViewer; at: Date }) {
 
   const Item = ({ l }: { l: (typeof items)[number] }) => {
     const d = byName.get(l.title);
-    const plan = d ? planFor(d.control, d.summary) : null;
+    const plan = d ? planText(planFor(d.control, d.summary), d.summary, t) : null;
     const auto = d?.summary.auto?.achieved;
     const consult = consults.find((c) => c.title === l.title && c.startsAt < l.startsAt);
     return (

@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { INTL_LOCALE } from "@/i18n/config";
 /**
  * Время в кабинете — всегда московское (Europe/Moscow, UTC+3 без перехода на летнее время с 2014 г.).
  * Сервер на хостинге работает в UTC, поэтому все «сегодня/неделя» считаем через эти функции.
@@ -123,3 +125,55 @@ export function plural(n: number, one: string, few: string, many: string) {
   if (b === 1) return one;
   return many;
 }
+
+// ───────── Локализованные форматы (раунд 3, D-035). fmt выше — русский: им формируются тексты в БД, .ics и т. п.
+
+const REL: Record<Locale, [today: string, tomorrow: string, yesterday: string]> = {
+  ru: ["сегодня", "завтра", "вчера"], en: ["today", "tomorrow", "yesterday"], zh: ["今天", "明天", "昨天"], fr: ["aujourd’hui", "demain", "hier"],
+};
+const fmtCache = new Map<Locale, ReturnType<typeof buildFmt>>();
+function buildFmt(locale: Locale) {
+  if (locale === "ru") {
+    return {
+      ...fmt, locale,
+      rel: (target: Date, from: Date = now()) => relativeDay(target, from),
+      near: (target: Date, from: Date = now()) => nearDay(target, from),
+      cap: (s: string) => s.charAt(0).toUpperCase() + s.slice(1),
+    };
+  }
+  const L = INTL_LOCALE[locale];
+  const g = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(L, { timeZone: TZ, ...o });
+  const time = g({ hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  const dm = g({ day: "numeric", month: "long" });
+  const wd = g({ weekday: "long" });
+  const wds = g({ weekday: "short" });
+  const full = g({ day: "numeric", month: "long", year: "numeric" });
+  const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const [today, tomorrow, yesterday] = REL[locale];
+  const rel = (target: Date, from: Date = now()) => {
+    const diff = Math.round((startOfDay(target).getTime() - startOfDay(from).getTime()) / DAY);
+    return diff === 0 ? today : diff === 1 ? tomorrow : diff === -1 ? yesterday : dm.format(target);
+  };
+  const sep = locale === "zh" ? "" : ", ";
+  return {
+    locale,
+    time: (d: Date) => time.format(d),
+    dayMonth: (d: Date) => dm.format(d),
+    weekday: (d: Date) => wd.format(d),
+    weekdayShort: (d: Date) => wds.format(d),
+    full: (d: Date) => full.format(d),
+    dateTime: (d: Date) => `${dm.format(d)}${sep}${time.format(d)}`,
+    longDay: (d: Date) => `${cap(wd.format(d))}${sep}${dm.format(d)}`,
+    shortDay: (d: Date) => (locale === "zh" ? `${dm.format(d)}（${wds.format(d)}）` : `${dm.format(d)} (${wds.format(d)})`),
+    rel,
+    near: (target: Date, from: Date = now()) => { const r = rel(target, from); return r === today || r === tomorrow ? r : null; },
+    cap,
+  };
+}
+/** Форматы дат для языка интерфейса. */
+export function fmtFor(locale: Locale) {
+  let f = fmtCache.get(locale);
+  if (!f) { f = buildFmt(locale); fmtCache.set(locale, f); }
+  return f;
+}
+export type Fmt = ReturnType<typeof fmtFor>;

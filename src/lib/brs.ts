@@ -38,6 +38,17 @@ export type DisciplineSummary = {
   auto: { kind: "credit" | "excellent"; target: number; achieved: boolean; need: number; possible: boolean } | null;
   risk: "none" | "watch" | "high";
   riskReason: string | null;
+  /** Причина риска без языка: ключ grades.risk.* + значения (раунд 3, переводы). */
+  riskKey: RiskKey | null;
+  riskVars: { pace?: number; need?: number };
+};
+export type RiskKey = "finalLow" | "unreachable" | "pace";
+
+// Русские формулировки (для текстов на сервере и обратной совместимости); переводы — в словаре grades.risk / grades.plan.
+const RISK_RU: Record<RiskKey, (v: DisciplineSummary["riskVars"]) => string> = {
+  finalLow: () => "итог ниже 60 — нужна пересдача",
+  unreachable: () => "даже с максимумом за экзамен не набрать 60",
+  pace: (v) => `темп ${v.pace}% — для «удовлетворительно» нужно ${v.need} б. на экзамене`,
 };
 
 /** Сводка по дисциплине: сколько набрано, прогноз, автомат, риски. */
@@ -60,17 +71,19 @@ export function summarize(control: Control, items: AssessmentInput[]): Disciplin
   };
 
   let risk: DisciplineSummary["risk"] = "none";
-  let riskReason: string | null = null;
+  let riskKey: RiskKey | null = null;
+  const riskVars: DisciplineSummary["riskVars"] = {};
   const maxReachable = earned + remainingMax + BRS.finalMax;
   if (total !== null && total < BRS.passTotal) {
-    risk = "high"; riskReason = "итог ниже 60 — нужна пересдача";
+    risk = "high"; riskKey = "finalLow";
   } else if (maxReachable < BRS.passTotal) {
-    risk = "high"; riskReason = "даже с максимумом за экзамен не набрать 60";
+    risk = "high"; riskKey = "unreachable";
   } else if (gradedMax >= 10 && pacePct < 60) {
-    risk = "watch";
-    riskReason = `темп ${pacePct}% — для «удовлетворительно» нужно ${Math.max(0, round1(BRS.passTotal - projectedCurrent))} б. на экзамене`;
+    risk = "watch"; riskKey = "pace";
+    riskVars.pace = pacePct; riskVars.need = Math.max(0, round1(BRS.passTotal - projectedCurrent));
   }
-  return { earned, gradedMax, remainingMax, pacePct, projectedCurrent, final, total, auto, risk, riskReason };
+  const riskReason = riskKey ? RISK_RU[riskKey](riskVars) : null;
+  return { earned, gradedMax, remainingMax, pacePct, projectedCurrent, final, total, auto, risk, riskReason, riskKey, riskVars };
 }
 
 /** Сколько нужно набрать на экзамене при данном текущем балле, чтобы получить целевую оценку. */
@@ -92,10 +105,14 @@ export function averagePoints(points: number[]) {
   return round1(points.reduce((s, p) => s + p, 0) / points.length);
 }
 
+export type PlanHead = "riskHigh" | "okCredit" | "okExcellent" | "goalCredit" | "goalExcellent" | "watch" | "creditExam" | "exam";
+export type PlanDetail = "riskHighDetail" | "okCreditDetail" | "okExcellentDetail" | "goalCreditDetail" | "goalExcellentDetail" | "creditNeed" | "creditImpossible" | "examNeed" | "examImpossible";
+export type PlanVars = { earned?: number; target?: number; need?: number; remaining?: number; pct?: number; pace?: number };
+
 export type Plan = {
   tone: "ok" | "goal" | "exam" | "risk";
-  headline: string;
-  detail: string;
+  /** Ключи для перевода: grades.plan.<head> / grades.plan.<detail>; parts — «отлично — ~N» и т. п. */
+  head: PlanHead; detail: PlanDetail; vars: PlanVars; parts: [key: "partExcellent" | "partGood" | "partSat", n: number][];
   /** Средний % от максимума, который нужен за оставшиеся работы, чтобы выйти на автомат. */
   needPct: number | null;
 };
@@ -103,25 +120,28 @@ export type Plan = {
 /**
  * «Что мне делать» по дисциплине — одной фразой (переработка раздела по правке капитана №4).
  * Порядок проверок: риск → автомат уже есть → автомат достижим → только экзамен/зачёт.
+ * Возвращает ключи и числа; текст на нужном языке собирает planText() из src/i18n/brs.ts.
  */
 export function planFor(control: Control, s: DisciplineSummary): Plan {
   const isCredit = control === "CREDIT";
-  const autoName = isCredit ? "зачёт без сдачи" : "«отлично» без экзамена";
-  if (s.risk === "high") {
-    return { tone: "risk", headline: "Есть риск не сдать", detail: `${s.riskReason ?? ""}. Запишитесь к методисту или к преподавателю на консультацию.`, needPct: null };
-  }
+  const base = { vars: {} as PlanVars, parts: [] as Plan["parts"], needPct: null as number | null };
+  if (s.risk === "high") return { ...base, tone: "risk", head: "riskHigh", detail: "riskHighDetail" };
   if (s.auto?.achieved) {
-    return { tone: "ok", headline: isCredit ? "Зачёт уже ваш" : "«Отлично» без экзамена — уже можно", detail: isCredit ? `Набрано ${s.earned} из 60 — больше ${BRS.autoCredit}, зачёт ставится автоматически.` : `Набрано ${s.earned} из 60 — больше ${BRS.autoExcellent}. Можно не сдавать экзамен и получить «отлично».`, needPct: null };
+    return { ...base, tone: "ok", head: isCredit ? "okCredit" : "okExcellent", detail: isCredit ? "okCreditDetail" : "okExcellentDetail", vars: { earned: s.earned, target: isCredit ? BRS.autoCredit : BRS.autoExcellent } };
   }
   if (s.auto?.possible && s.remainingMax > 0) {
     const pct = Math.min(100, Math.ceil((s.auto.need / s.remainingMax) * 100));
-    return { tone: s.risk === "watch" ? "risk" : "goal", headline: `До «${isCredit ? "автомата" : "отлично» автоматом"}${isCredit ? "»" : ""}: ещё ${s.auto.need} б.`, detail: `Осталось работ на ${s.remainingMax} б. Набирайте в среднем ${pct}% за каждую — и получите ${autoName}.`, needPct: pct };
+    return { ...base, tone: s.risk === "watch" ? "risk" : "goal", head: isCredit ? "goalCredit" : "goalExcellent", detail: isCredit ? "goalCreditDetail" : "goalExcellentDetail", vars: { need: s.auto.need, remaining: s.remainingMax, pct }, needPct: pct };
   }
+  const watch = s.risk === "watch";
   if (isCredit) {
     const need = neededOnFinal(s.projectedCurrent, BRS.passTotal);
-    return { tone: s.risk === "watch" ? "risk" : "exam", headline: s.risk === "watch" ? `Нужно подтянуть баллы: темп ${s.pacePct}%` : "Нужно сдавать зачёт", detail: need.feasible ? `При нынешнем темпе на зачёте нужно набрать около ${need.need} из 40.` : "Даже максимум на зачёте не даст 60 — срочно к методисту.", needPct: null };
+    return { ...base, tone: watch ? "risk" : "exam", head: watch ? "watch" : "creditExam", detail: need.feasible ? "creditNeed" : "creditImpossible", vars: { pace: s.pacePct, need: need.need } };
   }
   const n5 = neededOnFinal(s.projectedCurrent, 90), n4 = neededOnFinal(s.projectedCurrent, 75), n3 = neededOnFinal(s.projectedCurrent, 60);
-  const parts = [n5.feasible && `«отлично» — ~${n5.need}`, n4.feasible && `«хорошо» — ~${n4.need}`, n3.feasible && `«удовл.» — ~${n3.need}`].filter(Boolean);
-  return { tone: s.risk === "watch" ? "risk" : "exam", headline: s.risk === "watch" ? `Нужно подтянуть баллы: темп ${s.pacePct}%` : "Готовимся к экзамену", detail: parts.length ? `Сколько нужно на экзамене (из 40) при нынешнем темпе: ${parts.slice(0, 2).join(", ")}.` : "Даже максимум на экзамене не даст 60 — срочно к методисту.", needPct: null };
+  const parts: Plan["parts"] = [];
+  if (n5.feasible) parts.push(["partExcellent", n5.need]);
+  if (n4.feasible) parts.push(["partGood", n4.need]);
+  if (n3.feasible) parts.push(["partSat", n3.need]);
+  return { ...base, tone: watch ? "risk" : "exam", head: watch ? "watch" : "exam", detail: parts.length ? "examNeed" : "examImpossible", vars: { pace: s.pacePct }, parts: parts.slice(0, 2) };
 }

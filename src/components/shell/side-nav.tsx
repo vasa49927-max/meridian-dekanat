@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { STAFF_NAV, STUDENT_NAV } from "./nav";
 import { cn } from "@/lib/cn";
+import { useI18n } from "@/i18n/client";
 
 export function isActive(pathname: string, href: string, root: string) {
   return href === root ? pathname === root : pathname === href || pathname.startsWith(href + "/");
@@ -10,10 +11,11 @@ export function isActive(pathname: string, href: string, root: string) {
 
 export function SideNav({ role, unread = 0 }: { role: "STUDENT" | "STAFF"; unread?: number }) {
   const pathname = usePathname();
+  const { t, tn } = useI18n();
   const items = role === "STUDENT" ? STUDENT_NAV : STAFF_NAV;
   const root = role === "STUDENT" ? "/" : "/staff";
   return (
-    <nav aria-label="Разделы" className="flex flex-1 flex-col gap-0.5">
+    <nav aria-label={t("common.nav.sections")} className="flex flex-1 flex-col gap-0.5">
       {items.map((it) => {
         const active = isActive(pathname, it.href, root);
         const Icon = it.icon;
@@ -22,8 +24,8 @@ export function SideNav({ role, unread = 0 }: { role: "STUDENT" | "STAFF"; unrea
           <Link key={it.href} href={it.href} aria-current={active ? "page" : undefined}
             className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium text-side-fg/85 transition-colors hover:bg-side-on hover:text-side-fg", active && "bg-side-on font-semibold text-side-fg")}>
             <Icon className={cn("h-5 w-5", active && "text-accent")} aria-hidden />
-            <span>{it.label}</span>
-            {badge && <span className="ml-auto rounded-full bg-danger-solid px-2 py-0.5 text-[11px] font-bold text-white" aria-label={`${badge} непрочитанных`}>{badge}</span>}
+            <span>{t(`common.nav.${it.key}`)}</span>
+            {badge && <span className="ml-auto rounded-full bg-danger-solid px-2 py-0.5 text-[11px] font-bold text-white" aria-label={tn("common.nav.unreadCount", badge)}>{badge}</span>}
           </Link>
         );
       })}
