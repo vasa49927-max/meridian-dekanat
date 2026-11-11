@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { headers } from "next/headers";
 import { apiViewer, assertSameOrigin } from "@/server/auth/guards";
+import { getI18n } from "@/i18n/server";
 import { countSubscriptions, isAllowedEndpoint, removeSubscription, saveSubscription, vapidKeys } from "@/server/push";
 
 const sub = z.object({
@@ -22,8 +23,8 @@ export async function POST(req: Request) {
   const auth = await apiViewer("STUDENT");
   if ("error" in auth) return auth.error;
   const p = sub.safeParse(await req.json().catch(() => null));
-  if (!p.success || !isAllowedEndpoint(p.data.endpoint)) return Response.json({ error: "Некорректная подписка" }, { status: 400 });
-  if ((await countSubscriptions(auth.viewer.userId)) >= 10) return Response.json({ error: "Слишком много устройств — отключите уведомления на старых" }, { status: 429 });
+  if (!p.success || !isAllowedEndpoint(p.data.endpoint)) return Response.json({ error: (await getI18n()).t("profile.pushSettings.badSubscription") }, { status: 400 });
+  if ((await countSubscriptions(auth.viewer.userId)) >= 10) return Response.json({ error: (await getI18n()).t("profile.pushSettings.tooManyDevices") }, { status: 429 });
   await saveSubscription(auth.viewer.userId, { endpoint: p.data.endpoint, p256dh: p.data.keys.p256dh, auth: p.data.keys.auth }, (await headers()).get("user-agent")?.slice(0, 300) ?? null);
   return Response.json({ ok: true });
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ArrowLeftRight, MapPin } from "lucide-react";
-import { untilText, fmt, nearDay } from "@/lib/time";
+import { useI18n } from "@/i18n/client";
 
 type Props = {
   title: string; type: string; startsAt: string; endsAt: string; room: string; building: string; address: string; hint: string | null;
@@ -14,6 +14,16 @@ type Props = {
  * Отсчёт живой и синхронизирован с временем сервера.
  */
 export function NextLessonCard(p: Props) {
+  const { t, tn, f } = useI18n();
+  /** «25 мин», «2 ч 10 мин», «3 дня» — на языке интерфейса (как untilText из lib/time). */
+  const until = (ms: number) => {
+    const total = Math.max(0, Math.round(ms / 60000));
+    if (total < 60) return t("today.dur.min", { n: total });
+    const h = Math.floor(total / 60);
+    const m = total % 60;
+    if (h >= 24) return tn("today.dur.days", Math.floor(h / 24));
+    return m ? t("today.dur.hm", { h, m }) : t("today.dur.h", { n: h });
+  };
   const [nowMs, setNow] = useState(() => new Date(p.serverNow).getTime());
   useEffect(() => {
     const skew = new Date(p.serverNow).getTime() - Date.now(); // разница часов клиента и сервера
@@ -23,20 +33,21 @@ export function NextLessonCard(p: Props) {
   const start = new Date(p.startsAt);
   const end = new Date(p.endsAt);
   const ongoing = nowMs >= +start && nowMs < +end;
-  const near = nearDay(start, new Date(nowMs));
+  const near = f.near(start, new Date(nowMs));
   const soon = +start - nowMs < 12 * 3600 * 1000;
-  const label = ongoing ? "Идёт сейчас" : "Следующая пара";
-  const countdown = ongoing ? `ещё ${untilText(+end - nowMs)}` : soon ? `через ${untilText(+start - nowMs)}` : null;
+  const label = ongoing ? t("today.next.now") : t("today.next.next");
+  const countdown = ongoing ? t("today.next.left", { time: until(+end - nowMs) }) : soon ? t("today.next.in", { time: until(+start - nowMs) }) : null;
   const progress = ongoing ? Math.min(100, ((nowMs - +start) / (+end - +start)) * 100) : null;
   // Правка капитана (раунд 2): в плитке «День» — дата числом (не переносится), день недели — подписью ниже.
-  const weekday = fmt.weekday(start);
+  const weekday = f.weekday(start);
+  const dayLine = near ? t("today.next.nearWeekday", { near, weekday }) : weekday;
   const tiles: [string, string, string][] = [
-    ["День", fmt.dayMonth(start), near ? `${near}, ${weekday}` : weekday],
-    ["Начало", fmt.time(start), `до ${fmt.time(end)}`],
-    ["Аудитория", p.room, p.building],
+    [t("today.next.day"), f.dayMonth(start), dayLine],
+    [t("today.next.start"), f.time(start), t("today.next.until", { time: f.time(end) })],
+    [t("today.next.room"), p.room, p.building],
   ];
   return (
-    <section aria-label={`${label}: ${p.title}, ${near ? `${near}, ` : ""}${weekday}, ${fmt.dayMonth(start)}, в ${fmt.time(start)}, аудитория ${p.room}`} className="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-hero p-4 text-hero-fg sm:p-5 lg:p-6">
+    <section aria-label={t("today.next.aria", { label, title: p.title, weekday: dayLine, date: f.dayMonth(start), time: f.time(start), room: p.room })} className="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-hero p-4 text-hero-fg sm:p-5 lg:p-6">
       <svg className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 opacity-[0.07]" viewBox="0 0 40 40" aria-hidden>
         <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" strokeWidth=".6" /><path d="M20 3c-6.5 4.5-9.5 10.2-9.5 17s3 12.5 9.5 17M20 3c6.5 4.5 9.5 10.2 9.5 17s-3 12.5-9.5 17M5 26h30M5 14h30" fill="none" stroke="currentColor" strokeWidth=".6" />
       </svg>
@@ -59,8 +70,8 @@ export function NextLessonCard(p: Props) {
 
       {p.moved && p.prevText && (
         <p className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-          <span className="inline-flex items-center gap-1 rounded-lg bg-accent px-2 py-0.5 text-xs font-bold text-[#14182a]"><ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />Пара перенесена</span>
-          <span className="text-hero-muted">обычно: {p.prevText}</span>
+          <span className="inline-flex items-center gap-1 rounded-lg bg-accent px-2 py-0.5 text-xs font-bold text-[#14182a]"><ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />{t("today.next.moved")}</span>
+          <span className="text-hero-muted">{t("today.next.usually", { text: p.prevText })}</span>
         </p>
       )}
 
@@ -68,7 +79,7 @@ export function NextLessonCard(p: Props) {
         <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
         <span>{p.type}{p.teacher ? ` · ${p.teacher}` : ""} · {p.address}{p.hint && <span className="hidden sm:inline"> · {p.hint}</span>}</span>
       </p>
-      {progress !== null && <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-hero-2" role="progressbar" aria-label="Прошло времени пары" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-accent" style={{ width: `${progress}%` }} /></div>}
+      {progress !== null && <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-hero-2" role="progressbar" aria-label={t("today.next.progress")} aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-accent" style={{ width: `${progress}%` }} /></div>}
     </section>
   );
 }

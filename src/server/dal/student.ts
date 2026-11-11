@@ -93,6 +93,9 @@ export const getMyGrades = cache(async (v: StudentViewer) => {
 });
 
 // ───────── Сроки
+/** Для контрольных точек — части текста, чтобы интерфейс собрал строку на своём языке. */
+export type DeadlineParts = { work: string; short: string; name: string; max: number };
+
 export async function listMyDeadlines(v: StudentViewer, at: Date, limit = 6) {
   const general = await db.select().from(t.deadlines).where(and(
     gt(t.deadlines.dueAt, at),
@@ -105,8 +108,9 @@ export async function listMyDeadlines(v: StudentViewer, at: Date, limit = 6) {
   )).orderBy(asc(t.deadlines.dueAt)).limit(limit);
   const grades = await getMyGrades(v);
   const control = grades.current.flatMap((d) => d.items.filter((a) => a.kind === "CONTROL" && a.dueAt && a.dueAt > at && a.points === null)
-    .map((a) => ({ id: a.id, title: `${a.title} — ${d.short}`, description: `${d.name} · до ${a.maxPoints} б.`, dueAt: a.dueAt!, link: "/grades" as string | null })));
-  return [...general.map((g) => ({ id: g.id, title: g.title, description: g.description, dueAt: g.dueAt, link: g.link })), ...control]
+    .map((a) => ({ id: a.id, title: `${a.title} — ${d.short}`, description: `${d.name} · до ${a.maxPoints} б.`, dueAt: a.dueAt!, link: "/grades" as string | null,
+      parts: { work: a.title, short: d.short, name: d.name, max: a.maxPoints } as DeadlineParts | null })));
+  return [...general.map((g) => ({ id: g.id, title: g.title, description: g.description, dueAt: g.dueAt, link: g.link, parts: null as DeadlineParts | null })), ...control]
     .sort((a, b) => +a.dueAt - +b.dueAt).slice(0, limit);
 }
 

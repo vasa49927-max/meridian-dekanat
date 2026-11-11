@@ -39,25 +39,39 @@ export async function getMyRequest(v: StudentViewer, id: string) {
   return r ?? null;
 }
 
+/**
+ * Тексты ошибок для студента. По умолчанию — русские (unit-тесты, помощник); Server Action передаёт переведённые (i18n).
+ */
+export type RequestMsgs = {
+  tooLong: (max: number) => string; chooseOption: string; required: (label: string) => string;
+  noType: string; checkFields: string; createFailed: string; replyNotAllowed: string; withdrawNotAllowed: string; rateNotAllowed: string; alreadyRated: string;
+};
+export const RU_REQUEST_MSGS: RequestMsgs = {
+  tooLong: (max) => `Не длиннее ${max} символов`, chooseOption: "Выберите вариант из списка", required: (label) => `Заполните поле «${label}»`,
+  noType: "Такого вида заявки нет", checkFields: "Проверьте поля формы", createFailed: "Не удалось создать заявку",
+  replyNotAllowed: "Ответить можно, когда деканат просит дополнить заявку", withdrawNotAllowed: "Отозвать можно только заявку, которую ещё не взяли в работу",
+  rateNotAllowed: "Оценить можно, когда заявка закрыта", alreadyRated: "Вы уже оценили эту заявку",
+};
+
 /** zod-схема формы строится из описания полей типа заявки — сервер не доверяет клиенту. */
-export function schemaForFields(fields: RequestField[]) {
+export function schemaForFields(fields: RequestField[], m: RequestMsgs = RU_REQUEST_MSGS) {
   const shape: Record<string, z.ZodType<string>> = {};
   for (const f of fields) {
-    let s = z.string().trim().max(f.max ?? 300, `Не длиннее ${f.max ?? 300} символов`);
-    if (f.kind === "select" && f.options) s = s.refine((x) => x === "" || f.options!.includes(x), "Выберите вариант из списка") as unknown as typeof s;
-    shape[f.name] = f.required ? s.min(1, `Заполните поле «${f.label}»`) : s.optional().transform((x) => x ?? "") as unknown as z.ZodType<string>;
+    let s = z.string().trim().max(f.max ?? 300, m.tooLong(f.max ?? 300));
+    if (f.kind === "select" && f.options) s = s.refine((x) => x === "" || f.options!.includes(x), m.chooseOption) as unknown as typeof s;
+    shape[f.name] = f.required ? s.min(1, m.required(f.label)) : s.optional().transform((x) => x ?? "") as unknown as z.ZodType<string>;
   }
   return z.object(shape).strict();
 }
 
-export async function createMyRequest(v: StudentViewer, code: string, raw: Record<string, unknown>, comment: string | null, files: ReadyFile[] = []) {
+export async function createMyRequest(v: StudentViewer, code: string, raw: Record<string, unknown>, comment: string | null, files: ReadyFile[] = [], m: RequestMsgs = RU_REQUEST_MSGS) {
   const type = await getRequestType(code);
-  if (!type) return { ok: false as const, error: "Такого вида заявки нет" };
-  const parsed = schemaForFields(type.fields).safeParse(raw);
+  if (!type) return { ok: false as const, error: m.noType };
+  const parsed = schemaForFields(type.fields, m).safeParse(raw);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     for (const i of parsed.error.issues) fieldErrors[String(i.path[0] ?? "_")] = i.message;
-    return { ok: false as const, error: "Проверьте поля формы", fieldErrors };
+    return { ok: false as const, error: m.checkFields, fieldErrors };
   }
   const payload = Object.fromEntries(Object.entries(parsed.data).filter(([, val]) => val !== ""));
   const created = now();
@@ -78,14 +92,14 @@ export async function createMyRequest(v: StudentViewer, code: string, raw: Recor
       if (attempt === 2 || !(e instanceof Error) || !e.message.includes("requests_number_unique")) throw e;
     }
   }
-  return { ok: false as const, error: "Не удалось создать заявку" };
+  return { ok: false as const, error: m.createFailed };
 }
 
 /** Студент отвечает на «нужно дополнить» или отзывает заявку. Только свою и только в допустимом статусе. */
-export async function replyToMyRequest(v: StudentViewer, id: string, comment: string, files: ReadyFile[] = []) {
+export async function replyToMyRequest(v: StudentViewer, id: string, comment: string, files: ReadyFile[] = [], m: RequestMsgs = RU_REQUEST_MSGS) {
   const r = await getMyRequest(v, id);
   if (!r) return { ok: false as const, notFound: true };
-  if (r.status !== "NEEDS_INFO") return { ok: false as const, error: "Ответить можно, когда деканат просит дополнить заявку" };
+  if (r.status !== "NEEDS_INFO") return { ok: false as const, error: m.replyNotAllowed };
   await db.transaction(async (tx) => {
     await tx.update(t.requests).set({ status: "SUBMITTED", studentComment: comment, updatedAt: new Date() }).where(and(eq(t.requests.id, id), eq(t.requests.studentId, v.studentId)));
     await tx.insert(t.requestEvents).values({ requestId: id, status: "SUBMITTED", actor: "Студент", comment: files.length ? `${comment} · приложено файлов: ${files.length}` : comment });
@@ -94,10 +108,10 @@ export async function replyToMyRequest(v: StudentViewer, id: string, comment: st
   return { ok: true as const };
 }
 
-export async function withdrawMyRequest(v: StudentViewer, id: string) {
+export async function withdrawMyRequest(v: StudentViewer, id: string, m: RequestMsgs = RU_REQUEST_MSGS) {
   const r = await getMyRequest(v, id);
   if (!r) return { ok: false as const, notFound: true };
-  if (r.status !== "SUBMITTED") return { ok: false as const, error: "Отозвать можно только заявку, которую ещё не взяли в работу" };
+  if (r.status !== "SUBMITTED") return { ok: false as const, error: m.withdrawNotAllowed };
   await db.transaction(async (tx) => {
     await tx.update(t.requests).set({ status: "REJECTED", staffComment: "Отозвана студентом", updatedAt: new Date() }).where(and(eq(t.requests.id, id), eq(t.requests.studentId, v.studentId)));
     await tx.insert(t.requestEvents).values({ requestId: id, status: "REJECTED", actor: "Студент", comment: "Отозвана студентом" });
@@ -111,11 +125,11 @@ export const feedbackSchema = z.object({
 });
 
 /** Оценка работы деканата — только своя заявка, только закрытая (выдана/отклонена), один раз. */
-export async function rateMyRequest(v: StudentViewer, id: string, input: z.infer<typeof feedbackSchema>) {
+export async function rateMyRequest(v: StudentViewer, id: string, input: z.infer<typeof feedbackSchema>, m: RequestMsgs = RU_REQUEST_MSGS) {
   const r = await getMyRequest(v, id);
   if (!r) return { ok: false as const, notFound: true };
-  if (r.status !== "ISSUED" && r.status !== "REJECTED" && !(r.status === "READY" && !r.type.producesDocument)) return { ok: false as const, error: "Оценить можно, когда заявка закрыта" };
+  if (r.status !== "ISSUED" && r.status !== "REJECTED" && !(r.status === "READY" && !r.type.producesDocument)) return { ok: false as const, error: m.rateNotAllowed };
   const res = await db.insert(t.requestFeedback).values({ requestId: r.id, studentId: v.studentId, rating: input.rating, comment: input.comment || null })
     .onConflictDoNothing({ target: t.requestFeedback.requestId }).returning({ id: t.requestFeedback.id });
-  return res.length ? { ok: true as const } : { ok: false as const, error: "Вы уже оценили эту заявку" };
+  return res.length ? { ok: true as const } : { ok: false as const, error: m.alreadyRated };
 }

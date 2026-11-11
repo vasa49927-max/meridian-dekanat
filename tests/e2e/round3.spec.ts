@@ -212,3 +212,30 @@ test.describe("Часть 2: календарь, сессия, уведомле�
     await expect(page.getByLabel(/Утренняя сводка/)).toBeChecked();
   });
 });
+
+test.describe("Часть 3: языки интерфейса", () => {
+  test("переключение языка на входе и в кабинете: английский → китайский → русский; данные из БД переводятся", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByLabel("Язык").selectOption("en");
+    await expect(page.getByRole("heading", { name: "Sign in to your account" })).toBeVisible();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.getByRole("note")).toContainText("Concept for the MGIMO AI contest.");
+    await page.fill("#login", "sokolova");
+    await page.fill("#password", "Demo-2026-anna");
+    await page.click("button[type=submit]");
+    await page.waitForURL((u) => !u.pathname.startsWith("/login"));
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Good morning, Anna");
+    await expect(page.getByRole("heading", { name: "International Financial Markets" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Sections" }).getByRole("link", { name: "Timetable" })).toBeVisible();
+
+    await page.getByLabel("Language").selectOption("zh");
+    await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
+    await expect(page.getByRole("heading", { name: "国际金融市场" })).toBeVisible();
+    await page.goto("/grades");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("成绩");
+
+    await page.getByLabel("语言").selectOption("ru");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Успеваемость");
+    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+  });
+});

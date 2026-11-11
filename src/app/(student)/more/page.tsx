@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { Bell, CalendarClock, ChevronRight, LogOut, Sparkles, UserRound } from "lucide-react";
 import { requireStudent } from "@/server/auth/guards";
 import { countMyUnread } from "@/server/dal/student";
@@ -7,21 +6,26 @@ import { PageHeader } from "@/components/ui/page-header";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { TourButton } from "@/components/shell/onboarding";
 import { logoutAction } from "../../(auth)/login/actions";
+import { getI18n } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Ещё" };
+export async function generateMetadata() {
+  const { t } = await getI18n();
+  return { title: t("common.nav.more") };
+}
 
 export default async function MorePage() {
   const v = await requireStudent();
+  const { t, tn } = await getI18n();
   const unread = await countMyUnread(v);
   const items = [
-    { href: "/notifications", label: "Уведомления", hint: unread ? `${unread} непрочитанных` : "всё прочитано", icon: Bell, badge: unread },
-    { href: "/assistant", label: "Помощник деканата", hint: "ИИ отвечает по Положению и вашим данным", icon: Sparkles },
-    { href: "/appointments", label: "Запись к методисту", hint: "без живой очереди", icon: CalendarClock },
-    { href: "/profile", label: "Профиль", hint: "данные, языки, сессии", icon: UserRound },
+    { href: "/notifications", label: t("common.nav.notifications"), hint: unread ? tn("today.more.unread", unread) : t("today.more.allRead"), icon: Bell, badge: unread },
+    { href: "/assistant", label: t("today.more.assistant"), hint: t("today.more.assistantHint"), icon: Sparkles },
+    { href: "/appointments", label: t("common.nav.appointments"), hint: t("today.more.appointmentsHint"), icon: CalendarClock },
+    { href: "/profile", label: t("common.nav.profile"), hint: t("today.more.profileHint"), icon: UserRound },
   ];
   return (
     <div className="pt-2">
-      <PageHeader title="Ещё" />
+      <PageHeader title={t("common.nav.more")} />
       <ul className="overflow-hidden rounded-2xl border border-line bg-surface">
         {items.map((it) => (
           <li key={it.href} className="border-b border-line last:border-0">
@@ -37,7 +41,7 @@ export default async function MorePage() {
       <div className="mt-4 flex flex-wrap gap-2">
         <ThemeToggle withLabel />
         <TourButton className="inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-medium hover:bg-surface-2" />
-        <form action={logoutAction}><button className="inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-medium text-danger hover:bg-surface-2"><LogOut className="h-5 w-5" aria-hidden />Выйти</button></form>
+        <form action={logoutAction}><button className="inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-medium text-danger hover:bg-surface-2"><LogOut className="h-5 w-5" aria-hidden />{t("common.nav.logout")}</button></form>
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ const common: Shape<typeof ru> = {
   disclaimerStrong: "Concept pour le concours IA du MGIMO.",
   disclaimerRest: "Ce n’est pas un service officiel du MGIMO. Toutes les personnes et données sont fictives.",
   nav: {
-    sections: "Rubriques", mainSections: "Rubriques principales", today: "Aujourd’hui", schedule: "Emploi du temps", grades: "Résultats", requests: "Demandes et attestations",
+    sections: "Rubriques", mainSections: "Rubriques principales", today: "Aujourd’hui", schedule: "Planning", grades: "Résultats", requests: "Demandes et attestations",
     requestsShort: "Demandes", notifications: "Notifications", assistant: "Assistant", appointments: "Rendez-vous", profile: "Profil", more: "Plus",
     unreadCount: { one: "{n} non lue", other: "{n} non lues" },
     staffQueue: "File des demandes", staffAnnouncements: "Annonces", staffLessons: "Changements de cours", staffReception: "Accueil des étudiants", staffDemo: "Données de démo",

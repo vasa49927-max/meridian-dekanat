@@ -1,11 +1,12 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { AlertTriangle, BookOpen, CalendarClock, CheckCircle2, CircleDot, Flag, Target } from "lucide-react";
 import { requireStudent } from "@/server/auth/guards";
 import { getMyGrades } from "@/server/dal/student";
 import { BRS, averagePoints, markFor, planFor } from "@/lib/brs";
-import { fmt, now } from "@/lib/time";
+import { now } from "@/lib/time";
 import { getI18n } from "@/i18n/server";
+import { INTL_LOCALE } from "@/i18n/config";
+import type { I18n } from "@/i18n";
 import { planText } from "@/i18n/brs";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card } from "@/components/ui/card";
@@ -15,10 +16,17 @@ import { PointsBar } from "@/components/grades/progress";
 import { WhatIf } from "@/components/grades/what-if";
 import { cn } from "@/lib/cn";
 
-export const metadata: Metadata = { title: "Успеваемость" };
+export async function generateMetadata() {
+  const { t } = await getI18n();
+  return { title: t("grades.title") };
+}
 
-const CONTROL = { EXAM: "Экзамен", CREDIT: "Зачёт", GRADED_CREDIT: "Дифф. зачёт" } as const;
-const semTitle = (s: string) => { const [y, t] = s.split("-"); return `${t === "осень" ? "Осенний" : "Весенний"} семестр ${t === "осень" ? `${y}/${+y + 1}` : `${+y - 1}/${y}`}`; };
+/** «2026-осень» → «Осенний семестр 2026/2027» на языке интерфейса. */
+const semTitle = (s: string, t: I18n["t"]) => {
+  const [y, season] = s.split("-");
+  return season === "осень" ? t("grades.semester.autumn", { years: `${y}/${+y + 1}` }) : t("grades.semester.spring", { years: `${+y - 1}/${y}` });
+};
+const MARK_KEY = { 5: "excellent", 4: "good", 3: "satisfactory", 2: "fail" } as const;
 const TONE = {
   ok: { box: "border-ok/30 bg-ok-bg", text: "text-ok", icon: CheckCircle2 },
   goal: { box: "border-primary/25 bg-primary-soft dark:border-accent/30", text: "text-primary dark:text-accent-text", icon: Target },
@@ -35,7 +43,9 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
   const v = await requireStudent();
   const { tab } = await searchParams;
   const at = now();
-  const { t } = await getI18n();
+  const i18n = await getI18n();
+  const { t, tn, tr, name, f, locale } = i18n;
+  const num = (n: number) => n.toLocaleString(INTL_LOCALE[locale]);
   const { current, past } = await getMyGrades(v);
   const cards = current.map((d) => {
     const plan = planFor(d.control, d.summary);
@@ -48,59 +58,59 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
   const avg = averagePoints(past.map((p) => p.points));
   const semesters = [...new Set(past.map((p) => p.semester))].reverse();
   const isPast = tab === "record";
-  const focus = focusSteps(cards);
+  const focus = focusSteps(cards, i18n);
 
   return (
     <div className="pt-2 lg:pt-0">
-      <PageHeader title="Успеваемость" subtitle="Осенний семестр 2026/27" />
+      <PageHeader title={t("grades.title")} subtitle={t("grades.semester.autumn", { years: "2026/27" })} />
 
       {/* Сводка: на что обратить внимание прямо сейчас */}
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Card className={cn("p-4", risks.length && "border-danger/40")}>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted">Требуют внимания</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted">{t("grades.summary.attention")}</p>
           <p className={cn("mt-1 font-serif text-3xl tabular", risks.length ? "text-danger" : "text-ok")}>{risks.length}</p>
-          <p className="text-xs text-muted">{risks.length ? risks.map((r) => r.d.short).join(", ") : "всё под контролем"}</p>
+          <p className="text-xs text-muted">{risks.length ? risks.map((r) => tr("short", r.d.short)).join(", ") : t("grades.summary.allGood")}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted">Уже автомат</p>
-          <p className="mt-1 font-serif text-3xl tabular">{autos.length}<span className="text-lg text-muted"> из {cards.length}</span></p>
-          <p className="text-xs text-muted">{autos.length ? autos.map((r) => r.d.short).join(", ") : "пока нет"}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted">{t("grades.summary.autos")}</p>
+          <p className="mt-1 font-serif text-3xl tabular">{autos.length}<span className="text-lg text-muted"> {t("grades.summary.of", { n: cards.length })}</span></p>
+          <p className="text-xs text-muted">{autos.length ? autos.map((r) => tr("short", r.d.short)).join(", ") : t("grades.summary.none")}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted">Ближайшая работа</p>
-          <p className="mt-1 font-serif text-2xl leading-tight">{upcoming ? fmt.dayMonth(upcoming.dueAt!) : "—"}</p>
-          <p className="text-xs text-muted">{upcoming ? `${upcoming.title} · ${upcoming.short} · до ${upcoming.maxPoints} б.` : "в семестре всё сдано"}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted">{t("grades.summary.next")}</p>
+          <p className="mt-1 font-serif text-2xl leading-tight">{upcoming ? f.dayMonth(upcoming.dueAt!) : "—"}</p>
+          <p className="text-xs text-muted">{upcoming ? t("grades.summary.nextDetail", { title: tr("assessments", upcoming.title), short: tr("short", upcoming.short), max: upcoming.maxPoints }) : t("grades.summary.allDone")}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted">Средний балл зачётки</p>
-          <p className="mt-1 font-serif text-3xl tabular">{avg !== null ? avg.toLocaleString("ru-RU") : "—"}</p>
-          <p className="text-xs text-muted">{avg !== null ? `${semesters.length} сем. · из 100` : "итоги появятся после сессии"}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted">{t("grades.summary.avg")}</p>
+          <p className="mt-1 font-serif text-3xl tabular">{avg !== null ? num(avg) : "—"}</p>
+          <p className="text-xs text-muted">{avg !== null ? tn("grades.summary.avgDetail", semesters.length) : t("grades.summary.avgEmpty")}</p>
         </Card>
       </div>
 
-      <nav aria-label="Период" className="mb-4 inline-flex rounded-xl border border-line bg-surface p-1">
-        <Link aria-current={!isPast ? "page" : undefined} href="/grades" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", !isPast ? "bg-primary text-primary-fg" : "text-muted")}>Текущий семестр</Link>
-        <Link aria-current={isPast ? "page" : undefined} href="/grades?tab=record" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", isPast ? "bg-primary text-primary-fg" : "text-muted")}>Зачётка</Link>
+      <nav aria-label={t("grades.tabs.aria")} className="mb-4 inline-flex rounded-xl border border-line bg-surface p-1">
+        <Link aria-current={!isPast ? "page" : undefined} href="/grades" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", !isPast ? "bg-primary text-primary-fg" : "text-muted")}>{t("grades.tabs.current")}</Link>
+        <Link aria-current={isPast ? "page" : undefined} href="/grades?tab=record" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", isPast ? "bg-primary text-primary-fg" : "text-muted")}>{t("grades.tabs.record")}</Link>
       </nav>
 
       {!isPast ? (
         <>
           {/* Как это работает — в три шага, всегда на виду */}
-          <ol aria-label="Как считается итог" className="mb-4 grid gap-2 rounded-2xl border border-line bg-surface p-3 text-sm sm:grid-cols-3">
-            <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">1</span><span><b>Работы в семестре</b> — до {BRS.currentMax} баллов (коллоквиумы, эссе, семинары)</span></li>
-            <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">2</span><span><b>Экзамен или зачёт</b> — до {BRS.finalMax}. Автомат: зачёт от {BRS.autoCredit}, «отлично» от {BRS.autoExcellent} за семестр</span></li>
-            <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">3</span><span><b>Итог из 100:</b> 90+ «отлично», 75+ «хорошо», 60+ «удовл.»</span></li>
+          <ol aria-label={t("grades.how.aria")} className="mb-4 grid gap-2 rounded-2xl border border-line bg-surface p-3 text-sm sm:grid-cols-3">
+            <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">1</span><span><b>{t("grades.how.s1b")}</b> {t("grades.how.s1", { max: BRS.currentMax })}</span></li>
+            <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">2</span><span><b>{t("grades.how.s2b")}</b> {t("grades.how.s2", { max: BRS.finalMax, credit: BRS.autoCredit, excellent: BRS.autoExcellent })}</span></li>
+            <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">3</span><span><b>{t("grades.how.s3b")}</b> {t("grades.how.s3")}</span></li>
           </ol>
 
           {/* Раунд 3: «С чего начать» — одна короткая очередь действий вместо одинаковых советов в каждой карточке */}
           {focus.length > 0 && (
             <section aria-labelledby="focus-h" className="mb-4 rounded-2xl border border-primary/25 bg-primary-soft p-4 dark:border-accent/30">
-              <h2 id="focus-h" className="mb-2 flex items-center gap-2 font-semibold"><Target className="h-5 w-5 text-primary dark:text-accent-text" aria-hidden />С чего начать</h2>
+              <h2 id="focus-h" className="mb-2 flex items-center gap-2 font-semibold"><Target className="h-5 w-5 text-primary dark:text-accent-text" aria-hidden />{t("grades.focus.title")}</h2>
               <ol className="space-y-1.5 text-sm">
-                {focus.map((f, i) => (
+                {focus.map((step, i) => (
                   <li key={i} className="flex gap-2.5">
                     <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg dark:bg-accent dark:text-[#14182a]">{i + 1}</span>
-                    <span><a href={`#${encodeURIComponent(f.anchor)}`} className="font-semibold underline-offset-2 hover:underline">{f.lead}</a> {f.text}</span>
+                    <span><a href={`#${encodeURIComponent(step.anchor)}`} className="font-semibold underline-offset-2 hover:underline">{step.lead}</a> {step.text}</span>
                   </li>
                 ))}
               </ol>
@@ -113,13 +123,13 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
               const T = TONE[plan.tone];
               const target = d.control === "CREDIT" ? BRS.autoCredit : BRS.autoExcellent;
               return (
-                <Card key={d.id} as="article" id={d.name} aria-label={d.name} className="scroll-mt-24">
+                <Card key={d.id} as="article" id={d.name} aria-label={tr("subjects", d.name)} className="scroll-mt-24">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h2 className="font-semibold leading-snug">{d.name}</h2>
-                      <p className="text-[13px] text-muted">{d.teacherTitle} {d.teacherLast} {d.teacherFirst[0]}. · {d.credits} з.е.</p>
+                      <h2 className="font-semibold leading-snug">{tr("subjects", d.name)}</h2>
+                      <p className="text-[13px] text-muted">{tr("titles", d.teacherTitle)} {name(d.teacherLast)} {name(d.teacherFirst)[0]}. · {tn("grades.card.credits", d.credits)}</p>
                     </div>
-                    <Badge tone={d.control === "EXAM" ? "primary" : "neutral"}>{CONTROL[d.control]}</Badge>
+                    <Badge tone={d.control === "EXAM" ? "primary" : "neutral"}>{t(`common.control.${d.control}`)}</Badge>
                   </div>
 
                   {/* 1. Что мне делать — главное в карточке */}
@@ -129,24 +139,24 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
                   </div>
 
                   {/* 2. Где я сейчас */}
-                  <PointsBar earned={s.earned} remaining={s.remainingMax} target={target} targetLabel={d.control === "CREDIT" ? "зачёт автоматом" : "«отлично» автоматом"} />
+                  <PointsBar earned={s.earned} remaining={s.remainingMax} target={target} targetLabel={d.control === "CREDIT" ? t("grades.card.autoCredit") : t("grades.card.autoExcellent")} />
 
                   {/* 3. Следующая работа */}
                   {next && (
                     <p className="mt-3 flex items-start gap-2 text-sm">
                       <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-accent-text" aria-hidden />
-                      <span>Следующая работа: <b>{next.title}</b> · {fmt.dayMonth(next.dueAt!)} · до {next.maxPoints}&nbsp;б.{plan.needPct ? <> — цель <b>{Math.ceil((next.maxPoints * plan.needPct) / 100)}+</b></> : null}</span>
+                      <span>{t("grades.card.nextLabel")} <b>{tr("assessments", next.title)}</b> · {f.dayMonth(next.dueAt!)} · {t("grades.card.upTo", { n: next.maxPoints })}{plan.needPct ? <> {t("grades.card.goal")} <b>{Math.ceil((next.maxPoints * plan.needPct) / 100)}+</b></> : null}</span>
                     </p>
                   )}
 
                   <details className="mt-3">
-                    <summary className="tap cursor-pointer text-sm font-semibold text-primary dark:text-accent-text">Все работы и калькулятор итога</summary>
+                    <summary className="tap cursor-pointer text-sm font-semibold text-primary dark:text-accent-text">{t("grades.card.details")}</summary>
                     <ul className="mt-3 divide-y divide-line text-sm">
                       {d.items.map((a) => (
                         <li key={a.id} className="flex items-center gap-2 py-1.5">
-                          {a.points !== null ? <CheckCircle2 className="h-4 w-4 shrink-0 text-ok" aria-label="оценено" /> : <CircleDot className="h-4 w-4 shrink-0 text-muted" aria-label="ещё не оценено" />}
-                          <span className="min-w-0 flex-1">{a.title}<span className="text-muted"> · {a.dueAt ? fmt.dayMonth(a.dueAt) : "сессия"}</span></span>
-                          <span className="tabular">{a.points !== null ? <b>{a.points}</b> : <span className="text-muted">{a.dueAt && a.dueAt < at ? "проверяется" : "—"}</span>}<span className="text-muted"> / {a.maxPoints}</span></span>
+                          {a.points !== null ? <CheckCircle2 className="h-4 w-4 shrink-0 text-ok" aria-label={t("grades.card.graded")} /> : <CircleDot className="h-4 w-4 shrink-0 text-muted" aria-label={t("grades.card.notGraded")} />}
+                          <span className="min-w-0 flex-1">{tr("assessments", a.title)}<span className="text-muted"> · {a.dueAt ? f.dayMonth(a.dueAt) : t("grades.card.session")}</span></span>
+                          <span className="tabular">{a.points !== null ? <b>{a.points}</b> : <span className="text-muted">{a.dueAt && a.dueAt < at ? t("grades.card.checking") : "—"}</span>}<span className="text-muted"> / {a.maxPoints}</span></span>
                         </li>
                       ))}
                     </ul>
@@ -156,29 +166,29 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
               );
             })}
           </div>
-          <p className="mt-3 text-xs text-muted">Правила БРС взяты из вымышленного «Положения о деканате (концепт)», раздел 4 — их можно спросить у помощника.</p>
+          <p className="mt-3 text-xs text-muted">{t("grades.card.rules")}</p>
         </>
       ) : past.length ? (
         <div className="space-y-4">
           {semesters.map((sem) => {
             const list = past.filter((p) => p.semester === sem);
             return (
-              <Card key={sem} aria-label={semTitle(sem)}>
-                <h2 className="mb-3 flex items-baseline justify-between font-semibold"><span>{semTitle(sem)}</span><span className="text-sm font-normal text-muted"> · средний {averagePoints(list.map((l) => l.points))?.toLocaleString("ru-RU")}</span></h2>
+              <Card key={sem} aria-label={semTitle(sem, t)}>
+                <h2 className="mb-3 flex items-baseline justify-between font-semibold"><span>{semTitle(sem, t)}</span><span className="text-sm font-normal text-muted"> {t("grades.record.avg", { avg: num(averagePoints(list.map((l) => l.points)) ?? 0) })}</span></h2>
                 <ul className="divide-y divide-line">
                   {list.map((g) => (
                     <li key={g.id} className="flex items-center justify-between gap-3 py-2">
-                      <div className="min-w-0"><p className="text-sm font-medium">{g.disciplineName}</p><p className="text-xs text-muted">{CONTROL[g.control]} · {g.credits} з.е.</p></div>
-                      <div className="text-right"><p className="font-semibold tabular">{g.points}</p><p className="text-xs text-muted">{g.control === "CREDIT" ? "зачтено" : markFor(g.points).label}</p></div>
+                      <div className="min-w-0"><p className="text-sm font-medium">{tr("subjects", g.disciplineName)}</p><p className="text-xs text-muted">{t(`common.control.${g.control}`)} · {tn("grades.card.credits", g.credits)}</p></div>
+                      <div className="text-right"><p className="font-semibold tabular">{g.points}</p><p className="text-xs text-muted">{g.control === "CREDIT" ? t("grades.record.passed") : t(`grades.marks.${MARK_KEY[markFor(g.points).mark]}`)}</p></div>
                     </li>
                   ))}
                 </ul>
               </Card>
             );
           })}
-          <p className="text-sm text-muted">Нужна официальная выписка? <Link href="/requests/new/RECORD_EXTRACT" className="font-semibold text-primary underline dark:text-accent-text">Заказать выписку из зачётки</Link></p>
+          <p className="text-sm text-muted">{t("grades.record.needExtract")} <Link href="/requests/new/RECORD_EXTRACT" className="font-semibold text-primary underline dark:text-accent-text">{t("grades.record.orderExtract")}</Link></p>
         </div>
-      ) : <EmptyState icon={<BookOpen />} title="Зачётка пока пустая">Итоги появятся после первой сессии. А текущие баллы уже видны во вкладке «Текущий семестр».</EmptyState>}
+      ) : <EmptyState icon={<BookOpen />} title={t("grades.record.emptyTitle")}>{t("grades.record.emptyText")}</EmptyState>}
     </div>
   );
 }
@@ -189,21 +199,22 @@ type FocusCard = { d: { name: string; short: string }; text: { headline: string 
  * До трёх шагов «с чего начать»: 1) предмет с риском, 2) ближайшая работа с целью в баллах,
  * 3) предмет, где автомат получить проще всего. Повторы предметов пропускаем.
  */
-function focusSteps(cards: FocusCard[]) {
+function focusSteps(cards: FocusCard[], { t, tr, f, locale }: I18n) {
   const out: { anchor: string; lead: string; text: string }[] = [];
   const used = new Set<string>();
   const risk = cards.find((c) => c.plan.tone === "risk");
   if (risk) {
-    out.push({ anchor: risk.d.name, lead: `${risk.d.short}:`, text: `${risk.text.headline.toLowerCase()} — разберитесь с этим предметом первым, запишитесь на консультацию.` });
+    out.push({ anchor: risk.d.name, lead: t("grades.focus.lead", { short: tr("short", risk.d.short) }), text: t("grades.focus.risk", { headline: risk.text.headline.toLocaleLowerCase(INTL_LOCALE[locale]) }) });
     used.add(risk.d.name);
   }
   const soon = cards.filter((c) => c.next?.dueAt && !used.has(c.d.name)).sort((a, b) => +a.next!.dueAt! - +b.next!.dueAt!)[0];
   if (soon?.next?.dueAt) {
-    const goal = soon.plan.needPct ? ` — цель ${Math.ceil((soon.next.maxPoints * soon.plan.needPct) / 100)}+ из ${soon.next.maxPoints}` : ` — до ${soon.next.maxPoints} б.`;
-    out.push({ anchor: soon.d.name, lead: `${fmt.dayMonth(soon.next.dueAt)} — ${soon.next.title}`, text: `по предмету «${soon.d.short}»${goal}.` });
+    const short = tr("short", soon.d.short), max = soon.next.maxPoints;
+    const text = soon.plan.needPct ? t("grades.focus.soonGoal", { short, target: Math.ceil((max * soon.plan.needPct) / 100), max }) : t("grades.focus.soonMax", { short, max });
+    out.push({ anchor: soon.d.name, lead: t("grades.focus.soonLead", { date: f.dayMonth(soon.next.dueAt), title: tr("assessments", soon.next.title) }), text });
     used.add(soon.d.name);
   }
   const easiest = cards.filter((c) => c.plan.tone === "goal" && c.plan.needPct !== null && !used.has(c.d.name)).sort((a, b) => a.plan.needPct! - b.plan.needPct!)[0];
-  if (easiest) out.push({ anchor: easiest.d.name, lead: `${easiest.d.short}:`, text: `автомат ближе всего — достаточно в среднем ${easiest.plan.needPct}% за оставшиеся работы.` });
+  if (easiest) out.push({ anchor: easiest.d.name, lead: t("grades.focus.lead", { short: tr("short", easiest.d.short) }), text: t("grades.focus.easiest", { pct: easiest.plan.needPct! }) });
   return out;
 }

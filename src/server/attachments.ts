@@ -20,16 +20,24 @@ const cleanName = (n: string) => n.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").re
 
 export type ReadyFile = { fileName: string; mime: string; size: number; data: Buffer };
 
+/** Тексты ошибок вложений. По умолчанию — русские; Server Action передаёт переведённые (i18n). */
+export type UploadMsgs = { tooMany: (max: number) => string; tooBig: (name: string) => string; badType: (name: string) => string };
+export const RU_UPLOAD_MSGS: UploadMsgs = {
+  tooMany: (max) => `Можно приложить не больше ${max} файлов за раз`,
+  tooBig: (name) => `Файл «${name}» больше 5 МБ`,
+  badType: (name) => `Файл «${name}»: подходят только PDF, JPG, PNG или DOCX`,
+};
+
 /** Проверяет файлы из FormData. Пустые поля (файл не выбран) пропускаются. */
-export async function readUploads(entries: FormDataEntryValue[]): Promise<{ ok: true; files: ReadyFile[] } | { ok: false; error: string }> {
+export async function readUploads(entries: FormDataEntryValue[], m: UploadMsgs = RU_UPLOAD_MSGS): Promise<{ ok: true; files: ReadyFile[] } | { ok: false; error: string }> {
   const files = entries.filter((e): e is File => typeof e === "object" && "arrayBuffer" in e && e.size > 0);
-  if (files.length > ATTACH_LIMITS.maxPerUpload) return { ok: false, error: `Можно приложить не больше ${ATTACH_LIMITS.maxPerUpload} файлов за раз` };
+  if (files.length > ATTACH_LIMITS.maxPerUpload) return { ok: false, error: m.tooMany(ATTACH_LIMITS.maxPerUpload) };
   const out: ReadyFile[] = [];
   for (const f of files) {
-    if (f.size > ATTACH_LIMITS.maxFileBytes) return { ok: false, error: `Файл «${cleanName(f.name)}» больше 5 МБ` };
+    if (f.size > ATTACH_LIMITS.maxFileBytes) return { ok: false, error: m.tooBig(cleanName(f.name)) };
     const data = Buffer.from(await f.arrayBuffer());
     const mime = sniff(data, f.name);
-    if (!mime) return { ok: false, error: `Файл «${cleanName(f.name)}»: подходят только PDF, JPG, PNG или DOCX` };
+    if (!mime) return { ok: false, error: m.badType(cleanName(f.name)) };
     out.push({ fileName: cleanName(f.name), mime, size: data.length, data });
   }
   return { ok: true, files: out };

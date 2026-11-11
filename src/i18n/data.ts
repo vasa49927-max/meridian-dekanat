@@ -44,6 +44,7 @@ const en: DataDict = {
   positions: { "Методист единого студенческого офиса": "Student Office coordinator", "Специалист единого студенческого офиса": "Student Office specialist" },
   offices: { "Студенческий офис, ауд. 1012, корпус А": "Student Office, room 1012, Building A" },
   rt: {
+    "Можно оставить «по месту требования»": "You can leave “To whom it may concern”",
     "Справка об обучении": "Certificate of enrolment",
     "Подтверждает, что вы студент МГИМО. Для работы, банка, соцзащиты, «по месту требования».": "Confirms that you are a student. For an employer, bank or social services.",
     "Куда предоставляется": "Issued to", "По месту требования": "To whom it may concern", "Количество экземпляров": "Number of copies",
@@ -102,6 +103,7 @@ const zh: DataDict = {
   positions: { "Методист единого студенческого офиса": "学生事务中心教务员", "Специалист единого студенческого офиса": "学生事务中心专员" },
   offices: { "Студенческий офис, ауд. 1012, корпус А": "学生事务中心，A楼1012室" },
   rt: {
+    "Можно оставить «по месту требования»": "可以保留“致相关机构”",
     "Справка об обучении": "在读证明", "Подтверждает, что вы студент МГИМО. Для работы, банка, соцзащиты, «по месту требования».": "证明您是在读学生。用于雇主、银行或社保机构。",
     "Куда предоставляется": "提交至", "По месту требования": "致相关机构", "Количество экземпляров": "份数",
     "Справка об обучении на английском": "英文在读证明", "Для визы, посольства, зарубежной стажировки или обмена. Электронная, с QR-кодом проверки.": "用于签证、使馆、海外实习或交换。电子版，附验证二维码。",
@@ -154,6 +156,7 @@ const fr: DataDict = {
   positions: { "Методист единого студенческого офиса": "Gestionnaire du bureau des étudiants", "Специалист единого студенческого офиса": "Chargée du bureau des étudiants" },
   offices: { "Студенческий офис, ауд. 1012, корпус А": "Bureau des étudiants, salle 1012, bâtiment A" },
   rt: {
+    "Можно оставить «по месту требования»": "Vous pouvez laisser « À qui de droit »",
     "Справка об обучении": "Certificat de scolarité", "Подтверждает, что вы студент МГИМО. Для работы, банка, соцзащиты, «по месту требования».": "Atteste que vous êtes étudiant. Pour un employeur, une banque ou les services sociaux.",
     "Куда предоставляется": "Destinataire", "По месту требования": "À qui de droit", "Количество экземпляров": "Nombre d’exemplaires",
     "Справка об обучении на английском": "Certificat de scolarité en anglais", "Для визы, посольства, зарубежной стажировки или обмена. Электронная, с QR-кодом проверки.": "Pour un visa, une ambassade, un stage ou un échange à l’étranger. Électronique, avec QR code de vérification.",

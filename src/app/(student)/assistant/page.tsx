@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
 import { requireStudent } from "@/server/auth/guards";
 import { assistantEnabled } from "@/server/ai/assistant";
 import { Chat } from "@/components/assistant/chat";
+import { getI18n } from "@/i18n/server";
 
-export const metadata: Metadata = { title: "Помощник деканата" };
+export async function generateMetadata() {
+  const { t } = await getI18n();
+  return { title: t("assistant.title") };
+}
 
 export default async function AssistantPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const v = await requireStudent();
