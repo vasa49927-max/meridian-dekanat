@@ -4,6 +4,7 @@ import type ru from "../ru/today";
 const today: Shape<typeof ru> = {
   greeting: { morning: "Bonjour, {name}", day: "Bon après-midi, {name}", evening: "Bonsoir, {name}", night: "Bonne nuit, {name}" },
   next: {
+    teacher: "Enseignant", position: { docent: "Maître de conférences", prof: "Professeur", senior: "Chargé d’enseignement", lect: "Enseignant", colonel: "Colonel" },
     now: "En cours", next: "Prochain cours", left: "encore {time}", in: "dans {time}",
     day: "Jour", start: "Début", room: "Salle", until: "jusqu’à {time}", nearWeekday: "{near}, {weekday}",
     aria: "{label} : {title}, {weekday}, {date}, à {time}, salle {room}",

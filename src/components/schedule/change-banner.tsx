@@ -29,25 +29,25 @@ export async function ChangeChip({ kind, className }: { kind: ChangeKind; classN
 
 /** Одна строка «что теперь» — крупно, и «вместо чего» — мелко. Без зачёркиваний (правка капитана №2c). */
 export async function ChangeLines({ l }: { l: LessonView }) {
-  const { t, f } = await getI18n();
+  const { t, f, tc } = await getI18n();
   const kind = changeKind(l);
   const prev = l.prevStartsAt ?? l.startsAt;
   if (kind === "cancel") return (
     <>
       <span className="block font-semibold text-fg">{f.shortDay(l.startsAt)} · {f.time(l.startsAt)} — <span className="text-danger">{t("schedule.change.noClass")}</span></span>
-      {l.changeNote && <span className="block text-[13px] text-muted">{l.changeNote}</span>}
+      {l.changeNote && <span className="block text-[13px] text-muted">{tc(l.changeNote)}</span>}
     </>
   );
   if (kind === "room") return (
     <>
       <span className="block font-semibold text-fg">{t("schedule.change.roomNow", { day: f.shortDay(l.startsAt), time: f.time(l.startsAt), room: l.room })}</span>
-      <span className="block text-[13px] text-muted">{t("schedule.change.roomWas", { room: l.prevRoom ?? "" })}{l.changeNote ? ` · ${l.changeNote}` : ""}</span>
+      <span className="block text-[13px] text-muted">{t("schedule.change.roomWas", { room: l.prevRoom ?? "" })}{l.changeNote ? ` · ${tc(l.changeNote)}` : ""}</span>
     </>
   );
   return (
     <>
       <span className="block font-semibold text-fg">{t("schedule.change.movedNow", { day: f.shortDay(l.startsAt), time: f.time(l.startsAt), room: l.room })}</span>
-      <span className="block text-[13px] text-muted">{t("schedule.change.movedWas", { day: f.shortDay(prev), time: f.time(prev), room: l.prevRoom ?? "" })}{l.changeNote ? ` — ${l.changeNote}` : ""}</span>
+      <span className="block text-[13px] text-muted">{t("schedule.change.movedWas", { day: f.shortDay(prev), time: f.time(prev), room: l.prevRoom ?? "" })}{l.changeNote ? ` — ${tc(l.changeNote)}` : ""}</span>
     </>
   );
 }

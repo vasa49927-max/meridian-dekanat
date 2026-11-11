@@ -2,6 +2,7 @@
 const today = {
   greeting: { morning: "Доброе утро, {name}", day: "Добрый день, {name}", evening: "Добрый вечер, {name}", night: "Доброй ночи, {name}" },
   next: {
+    teacher: "Преподаватель", position: { docent: "Доцент", prof: "Профессор", senior: "Старший преподаватель", lect: "Преподаватель", colonel: "Полковник" },
     now: "Идёт сейчас", next: "Следующая пара", left: "ещё {time}", in: "через {time}",
     day: "День", start: "Начало", room: "Аудитория", until: "до {time}", nearWeekday: "{near}, {weekday}",
     aria: "{label}: {title}, {weekday}, {date}, в {time}, аудитория {room}",

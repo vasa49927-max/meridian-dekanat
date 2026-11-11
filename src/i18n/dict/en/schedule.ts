@@ -74,7 +74,7 @@ const schedule: Shape<typeof ru> = {
     disableText: "The link will stop working and the calendar on your phone will no longer receive updates. Classes already loaded will stay until you remove the calendar.",
     disableConfirm: "Yes, turn off",
     howTitle: "How it works",
-    how1: "Your phone calendar fetches the timetable via a personal link. A rescheduled class moves; a cancelled one is marked “[ОТМЕНА]” (cancelled).",
+    how1: "Your phone calendar fetches the timetable via a personal link. A rescheduled class moves; a cancelled one is marked “[CANCELLED]”.",
     how2: "How often is up to the calendar app: iPhone and Yandex roughly every hour, Google up to several times a day. That is why we also send urgent changes to your notifications.",
     how3: "The link is secret: we store only its fingerprint. If you shared it by mistake, get a new one — the old one will stop working.",
     download: "Download the .ics file once (no updates)",

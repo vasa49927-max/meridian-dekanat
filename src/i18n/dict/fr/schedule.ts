@@ -74,7 +74,7 @@ const schedule: Shape<typeof ru> = {
     disableText: "Le lien ne fonctionnera plus et le calendrier de votre téléphone ne recevra plus de mises à jour. Les cours déjà chargés resteront jusqu’à la suppression du calendrier.",
     disableConfirm: "Oui, désactiver",
     howTitle: "Comment ça marche",
-    how1: "Le calendrier de votre téléphone récupère l’emploi du temps via un lien personnel. Un cours déplacé change de créneau, un cours annulé est marqué « [ОТМЕНА] » (annulé).",
+    how1: "Le calendrier de votre téléphone récupère l’emploi du temps via un lien personnel. Un cours déplacé change de créneau, un cours annulé est marqué « [ANNULÉ] » (annulé).",
     how2: "La fréquence dépend de l’application : iPhone et Yandex environ toutes les heures, Google jusqu’à plusieurs fois par jour. C’est pourquoi nous signalons aussi les changements urgents dans les notifications.",
     how3: "Le lien est secret : notre base ne conserve que son empreinte. Si vous l’avez envoyé à quelqu’un par erreur, générez-en un nouveau — l’ancien cessera de fonctionner.",
     download: "Télécharger le fichier .ics une seule fois (sans mises à jour)",

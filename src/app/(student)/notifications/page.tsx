@@ -21,7 +21,7 @@ const FILTERS = ["all", "unread", "important", "SCHEDULE", "REQUEST", "ANNOUNCEM
 
 export default async function NotificationsPage({ searchParams }: { searchParams: Promise<{ f?: string; before?: string; a?: string }> }) {
   const v = await requireStudent();
-  const { t, f } = await getI18n();
+  const { t, f, tc } = await getI18n();
   const sp = await searchParams;
   const filter: NotifFilter = FILTERS.find((k) => k === sp.f) ?? "all";
   const label = (k: NotifFilter) => (k === "all" ? t("common.actions.all") : t(`notifications.filter.${k}`));
@@ -39,9 +39,9 @@ export default async function NotificationsPage({ searchParams }: { searchParams
       <PageHeader title={t("common.nav.notifications")} subtitle={unread ? t("notifications.unread", { n: unread }) : t("notifications.allRead")} action={unread > 0 ? <form action={markAllReadAction}><Button variant="secondary" size="sm"><CheckCheck className="h-4 w-4" aria-hidden />{t("notifications.markAll")}</Button></form> : null} />
       {ann && (
         <Card className="mb-4 border-primary/30">
-          <div className="flex items-start justify-between gap-3"><p className="text-xs font-semibold uppercase tracking-wider text-accent-text">{ann.source} · {f.dayMonth(ann.publishedAt)}</p><Link href={q(filter)} aria-label={t("notifications.closeAnnouncement")} className="-m-1 rounded-lg p-1 text-muted hover:bg-surface-2"><X className="h-5 w-5" aria-hidden /></Link></div>
-          <h2 className="mt-1 font-serif text-xl">{ann.title}</h2>
-          <p className="mt-2 whitespace-pre-line">{ann.body}</p>
+          <div className="flex items-start justify-between gap-3"><p className="text-xs font-semibold uppercase tracking-wider text-accent-text">{tc(ann.source)} · {f.dayMonth(ann.publishedAt)}</p><Link href={q(filter)} aria-label={t("notifications.closeAnnouncement")} className="-m-1 rounded-lg p-1 text-muted hover:bg-surface-2"><X className="h-5 w-5" aria-hidden /></Link></div>
+          <h2 className="mt-1 font-serif text-xl">{tc(ann.title)}</h2>
+          <p className="mt-2 whitespace-pre-line">{tc(ann.body)}</p>
         </Card>
       )}
       <nav aria-label={t("notifications.filters")} className="-mx-4 mb-4 flex gap-1.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-wrap lg:px-0">

@@ -250,3 +250,64 @@ test("Часть 4: бот MAX «спит» без ключа — честный
   expect((await anon.post("/api/bot/max", { data: { update_type: "message_created" } })).status()).toBe(404);
   await anon.dispose();
 });
+
+test.describe("Раунд 4: правки капитана", () => {
+  test("карточка пары: плашка с должностью и ФИО преподавателя", async ({ page }) => {
+    await login(page, "anna");
+    const next = page.getByRole("region", { name: /^Следующая пара/ });
+    await expect(next.getByRole("definition").filter({ hasText: /^Ковалёва Марина Романовна$/ })).toBeVisible();
+    await expect(next.getByRole("definition").filter({ hasText: /^Доцент$/ })).toBeVisible();
+  });
+
+  test("экран входа на компьютере помещается без прокрутки (1440×760 и 1366×680)", async ({ browser }) => {
+    for (const [width, height] of [[1440, 760], [1366, 680]]) {
+      const ctx = await browser.newContext({ viewport: { width, height }, storageState: { cookies: [], origins: [] } });
+      const p = await ctx.newPage();
+      await p.goto("/login");
+      const { sh, ih } = await p.evaluate(() => ({ sh: document.documentElement.scrollHeight, ih: innerHeight }));
+      expect(sh, `${width}×${height}`).toBeLessThanOrEqual(ih);
+      await expect(p.getByRole("note")).toContainText("Концепт для конкурса МГИМО по ИИ.");
+      await ctx.close();
+    }
+  });
+
+  test("тёмная тема: пункты выпадающего списка читаемы (тёмный фон, светлый текст)", async ({ browser }) => {
+    const ctx = await browser.newContext({ colorScheme: "dark" });
+    const p = await ctx.newPage();
+    await login(p, "anna");
+    await p.goto("/appointments");
+    const colors = await p.locator("select option").first().evaluate((o) => { const s = getComputedStyle(o); return { bg: s.backgroundColor, fg: s.color }; });
+    expect(colors.bg).toBe("rgb(18, 26, 46)");
+    expect(colors.fg).toBe("rgb(238, 233, 221)");
+    await ctx.close();
+  });
+
+  test("заявление об оплате обучения: есть в каталоге, подаётся, попадает в очередь деканата", async ({ page, browser }) => {
+    await login(page, "timur");
+    await page.goto("/requests/new");
+    await page.getByRole("link", { name: /Заявление об оплате обучения/ }).click();
+    await page.waitForURL(/\/requests\/new\/TUITION_PAYMENT$/);
+    await page.getByLabel("Что нужно").selectOption("Отсрочка платежа");
+    await page.getByLabel("За какой период").selectOption("Весенний семестр 2026/27");
+    await page.getByLabel("Обоснование").fill("e2e: прошу отсрочку платежа до 15 февраля");
+    await page.getByRole("button", { name: /Отправить/ }).click();
+    await page.waitForURL(/\/requests\/[0-9a-f-]{36}\?created=1$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Заявление об оплате обучения");
+    const staff = await browser.newPage();
+    await login(staff, "staff");
+    await staff.goto("/staff?q=Галиев");
+    await expect(staff.getByRole("row").filter({ hasText: "Заявление об оплате обучения" }).first()).toBeVisible();
+    await staff.close();
+  });
+
+  test("английский: системные уведомления и объявления переведены", async ({ page }) => {
+    await page.context().addCookies([{ name: "lang", value: "en", url: "http://localhost:3000" }]);
+    await login(page, "anna");
+    await page.goto("/notifications");
+    await expect(page.getByText("Rescheduled: Spanish (second foreign language)")).toBeVisible();
+    await expect(page.getByText("Was: 18 November (Wed), 14:30, room 506. Now: 19 November (Thu), 17:40, room 1018.")).toBeVisible();
+    await expect(page.getByText("Model UN: delegate registration is open").first()).toBeVisible();
+    await page.goto("/");
+    await expect(page.getByText("Electives sign-up (spring)")).toBeVisible();
+  });
+});

@@ -4,7 +4,11 @@ import { eq } from "drizzle-orm";
 import { db, schema as t } from "@/server/db";
 import type { StudentViewer } from "@/server/auth/guards";
 import { listMyLessons, type LessonView } from "@/server/dal/student";
-import { LESSON_TYPE } from "@/components/schedule/lesson-meta";
+import type { Locale } from "@/i18n/config";
+import { buildI18n } from "@/i18n";
+import { DICTS } from "@/i18n/dict";
+import { DATA } from "@/i18n/data";
+import { CONTENT } from "@/i18n/content";
 import { addDays, now, startOfWeek } from "@/lib/time";
 
 /**
@@ -28,22 +32,25 @@ export function fold(line: string): string {
   return out.join("\r\n ");
 }
 
-export function buildIcs(lessons: LessonView[], name = "Меридиан — расписание"): string {
+export function buildIcs(lessons: LessonView[], locale: Locale = "ru"): string {
+  // Раунд 4: календарь на языке интерфейса (язык зашит в ссылку подписки параметром ?lang=).
+  const { t, tr, tc, name } = buildI18n(locale, DICTS[locale], DICTS.ru, locale === "ru" ? null : DATA[locale], locale === "ru" ? null : CONTENT[locale]);
   const stamp = dt(new Date());
   const lines = [
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Meridian concept//RU", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
-    fold(`X-WR-CALNAME:${esc(name)}`), "X-WR-TIMEZONE:Europe/Moscow",
+    fold(`X-WR-CALNAME:${esc(t("common.ics.calName"))}`), "X-WR-TIMEZONE:Europe/Moscow",
     // Подсказка клиентам: проверять обновления раз в час (Apple, Outlook, Яндекс учитывают; Google — по своему графику).
     "REFRESH-INTERVAL;VALUE=DURATION:PT1H", "X-PUBLISHED-TTL:PT1H",
   ];
   for (const l of lessons) {
-    const teacher = l.teacherLast ? `${l.teacherTitle ?? ""} ${l.teacherLast} ${l.teacherFirst ?? ""} ${l.teacherMiddle ?? ""}`.replace(/\s+/g, " ").trim() : "";
-    const note = l.status === "MOVED" ? `Изменение: ${l.changeNote ?? "перенос"}` : l.status === "CANCELLED" ? `Отменено: ${l.changeNote ?? ""}` : "";
+    const teacher = l.teacherLast ? name(`${l.teacherTitle ? tr("titles", l.teacherTitle) : ""} ${l.teacherLast} ${l.teacherFirst ?? ""} ${l.teacherMiddle ?? ""}`.replace(/\s+/g, " ").trim()) : "";
+    const note = l.status === "MOVED" ? t("common.ics.change", { note: l.changeNote ? tc(l.changeNote) : t("common.ics.moveDefault") }) : l.status === "CANCELLED" ? t("common.ics.cancelNote", { note: l.changeNote ? tc(l.changeNote) : "" }) : "";
     const seq = l.changedAt ? Math.max(1, Math.floor(+l.changedAt / 60000) % 100000) : 0;
+    const mark = l.status === "CANCELLED" ? `${t("common.ics.cancelled")} ` : l.status === "MOVED" ? `${t("common.ics.moved")} ` : "";
     lines.push(
       "BEGIN:VEVENT", `UID:${l.id}@meridian`, `DTSTAMP:${stamp}`, `SEQUENCE:${seq}`, `DTSTART:${dt(l.startsAt)}`, `DTEND:${dt(l.endsAt)}`,
-      fold(`SUMMARY:${esc(`${l.status === "CANCELLED" ? "[ОТМЕНА] " : l.status === "MOVED" ? "[ПЕРЕНОС] " : ""}${l.title} (${LESSON_TYPE[l.type]})`)}`),
-      fold(`LOCATION:${esc(`ауд. ${l.room}, ${l.buildingName}, ${l.buildingAddress}`)}`),
+      fold(`SUMMARY:${esc(`${mark}${tr("subjects", l.title)} (${t(`common.lessonType.${l.type}`)})`)}`),
+      fold(`LOCATION:${esc(`${t("common.ics.room", { room: l.room })}, ${tr("buildings", l.buildingName)}, ${tr("addresses", l.buildingAddress)}`)}`),
       fold(`DESCRIPTION:${esc([teacher, note].filter(Boolean).join("\n"))}`),
       `STATUS:${l.status === "CANCELLED" ? "CANCELLED" : "CONFIRMED"}`, "END:VEVENT",
     );
@@ -53,9 +60,9 @@ export function buildIcs(lessons: LessonView[], name = "Меридиан — р�
 }
 
 /** Окно календаря: прошлая неделя + полгода вперёд (семестр и сессия). */
-export async function calendarFor(v: StudentViewer) {
+export async function calendarFor(v: StudentViewer, locale: Locale = "ru") {
   const from = addDays(startOfWeek(now()), -7);
-  return buildIcs(await listMyLessons(v, from, addDays(from, 190)));
+  return buildIcs(await listMyLessons(v, from, addDays(from, 190)), locale);
 }
 
 const hash = (token: string) => createHash("sha256").update(token).digest("hex");

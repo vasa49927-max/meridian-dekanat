@@ -38,5 +38,6 @@ const common: Shape<typeof ru> = {
     sections: "Rubriques", theme: "Changer de thème", myCourses: "Mes matières", myRequests: "Mes demandes", lastRequests: "Demandes récentes",
     hintNav: "↑↓ choisir, Entrée ouvrir", hintEsc: "Échap fermer",
   },
+  ics: { cancelled: "[ANNULÉ]", moved: "[DÉPLACÉ]", room: "salle {room}", change: "Changement : {note}", cancelNote: "Annulé : {note}", moveDefault: "déplacé", calName: "Meridian — emploi du temps" },
 };
 export default common;

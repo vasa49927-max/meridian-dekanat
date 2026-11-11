@@ -36,5 +36,6 @@ const common = {
     sections: "Разделы", theme: "Переключить тему", myCourses: "Мои дисциплины", myRequests: "Мои заявки", lastRequests: "Последние заявки",
     hintNav: "↑↓ — выбор, Enter — открыть", hintEsc: "Esc — закрыть",
   },
+  ics: { cancelled: "[ОТМЕНА]", moved: "[ПЕРЕНОС]", room: "ауд. {room}", change: "Изменение: {note}", cancelNote: "Отменено: {note}", moveDefault: "перенос", calName: "Меридиан — расписание" },
 };
 export default common;

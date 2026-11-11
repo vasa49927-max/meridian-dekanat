@@ -58,7 +58,7 @@ export default async function NewRequestForm({ params, searchParams }: { params:
         <div className="mb-4 rounded-xl bg-bg p-3 text-sm">
           <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">{t("requests.form.fromProfile")}</p>
           <p className="font-medium">{name(p.student.lastName)} {name(p.student.firstName)} {name(p.student.middleName)}</p>
-          <p className="text-muted">{tr("faculties", p.faculty.code)} · {t("requests.form.profileLine", { course: p.group.course, group: p.group.name, book: p.student.recordBook })}</p>
+          <p className="text-muted">{tr("faculties", p.faculty.code)} · {t("requests.form.profileLine", { course: p.group.course, group: p.group.name, book: name(p.student.recordBook) })}</p>
         </div>
         <RequestForm code={type.code} fields={type.fields} defaults={defaults} />
       </Card>

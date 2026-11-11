@@ -145,3 +145,10 @@ body {
 /* Увеличенная область касания для маленьких текстовых ссылок (≥ 44px, WCAG 2.5.8) */
 .tap { position: relative; }
 .tap::after { content: ""; position: absolute; inset: -12px -8px; }
+
+/* Правка капитана (раунд 4): выпадающий список <select> в тёмной теме. Windows/Chrome рисует список
+   белым, а текст пунктов наследует светлый цвет темы — пункты не видно. Задаём фон и цвет явно. */
+select option, select optgroup {
+  background-color: var(--surface);
+  color: var(--fg);
+}

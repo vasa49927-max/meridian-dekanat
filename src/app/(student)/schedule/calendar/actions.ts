@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { requireStudent } from "@/server/auth/guards";
 import { disableCalendarFeed, rotateCalendarToken } from "@/server/calendar";
 import { env } from "@/server/env";
+import { getLocale } from "@/i18n/server";
 
 export type FeedState = { url?: string; error?: string };
 
@@ -11,7 +12,8 @@ export async function createFeedAction(): Promise<FeedState> {
   const v = await requireStudent();
   const token = await rotateCalendarToken(v.userId);
   revalidatePath("/schedule/calendar");
-  return { url: `${env.APP_URL.replace(/\/$/, "")}/api/calendar/${token}.ics` };
+  const locale = await getLocale();
+  return { url: `${env.APP_URL.replace(/\/$/, "")}/api/calendar/${token}.ics${locale === "ru" ? "" : `?lang=${locale}`}` };
 }
 
 export async function disableFeedAction(): Promise<void> {

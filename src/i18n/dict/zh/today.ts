@@ -4,6 +4,7 @@ import type ru from "../ru/today";
 const today: Shape<typeof ru> = {
   greeting: { morning: "早上好，{name}", day: "下午好，{name}", evening: "晚上好，{name}", night: "晚安，{name}" },
   next: {
+    teacher: "授课教师", position: { docent: "副教授", prof: "教授", senior: "高级讲师", lect: "讲师", colonel: "上校" },
     now: "正在上课", next: "下一节课", left: "还剩{time}", in: "{time}后",
     day: "日期", start: "开始", room: "教室", until: "至 {time}", nearWeekday: "{near}，{weekday}",
     aria: "{label}：{title}，{weekday}，{date}，{time}，教室 {room}",

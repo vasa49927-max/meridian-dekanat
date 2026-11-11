@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { ArrowLeftRight, MapPin } from "lucide-react";
+import { ArrowLeftRight, MapPin, UserRound } from "lucide-react";
 import { useI18n } from "@/i18n/client";
 
 type Props = {
   title: string; type: string; startsAt: string; endsAt: string; room: string; building: string; address: string; hint: string | null;
-  teacher: string | null; teacherInitials: string; serverNow: string; moved: boolean; prevText: string | null;
+  teacher: string | null; teacherFull?: string | null; teacherPosition?: string | null; teacherInitials: string; serverNow: string; moved: boolean; prevText: string | null;
 };
 
 /**
@@ -66,6 +66,17 @@ export function NextLessonCard(p: Props) {
             <dd className="mt-0.5 text-xs leading-snug text-hero-muted sm:text-[13px]">{sub}</dd>
           </div>
         ))}
+        {/* Правка капитана (раунд 4): плашка с должностью и ФИО преподавателя — на всю ширину под тремя плитками */}
+        {p.teacherFull && (
+          <div className="col-span-3 flex min-w-0 items-center gap-3 rounded-xl bg-hero-2/70 px-2.5 py-2.5 sm:px-3">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-hero/60 text-accent" aria-hidden><UserRound className="h-5 w-5" /></span>
+            <div className="min-w-0">
+              <dt className="text-[10px] font-semibold uppercase tracking-wider text-hero-muted sm:text-[11px]">{t("today.next.teacher")}</dt>
+              <dd className="text-[15px] font-bold leading-tight sm:text-lg">{p.teacherFull}</dd>
+              {p.teacherPosition && <dd className="text-xs text-hero-muted sm:text-[13px]">{p.teacherPosition}</dd>}
+            </div>
+          </div>
+        )}
       </dl>
 
       {p.moved && p.prevText && (
@@ -77,7 +88,7 @@ export function NextLessonCard(p: Props) {
 
       <p className="mt-3 flex items-start gap-1.5 text-[13px] text-hero-muted">
         <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-        <span>{p.type}{p.teacher ? ` · ${p.teacher}` : ""} · {p.address}{p.hint && <span className="hidden sm:inline"> · {p.hint}</span>}</span>
+        <span>{p.type}{p.teacher && !p.teacherFull ? ` · ${p.teacher}` : ""} · {p.address}{p.hint && <span className="hidden sm:inline"> · {p.hint}</span>}</span>
       </p>
       {progress !== null && <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-hero-2" role="progressbar" aria-label={t("today.next.progress")} aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-accent" style={{ width: `${progress}%` }} /></div>}
     </section>

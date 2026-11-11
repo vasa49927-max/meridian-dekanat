@@ -26,10 +26,10 @@ const WITHDRAWN = "Отозвана студентом";
 const OFFICE_SUFFIX = ", студенческий офис";
 
 /** Служебные тексты, которые пишет сама система (не люди), — на языке интерфейса. Для русского — без изменений. */
-function sysText({ locale, t, tn }: I18n, s: string) {
+function sysText({ locale, t, tn, tc }: I18n, s: string) {
   if (s === WITHDRAWN) return t("requests.sys.withdrawn");
   if (locale === "ru") return s;
-  return s.replace(/[Пп]риложено файлов: (\d+)/, (_, n: string) => tn("requests.sys.filesAttached", Number(n)));
+  return s.split(" · ").map((part) => (/[Пп]риложено файлов: \d+/.test(part) ? part.replace(/[Пп]риложено файлов: (\d+)/, (_, n: string) => tn("requests.sys.filesAttached", Number(n))) : tc(part))).join(" · ");
 }
 /** Кто сделал шаг: «Студент» или «Фамилия И. О., студенческий офис». */
 function actorLabel({ t, name }: I18n, a: string) {
@@ -76,14 +76,14 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
       <nav aria-label={t("requests.nav.label")} className="mb-2 text-sm"><Link href="/requests" className="tap text-muted hover:text-fg">{t("requests.nav.myRequests")}</Link></nav>
       {created && <p role="status" className="mb-4 flex items-center gap-2 rounded-xl bg-ok-bg px-4 py-3 font-medium text-ok"><CheckCircle2 className="h-5 w-5" aria-hidden />{t("requests.detail.created")}</p>}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div><h1 className="font-serif text-[26px] leading-tight">{tr("rt", r.type.title)}</h1><p className="mt-1 text-sm text-muted">{t("requests.detail.meta", { number: r.number, date: f.dateTime(r.createdAt) })}</p>
+        <div><h1 className="font-serif text-[26px] leading-tight">{tr("rt", r.type.title)}</h1><p className="mt-1 text-sm text-muted">{t("requests.detail.meta", { number: i18n.name(r.number), date: f.dateTime(r.createdAt) })}</p>
           {r.assignee && <p className="mt-0.5 text-sm text-muted">{t("requests.detail.assignee")} <span className="font-medium text-fg">{name(r.assignee.lastName)} {name(r.assignee.firstName)[0]}. {r.assignee.middleName ? `${name(r.assignee.middleName)[0]}.` : ""}</span>{t("requests.detail.assigneeOffice")}</p>}</div>
         <StatusBadge status={r.status} className="text-sm" />
       </div>
       <Card className="mb-4">
         <Tracker status={r.status} events={r.events} i18n={i18n} />
         {["SUBMITTED", "IN_PROGRESS"].includes(r.status) && <p className="mt-4 text-sm text-muted">{t("requests.detail.dueLead")}<b className="text-fg">{t("requests.detail.dueValue", { date: f.dayMonth(r.dueAt) })}</b>{t("requests.detail.dueEnd")}</p>}
-        {r.status === "NEEDS_INFO" && <div className="mt-4 rounded-xl border border-warn-line bg-warn-bg p-3.5 text-sm text-warn"><p className="font-semibold">{t("requests.detail.needsInfo")}</p><p className="mt-1">{r.staffComment}</p></div>}
+        {r.status === "NEEDS_INFO" && <div className="mt-4 rounded-xl border border-warn-line bg-warn-bg p-3.5 text-sm text-warn"><p className="font-semibold">{t("requests.detail.needsInfo")}</p><p className="mt-1">{sysText(i18n, r.staffComment ?? "")}</p></div>}
         {r.status === "REJECTED" && r.staffComment && <div className="mt-4 rounded-xl bg-danger-bg p-3.5 text-sm text-danger"><p className="font-semibold">{t("requests.detail.rejectReason")}</p><p className="mt-1">{sysText(i18n, r.staffComment)}</p></div>}
         {r.status === "REJECTED" && <div className="mt-3"><LinkButton href={`/requests/new/${r.type.code}?again=${r.id}`} variant="soft"><RotateCcw className="h-4 w-4" aria-hidden />{t("requests.detail.again")}</LinkButton><p className="mt-1.5 text-xs text-muted">{t("requests.detail.againHint")}</p></div>}
         {r.status === "NEEDS_INFO" && <div className="mt-4"><ReplyForm id={r.id} /></div>}
@@ -113,7 +113,7 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
         <Card>
           <CardTitle>{t("requests.detail.data")}</CardTitle>
           <dl className="space-y-2 text-sm">
-            {r.type.fields.map((x) => r.payload[x.name] ? <div key={x.name}><dt className="text-muted">{tr("rt", x.label)}</dt><dd className="font-medium">{x.kind === "select" ? tr("rt", r.payload[x.name]) : r.payload[x.name]}</dd></div> : null)}
+            {r.type.fields.map((x) => r.payload[x.name] ? <div key={x.name}><dt className="text-muted">{tr("rt", x.label)}</dt><dd className="font-medium">{x.kind === "select" ? tr("rt", r.payload[x.name]) : i18n.tc(r.payload[x.name])}</dd></div> : null)}
             {r.studentComment && <div><dt className="text-muted">{t("requests.detail.yourComment")}</dt><dd className="font-medium">{r.studentComment}</dd></div>}
           </dl>
           {files.length > 0 && <div className="mt-3"><p className="mb-1.5 text-sm text-muted">{t("requests.detail.attachments")}</p><AttachmentsList items={files} viewer="STUDENT" /></div>}

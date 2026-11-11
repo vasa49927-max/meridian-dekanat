@@ -38,5 +38,6 @@ const common: Shape<typeof ru> = {
     sections: "Sections", theme: "Toggle theme", myCourses: "My courses", myRequests: "My requests", lastRequests: "Recent requests",
     hintNav: "↑↓ select, Enter open", hintEsc: "Esc close",
   },
+  ics: { cancelled: "[CANCELLED]", moved: "[RESCHEDULED]", room: "room {room}", change: "Change: {note}", cancelNote: "Cancelled: {note}", moveDefault: "rescheduled", calName: "Meridian — timetable" },
 };
 export default common;

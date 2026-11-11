@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RequestsPage({ searchParams }: { searchParams: Promise<{ all?: string }> }) {
   const v = await requireStudent();
-  const { t, tn, tr, f } = await getI18n();
+  const { t, tn, tr, tc, f, name } = await getI18n();
   const { all } = await searchParams;
   const [{ items }, types] = await Promise.all([listMyRequests(v, null, 50), listRequestTypes()]);
   const active = items.filter((r) => !["ISSUED", "REJECTED"].includes(r.status));
@@ -53,8 +53,8 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
                   <RequestIcon name={r.icon} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold leading-snug">{tr("rt", r.title)}</h3>{r.documentId && <span className="inline-flex items-center gap-1 text-xs text-ok"><QrCode className="h-3.5 w-3.5" aria-hidden />{t("requests.list.eDoc")}</span>}</div>
-                    <p className="text-[13px] text-muted">{t("requests.list.meta", { number: r.number, date: f.dayMonth(r.createdAt) })}{["SUBMITTED", "IN_PROGRESS"].includes(r.status) ? t("requests.list.due", { date: f.dayMonth(r.dueAt) }) : ""}</p>
-                    {r.staffComment && ["NEEDS_INFO", "REJECTED"].includes(r.status) && <p className="mt-1 line-clamp-2 text-[13px] text-warn">{r.staffComment === "Отозвана студентом" ? t("requests.sys.withdrawn") : r.staffComment}</p>}
+                    <p className="text-[13px] text-muted">{t("requests.list.meta", { number: name(r.number), date: f.dayMonth(r.createdAt) })}{["SUBMITTED", "IN_PROGRESS"].includes(r.status) ? t("requests.list.due", { date: f.dayMonth(r.dueAt) }) : ""}</p>
+                    {r.staffComment && ["NEEDS_INFO", "REJECTED"].includes(r.status) && <p className="mt-1 line-clamp-2 text-[13px] text-warn">{r.staffComment === "Отозвана студентом" ? t("requests.sys.withdrawn") : tc(r.staffComment)}</p>}
                   </div>
                   <StatusBadge status={r.status} className="ml-[52px] sm:ml-0" />
                 </Card>

@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
 async function LessonCard({ l, at, compact }: { l: LessonView; at: Date; compact?: boolean }) {
-  const { t, tr, name, f } = await getI18n();
+  const { t, tr, tc, name, f } = await getI18n();
   const title = tr("subjects", l.title);
   const type = t(`common.lessonType.${l.type}`);
   const kind = changeKind(l);
@@ -35,7 +35,7 @@ async function LessonCard({ l, at, compact }: { l: LessonView; at: Date; compact
       <div className="p-3.5">
         <p className="text-sm font-semibold tabular text-muted">{f.time(l.startsAt)}–{f.time(l.endsAt)} · {type}</p>
         <h3 className="mt-0.5 font-semibold leading-snug text-muted">{title}</h3>
-        {l.changeNote && <p className="mt-1.5 text-[13px] font-medium text-danger">{l.changeNote}</p>}
+        {l.changeNote && <p className="mt-1.5 text-[13px] font-medium text-danger">{tc(l.changeNote)}</p>}
       </div>
     </article>
   );

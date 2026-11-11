@@ -27,7 +27,7 @@ export function LoginForm({ next }: { next?: string }) {
   const [password, setPassword] = useState("");
   return (
     <>
-      <form action={action} className="space-y-4" noValidate>
+      <form action={action} className="space-y-4 lg:space-y-3" noValidate>
         <input type="hidden" name="next" value={next ?? ""} />
         <div>
           <Label htmlFor="login">{t("auth.login.login")}</Label>
@@ -51,15 +51,15 @@ export function LoginForm({ next }: { next?: string }) {
           <LogIn className="h-5 w-5" aria-hidden /> {pending ? t("auth.login.signingIn") : t("auth.login.signIn")}
         </Button>
       </form>
-      <div className="mt-6 rounded-2xl border border-line bg-surface-2/60 p-4">
-        <p className="mb-2 text-sm font-semibold">{t("auth.login.demoTitle")}</p>
-        <p className="mb-3 text-[13px] text-muted">{t("auth.login.demoText")}</p>
+      <div className="mt-5 rounded-2xl border border-line bg-surface-2/60 p-4 lg:mt-4 lg:p-3">
+        <p className="mb-1 text-sm font-semibold">{t("auth.login.demoTitle")}</p>
+        <p className="mb-2.5 text-xs text-muted">{t("auth.login.demoText")}</p>
         <ul className="grid gap-2 sm:grid-cols-2">
           {DEMO.map((d) => (
             <li key={d.login}>
-              <button type="button" onClick={() => { setLogin(d.login); setPassword(d.password); }} className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-left hover:border-primary">
+              <button type="button" onClick={() => { setLogin(d.login); setPassword(d.password); }} className="w-full rounded-xl border border-line bg-surface px-3 py-1.5 text-left hover:border-primary">
                 <span className="block text-sm font-semibold">{d.login}</span>
-                <span className="block text-xs text-muted">{who(d)}</span>
+                <span className="block truncate text-xs text-muted">{who(d)}</span>
               </button>
             </li>
           ))}

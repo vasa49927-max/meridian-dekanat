@@ -47,7 +47,7 @@ export default async function ProfilePage() {
   const rows: [string, string][] = [
     [t("profile.rows.faculty"), tr("faculties", p.faculty.name)], [t("profile.rows.program"), t("profile.values.program", { code: p.program.code, name: tr("programs", p.program.name) })],
     [t("profile.rows.courseGroup"), t("profile.values.courseGroup", { course: p.group.course, group: p.group.name, sub: s.subgroup })],
-    [t("profile.rows.recordBook"), s.recordBook], [t("profile.rows.form"), t("profile.values.form", { basis })], [t("profile.rows.year"), String(s.enrollmentYear)],
+    [t("profile.rows.recordBook"), name(s.recordBook)], [t("profile.rows.form"), t("profile.values.form", { basis })], [t("profile.rows.year"), String(s.enrollmentYear)],
     [t("profile.rows.campus"), p.faculty.campus === "ODINTSOVO" ? t("profile.values.odintsovo") : t("profile.values.moscow")],
     [t("profile.rows.email"), s.email], [t("profile.rows.login"), p.login],
   ];

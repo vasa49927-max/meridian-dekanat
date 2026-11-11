@@ -268,6 +268,7 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
     await addRequest(timur, "INDIVIDUAL_PLAN", { reason: "Стажировка / работа по профилю", period: "С 01.12.2026 по 28.02.2027", details: "Стажировка в юридической фирме (вымышленной), 3 дня в неделю. Контрольные точки сдаю по графику." }, [["SUBMITTED", 70], ["NEEDS_INFO", 26, "Приложите письмо-подтверждение от работодателя с графиком стажировки — ответьте в комментарии к заявке."]]);
     await addRequest(mei, "STUDY_CERT_EN", { country: "Китай", purpose: "Виза", dates: "С 28.12.2026 по 12.01.2027" }, [["SUBMITTED", 6]], "Нужна к 20 ноября, пожалуйста");
     await addRequest(mei, "STUDENT_ID_DUP", { reason: "Испорчен" }, [["SUBMITTED", 300], ["IN_PROGRESS", 290], ["ISSUED", 200, "Дубликат выдан."]]);
+    await addRequest(timur, "TUITION_PAYMENT", { kind: "Рассрочка платежа", term: "Весенний семестр 2026/27", contract: "Д-2023-04417", reason: "Прошу разделить оплату весеннего семестра на 4 ежемесячных платежа: стажировка начинается в декабре, первая зарплата — в январе." }, [["SUBMITTED", 30]]);
     // Очередь деканата: заявки однокурсников
     const extras = studentsAll.slice(3);
     const plan: [string, Record<string, string>, Ev[]][] = [

@@ -83,8 +83,9 @@ test.describe("Изоляция данных между студентами", (
     await login(page, "anna");
     const cookies = await page.context().cookies();
     await page.goto("/profile");
-    await page.getByRole("button", { name: "Выйти" }).last().click();
-    await expect(page).toHaveURL(/\/login/);
+    await page.waitForLoadState("networkidle"); // профиль стал длиннее — ждём гидратацию перед кликом
+    await page.getByRole("button", { name: "Выйти", exact: true }).last().click();
+    await expect(page).toHaveURL(/\/login/, { timeout: 15_000 });
     const ctx = await browser.newContext();
     await ctx.addCookies(cookies);
     const p2 = await ctx.newPage();

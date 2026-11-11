@@ -38,5 +38,6 @@ const common: Shape<typeof ru> = {
     sections: "栏目", theme: "切换主题", myCourses: "我的课程", myRequests: "我的申请", lastRequests: "最近的申请",
     hintNav: "↑↓ 选择，Enter 打开", hintEsc: "Esc 关闭",
   },
+  ics: { cancelled: "[停课]", moved: "[调课]", room: "{room} 教室", change: "变更：{note}", cancelNote: "已取消：{note}", moveDefault: "调课", calName: "Meridian — 课表" },
 };
 export default common;

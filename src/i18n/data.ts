@@ -8,6 +8,7 @@ export type DataDict = Record<Groups, Record<string, string>>;
 
 const en: DataDict = {
   subjects: {
+    "Административное право": "Administrative Law", "Английский язык": "English", "Введение в специальность": "Introduction to the Field", "Гражданское право": "Civil Law", "Испанский язык": "Spanish", "Конституционное право": "Constitutional Law", "Курсовая работа": "Term paper", "Логика": "Logic", "Математический анализ": "Calculus", "Международное публичное право": "Public International Law", "Международное экономическое право": "International Economic Law", "Микроэкономика": "Microeconomics", "Мировая экономика": "World Economy", "Налоговое право": "Tax Law", "Право ЕС": "EU Law", "Производственная практика": "Work placement", "Римское право": "Roman Law", "Теория государства и права": "Theory of State and Law", "Трудовое право": "Labour Law", "Уголовное право": "Criminal Law", "Философия": "Philosophy", "Французский язык": "French", "Эконометрика": "Econometrics", "Экономическая история": "Economic History",
     "Введение в языкознание": "Introduction to Linguistics", "Гражданский процесс": "Civil Procedure", "Деловой английский язык": "Business English",
     "Испанский язык (второй иностранный)": "Spanish (second foreign language)", "История России": "History of Russia", "История международных отношений": "History of International Relations",
     "Макроэкономика": "Macroeconomics", "Международное частное право": "Private International Law", "Международные финансовые рынки": "International Financial Markets",
@@ -44,6 +45,7 @@ const en: DataDict = {
   positions: { "Методист единого студенческого офиса": "Student Office coordinator", "Специалист единого студенческого офиса": "Student Office specialist" },
   offices: { "Студенческий офис, ауд. 1012, корпус А": "Student Office, room 1012, Building A" },
   rt: {
+    "Заявление об оплате обучения": "Tuition payment application", "Для обучающихся по договору: рассрочка или отсрочка платежа, оплата материнским капиталом или третьим лицом, возврат переплаты.": "For fee-paying students: payment by instalments or deferral, payment with maternity capital or by a third party, refund of overpayment.", "Что нужно": "What you need", "Рассрочка платежа": "Payment by instalments", "Отсрочка платежа": "Payment deferral", "Оплата материнским капиталом": "Payment with maternity capital", "Оплата третьим лицом (работодателем, родственником)": "Payment by a third party (employer, relative)", "Возврат излишне уплаченного": "Refund of overpayment", "За какой период": "For which period", "Весенний семестр 2026/27": "Spring semester 2026/27", "Осенний семестр 2026/27": "Autumn semester 2026/27", "2026/27 учебный год": "Academic year 2026/27", "Номер договора": "Contract number", "Например, Д-2025-01234": "e.g. D-2025-01234", "Обоснование": "Justification", "Почему нужна рассрочка или отсрочка, какой график платежей удобен": "Why you need instalments or a deferral, and which payment schedule suits you",
     "Можно оставить «по месту требования»": "You can leave “To whom it may concern”",
     "Справка об обучении": "Certificate of enrolment",
     "Подтверждает, что вы студент МГИМО. Для работы, банка, соцзащиты, «по месту требования».": "Confirms that you are a student. For an employer, bank or social services.",
@@ -77,6 +79,7 @@ const en: DataDict = {
 
 const zh: DataDict = {
   subjects: {
+    "Административное право": "行政法", "Английский язык": "英语", "Введение в специальность": "专业导论", "Гражданское право": "民法", "Испанский язык": "西班牙语", "Конституционное право": "宪法", "Курсовая работа": "学年论文", "Логика": "逻辑学", "Математический анализ": "数学分析", "Международное публичное право": "国际公法", "Международное экономическое право": "国际经济法", "Микроэкономика": "微观经济学", "Мировая экономика": "世界经济", "Налоговое право": "税法", "Право ЕС": "欧盟法", "Производственная практика": "专业实习", "Римское право": "罗马法", "Теория государства и права": "国家与法的理论", "Трудовое право": "劳动法", "Уголовное право": "刑法", "Философия": "哲学", "Французский язык": "法语", "Эконометрика": "计量经济学", "Экономическая история": "经济史",
     "Введение в языкознание": "语言学导论", "Гражданский процесс": "民事诉讼法", "Деловой английский язык": "商务英语", "Испанский язык (второй иностранный)": "西班牙语（第二外语）",
     "История России": "俄罗斯历史", "История международных отношений": "国际关系史", "Макроэкономика": "宏观经济学", "Международное частное право": "国际私法",
     "Международные финансовые рынки": "国际金融市场", "Международный коммерческий арбитраж": "国际商事仲裁", "Немецкий язык (второй иностранный)": "德语（第二外语）",
@@ -103,6 +106,7 @@ const zh: DataDict = {
   positions: { "Методист единого студенческого офиса": "学生事务中心教务员", "Специалист единого студенческого офиса": "学生事务中心专员" },
   offices: { "Студенческий офис, ауд. 1012, корпус А": "学生事务中心，A楼1012室" },
   rt: {
+    "Заявление об оплате обучения": "学费缴纳申请", "Для обучающихся по договору: рассрочка или отсрочка платежа, оплата материнским капиталом или третьим лицом, возврат переплаты.": "适用于自费合同学生：分期或延期缴费、使用母亲基金或由第三方支付、退还多缴费用。", "Что нужно": "申请事项", "Рассрочка платежа": "分期缴费", "Отсрочка платежа": "延期缴费", "Оплата материнским капиталом": "使用母亲基金支付", "Оплата третьим лицом (работодателем, родственником)": "由第三方支付（雇主、亲属）", "Возврат излишне уплаченного": "退还多缴费用", "За какой период": "缴费期间", "Весенний семестр 2026/27": "2026/27学年春季学期", "Осенний семестр 2026/27": "2026/27学年秋季学期", "2026/27 учебный год": "2026/27学年", "Номер договора": "合同编号", "Например, Д-2025-01234": "例如：D-2025-01234", "Обоснование": "申请理由", "Почему нужна рассрочка или отсрочка, какой график платежей удобен": "为什么需要分期或延期，希望的缴费安排",
     "Можно оставить «по месту требования»": "可以保留“致相关机构”",
     "Справка об обучении": "在读证明", "Подтверждает, что вы студент МГИМО. Для работы, банка, соцзащиты, «по месту требования».": "证明您是在读学生。用于雇主、银行或社保机构。",
     "Куда предоставляется": "提交至", "По месту требования": "致相关机构", "Количество экземпляров": "份数",
@@ -128,6 +132,7 @@ const zh: DataDict = {
 
 const fr: DataDict = {
   subjects: {
+    "Административное право": "Droit administratif", "Английский язык": "Anglais", "Введение в специальность": "Introduction à la discipline", "Гражданское право": "Droit civil", "Испанский язык": "Espagnol", "Конституционное право": "Droit constitutionnel", "Курсовая работа": "Mémoire de 1re partie", "Логика": "Logique", "Математический анализ": "Analyse mathématique", "Международное публичное право": "Droit international public", "Международное экономическое право": "Droit international économique", "Микроэкономика": "Microéconomie", "Мировая экономика": "Économie mondiale", "Налоговое право": "Droit fiscal", "Право ЕС": "Droit de l’UE", "Производственная практика": "Stage", "Римское право": "Droit romain", "Теория государства и права": "Théorie de l’État et du droit", "Трудовое право": "Droit du travail", "Уголовное право": "Droit pénal", "Философия": "Philosophie", "Французский язык": "Français", "Эконометрика": "Économétrie", "Экономическая история": "Histoire économique",
     "Введение в языкознание": "Introduction à la linguistique", "Гражданский процесс": "Procédure civile", "Деловой английский язык": "Anglais des affaires",
     "Испанский язык (второй иностранный)": "Espagnol (deuxième langue)", "История России": "Histoire de la Russie", "История международных отношений": "Histoire des relations internationales",
     "Макроэкономика": "Macroéconomie", "Международное частное право": "Droit international privé", "Международные финансовые рынки": "Marchés financiers internationaux",
@@ -156,6 +161,7 @@ const fr: DataDict = {
   positions: { "Методист единого студенческого офиса": "Gestionnaire du bureau des étudiants", "Специалист единого студенческого офиса": "Chargée du bureau des étudiants" },
   offices: { "Студенческий офис, ауд. 1012, корпус А": "Bureau des étudiants, salle 1012, bâtiment A" },
   rt: {
+    "Заявление об оплате обучения": "Demande relative aux frais de scolarité", "Для обучающихся по договору: рассрочка или отсрочка платежа, оплата материнским капиталом или третьим лицом, возврат переплаты.": "Pour les étudiants payants : paiement échelonné ou différé, paiement par le capital maternité ou un tiers, remboursement d’un trop-perçu.", "Что нужно": "Objet de la demande", "Рассрочка платежа": "Paiement échelonné", "Отсрочка платежа": "Report de paiement", "Оплата материнским капиталом": "Paiement par le capital maternité", "Оплата третьим лицом (работодателем, родственником)": "Paiement par un tiers (employeur, proche)", "Возврат излишне уплаченного": "Remboursement d’un trop-perçu", "За какой период": "Pour quelle période", "Весенний семестр 2026/27": "Semestre de printemps 2026/27", "Осенний семестр 2026/27": "Semestre d’automne 2026/27", "2026/27 учебный год": "Année universitaire 2026/27", "Номер договора": "Numéro de contrat", "Например, Д-2025-01234": "ex. : D-2025-01234", "Обоснование": "Justification", "Почему нужна рассрочка или отсрочка, какой график платежей удобен": "Pourquoi un échelonnement ou un report est nécessaire, quel calendrier vous convient",
     "Можно оставить «по месту требования»": "Vous pouvez laisser « À qui de droit »",
     "Справка об обучении": "Certificat de scolarité", "Подтверждает, что вы студент МГИМО. Для работы, банка, соцзащиты, «по месту требования».": "Atteste que vous êtes étudiant. Pour un employeur, une banque ou les services sociaux.",
     "Куда предоставляется": "Destinataire", "По месту требования": "À qui de droit", "Количество экземпляров": "Nombre d’exemplaires",

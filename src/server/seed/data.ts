@@ -192,6 +192,14 @@ export const REQUEST_TYPES: {
     fields: [{ name: "discipline", label: "Дисциплина", kind: "text", required: true }, { name: "source", label: "Где изучена", kind: "textarea", required: true, placeholder: "Вуз, программа, количество часов, оценка", max: 800 }] },
   { code: "STUDENT_ID_DUP", title: "Дубликат студенческого билета", description: "Если билет утерян или испорчен. Электронный билет продолжает работать.", category: "APPLICATION", slaDays: 5, producesDocument: false, icon: "id-card", regulationRef: "п. 7.5",
     fields: [{ name: "reason", label: "Причина", kind: "select", options: ["Утерян", "Испорчен", "Смена ФИО"], required: true }] },
+  // Правка капитана (раунд 4): заявление по оплате обучения — для студентов на договоре.
+  { code: "TUITION_PAYMENT", title: "Заявление об оплате обучения", description: "Для обучающихся по договору: рассрочка или отсрочка платежа, оплата материнским капиталом или третьим лицом, возврат переплаты.", category: "APPLICATION", slaDays: 10, producesDocument: false, icon: "wallet", regulationRef: "п. 7.7",
+    fields: [
+      { name: "kind", label: "Что нужно", kind: "select", options: ["Рассрочка платежа", "Отсрочка платежа", "Оплата материнским капиталом", "Оплата третьим лицом (работодателем, родственником)", "Возврат излишне уплаченного"], required: true },
+      { name: "term", label: "За какой период", kind: "select", options: ["Весенний семестр 2026/27", "Осенний семестр 2026/27", "2026/27 учебный год"], required: true },
+      { name: "contract", label: "Номер договора", kind: "text", placeholder: "Например, Д-2025-01234", max: 40 },
+      { name: "reason", label: "Обоснование", kind: "textarea", required: true, placeholder: "Почему нужна рассрочка или отсрочка, какой график платежей удобен", max: 800 },
+    ] },
 ];
 
 export const ANNOUNCEMENTS: { title: string; body: string; source: string; important: boolean; audience: "ALL" | "FACULTY" | "COURSE" | "GROUP"; faculty?: string; course?: number; group?: string; daysAgo: number }[] = [

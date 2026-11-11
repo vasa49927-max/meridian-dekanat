@@ -32,7 +32,7 @@ function greeting(d: Date) {
 
 export default async function TodayPage() {
   const v = await requireStudent();
-  const { t, tn, tr, name, f } = await getI18n();
+  const { t, tn, tr, tc, name, f } = await getI18n();
   const at = now();
   const dayStart = startOfDay(at);
   const [next, today, changes, deadlines, reqs, grades, news] = await Promise.all([
@@ -51,6 +51,11 @@ export default async function TodayPage() {
     teacherTitle: next.teacherTitle ? tr("titles", next.teacherTitle) : null, teacherLast: next.teacherLast ? name(next.teacherLast) : null,
     teacherFirst: next.teacherFirst ? name(next.teacherFirst) : null, teacherMiddle: next.teacherMiddle ? name(next.teacherMiddle) : null,
   }) : null;
+  // Правка капитана (раунд 4): отдельная плашка — должность полностью и ФИО преподавателя.
+  const POSITION = { "доц.": "docent", "проф.": "prof", "ст. преп.": "senior", "преп.": "lect", "полк.": "colonel" } as const;
+  const posKey = next?.teacherTitle ? POSITION[next.teacherTitle as keyof typeof POSITION] : undefined;
+  const teacherPosition = posKey ? t(`today.next.position.${posKey}`) : next?.teacherTitle ? tr("titles", next.teacherTitle) : null;
+  const teacherFull = next?.teacherLast ? name([next.teacherLast, next.teacherFirst, next.teacherMiddle].filter(Boolean).join(" ")) : null;
   const activeReqs = reqs.items.filter((r) => r.status !== "ISSUED" && r.status !== "REJECTED").slice(0, 3);
   const pastAvg = averagePoints(grades.past.map((g) => g.points));
   const autoDone = grades.current.filter((d) => d.summary.auto?.achieved).length;
@@ -83,7 +88,7 @@ export default async function TodayPage() {
             <NextLessonCard
               title={tr("subjects", next.title)} type={t(`common.lessonType.${next.type}`)} startsAt={next.startsAt.toISOString()} endsAt={next.endsAt.toISOString()}
               room={next.room} building={tr("buildings", next.buildingName)} address={tr("addresses", next.buildingAddress)} hint={next.buildingHint ? tr("hints", next.buildingHint) : null}
-              teacher={teacher} teacherInitials={`${name(next.teacherLast)[0] ?? ""}${name(next.teacherFirst)[0] ?? ""}`} serverNow={at.toISOString()}
+              teacher={teacher} teacherFull={teacherFull} teacherPosition={teacherPosition} teacherInitials={`${name(next.teacherLast)[0] ?? ""}${name(next.teacherFirst)[0] ?? ""}`} serverNow={at.toISOString()}
               moved={next.status === "MOVED"} prevText={next.prevStartsAt ? t("today.next.prev", { day: f.shortDay(next.prevStartsAt), time: f.time(next.prevStartsAt), room: next.prevRoom ?? "" }) : null}
             />
           ) : (
@@ -146,7 +151,7 @@ export default async function TodayPage() {
                           <p className={cn("font-semibold leading-snug", live && "text-primary dark:text-accent-text")}>{tr("subjects", l.title)}</p>
                           {kind && <ChangeChip kind={kind} className="mt-1" />}
                           <p className="mt-0.5 text-[13px] text-muted">
-                            {kind === "cancel" ? (l.changeNote ?? t("today.day.cancelled")) : kind === "room" ? t("today.day.roomChanged", { room: l.room, prev: l.prevRoom ?? "" }) : kind === "move" ? t("today.day.movedHere", { room: l.room }) : t("today.day.meta", { type: t(`common.lessonType.${l.type}`), room: l.room, building: name(l.buildingCode) })}
+                            {kind === "cancel" ? (l.changeNote ? tc(l.changeNote) : t("today.day.cancelled")) : kind === "room" ? t("today.day.roomChanged", { room: l.room, prev: l.prevRoom ?? "" }) : kind === "move" ? t("today.day.movedHere", { room: l.room }) : t("today.day.meta", { type: t(`common.lessonType.${l.type}`), room: l.room, building: name(l.buildingCode) })}
                           </p>
                         </div>
                       </li>
@@ -177,7 +182,7 @@ export default async function TodayPage() {
                     const inner = (
                       <div className="flex gap-3 py-2.5">
                         <Badge tone={hot ? "danger" : "neutral"} className="mt-0.5 min-w-[70px] justify-center">{f.near(d.dueAt, at) ?? f.dayMonth(d.dueAt)}</Badge>
-                        <div className="min-w-0"><p className="text-sm font-semibold leading-snug">{d.parts ? t("today.deadlines.workTitle", { work: tr("assessments", d.parts.work), short: tr("short", d.parts.short) }) : d.title}</p>{d.parts ? <p className="text-[13px] text-muted">{t("today.deadlines.workDesc", { name: tr("subjects", d.parts.name), max: d.parts.max })}</p> : d.description && <p className="text-[13px] text-muted">{d.description}</p>}</div>
+                        <div className="min-w-0"><p className="text-sm font-semibold leading-snug">{d.parts ? t("today.deadlines.workTitle", { work: tr("assessments", d.parts.work), short: tr("short", d.parts.short) }) : tc(d.title)}</p>{d.parts ? <p className="text-[13px] text-muted">{t("today.deadlines.workDesc", { name: tr("subjects", d.parts.name), max: d.parts.max })}</p> : d.description && <p className="text-[13px] text-muted">{tc(d.description)}</p>}</div>
                       </div>
                     );
                     return <li key={d.id}>{d.link ? <Link href={d.link} className="block rounded-lg hover:bg-surface-2/60">{inner}</Link> : inner}</li>;
@@ -217,7 +222,7 @@ export default async function TodayPage() {
                     <li key={n.id}>
                       <Link href={n.link ?? "/notifications"} className="flex items-start gap-3 rounded-lg py-2.5 hover:bg-surface-2/60">
                         <Megaphone className={cn("mt-0.5 h-4 w-4 shrink-0", n.important ? "text-danger" : "text-muted")} aria-hidden />
-                        <div className="min-w-0"><p className={cn("text-sm leading-snug", !n.readAt && "font-semibold")}>{n.title}</p><p className="text-[13px] text-muted">{f.dayMonth(n.createdAt)}{n.important ? ` · ${t("today.news.important")}` : ""}</p></div>
+                        <div className="min-w-0"><p className={cn("text-sm leading-snug", !n.readAt && "font-semibold")}>{tc(n.title)}</p><p className="text-[13px] text-muted">{f.dayMonth(n.createdAt)}{n.important ? ` · ${t("today.news.important")}` : ""}</p></div>
                       </Link>
                     </li>
                   ))}

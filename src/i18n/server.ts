@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from "./config";
 import { DICTS } from "./dict";
 import { DATA } from "./data";
+import { CONTENT } from "./content";
 import { buildI18n } from ".";
 
 /** Язык интерфейса из cookie (по умолчанию русский). */
@@ -15,11 +16,11 @@ export const getLocale = cache(async (): Promise<Locale> => {
 /** Переводы для серверных компонентов: const { t, tn, tr, f } = await getI18n(); */
 export const getI18n = cache(async () => {
   const locale = await getLocale();
-  return buildI18n(locale, DICTS[locale], DICTS.ru, locale === "ru" ? null : DATA[locale]);
+  return buildI18n(locale, DICTS[locale], DICTS.ru, locale === "ru" ? null : DATA[locale], locale === "ru" ? null : CONTENT[locale]);
 });
 
 /** То, что нужно провайдеру в браузере: только активный язык. */
 export async function clientI18nProps() {
   const locale = await getLocale();
-  return { locale, dict: DICTS[locale], data: locale === "ru" ? null : DATA[locale] };
+  return { locale, dict: DICTS[locale], data: locale === "ru" ? null : DATA[locale], content: locale === "ru" ? null : CONTENT[locale] };
 }
