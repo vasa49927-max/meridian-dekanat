@@ -23,7 +23,7 @@ export function FeedLink({ active }: { active: boolean }) {
         </div>
         <div className="flex flex-wrap gap-2">
           <a href={webcal} className="inline-flex h-11 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-fg">iPhone / Mac / Outlook</a>
-          <a href={google} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center rounded-xl border border-line bg-surface px-4 text-sm font-semibold hover:bg-surface-2">{t("schedule.feed.google")}</a>
+          <a href={google} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center control rounded-xl border border-line bg-surface px-4 text-sm font-semibold hover:bg-surface-2">{t("schedule.feed.google")}</a>
         </div>
         <p className="text-xs text-muted">{t("schedule.feed.yandex")}</p>
       </div>

@@ -57,19 +57,20 @@ export default async function ProfilePage() {
     .replace("Автотест (Chrome)", t("profile.device.autotest")).replace(/^Браузер/, t("profile.device.browser"));
   return (
     <div className="mx-auto max-w-3xl pt-2 lg:pt-0">
-      <Card className="mb-4 flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+      <section className="hero-surface relative mb-4 flex flex-col items-center gap-4 overflow-hidden rounded-[var(--radius-card)] p-5 text-center text-hero-fg sm:flex-row sm:p-6 sm:text-left">
+        <svg className="globe-spin pointer-events-none absolute -right-14 -top-14 h-56 w-56 opacity-[0.08]" viewBox="0 0 40 40" aria-hidden><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" strokeWidth=".6" /><path d="M20 3c-6.5 4.5-9.5 10.2-9.5 17s3 12.5 9.5 17M20 3c6.5 4.5 9.5 10.2 9.5 17s-3 12.5-9.5 17M5 26h30M5 14h30" fill="none" stroke="currentColor" strokeWidth=".6" /></svg>
         <Avatar name={name(`${s.firstName} ${s.lastName}`)} hue={s.avatarHue} size={88} />
         <div className="min-w-0">
-          <h1 className="font-serif text-[26px] leading-tight">{name(s.lastName)} {name(s.firstName)} {name(s.middleName)}</h1>
-          <p className="mt-1 text-muted">{tr("faculties", p.faculty.code)} · {t("profile.course", { course: p.group.course, group: p.group.name })}</p>
+          <h1 className="font-serif text-[26px] leading-tight lg:text-[32px]">{name(s.lastName)} {name(s.firstName)} {name(s.middleName)}</h1>
+          <p className="mt-1 text-hero-muted">{tr("faculties", p.faculty.code)} · {t("profile.course", { course: p.group.course, group: p.group.name })}</p>
           <div className="mt-2 flex flex-wrap justify-center gap-1.5 sm:justify-start">
             <Badge tone="primary">{s.gender === "F" ? t("profile.student.F") : t("profile.student.M")}</Badge>
             {s.militaryTraining && <Badge tone="info">{t("profile.military")}</Badge>}
             {p.faculty.campus === "ODINTSOVO" && <Badge>{t("profile.campusOdintsovo")}</Badge>}
           </div>
         </div>
-      </Card>
-      <div className="grid gap-4 md:grid-cols-[1.4fr_1fr]">
+      </section>
+      <div className="grid items-start gap-4 md:grid-cols-[1.4fr_1fr]">
         <Card>
           <CardTitle>{t("profile.study")}</CardTitle>
           <dl className="divide-y divide-line text-sm">
@@ -112,7 +113,7 @@ export default async function ProfilePage() {
             <div className="flex flex-wrap gap-2">
               <ThemeToggle withLabel />
               <LanguageSwitcher />
-              <TourButton className="inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-medium hover:bg-surface-2" />
+              <TourButton className="inline-flex h-11 items-center gap-2 control rounded-xl border border-line bg-surface px-4 text-sm font-medium hover:bg-surface-2" />
               <form action={logoutAction}><Button variant="secondary"><LogOut className="h-4 w-4" aria-hidden />{t("profile.logout")}</Button></form>
             </div>
             <p className="mt-2 text-xs text-muted">{t("common.lang.note")}</p>

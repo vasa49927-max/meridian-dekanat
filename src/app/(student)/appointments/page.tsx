@@ -75,7 +75,7 @@ export default async function AppointmentsPage() {
           : <EmptyState icon={<CalendarClock />} title={t("appointments.emptyTitle")}>{t("appointments.emptyText")}</EmptyState>}
       </Card>
       {history.length > 0 && (
-        <details className="mt-4 rounded-2xl border border-line bg-surface p-4 text-sm">
+        <details className="mt-4 card rounded-2xl border border-line bg-surface p-4 text-sm">
           <summary className="cursor-pointer font-semibold">{t("appointments.history")}</summary>
           <ul className="mt-2 space-y-1 text-muted">{history.map((a) => <li key={a.id}>{f.dateTime(a.startsAt)} — {topicLabel(a.topic)} · {a.status === "CANCELLED" ? t("appointments.cancelled") : t("appointments.done")}</li>)}</ul>
         </details>

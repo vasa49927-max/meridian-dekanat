@@ -76,7 +76,7 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
       <nav aria-label={t("requests.nav.label")} className="mb-2 text-sm"><Link href="/requests" className="tap text-muted hover:text-fg">{t("requests.nav.myRequests")}</Link></nav>
       {created && <p role="status" className="mb-4 flex items-center gap-2 rounded-xl bg-ok-bg px-4 py-3 font-medium text-ok"><CheckCircle2 className="h-5 w-5" aria-hidden />{t("requests.detail.created")}</p>}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div><h1 className="font-serif text-[26px] leading-tight">{tr("rt", r.type.title)}</h1><p className="mt-1 text-sm text-muted">{t("requests.detail.meta", { number: i18n.name(r.number), date: f.dateTime(r.createdAt) })}</p>
+        <div><span aria-hidden className="mb-2.5 block h-[3px] w-9 rounded-full bg-gradient-to-r from-accent to-accent/30" /><h1 className="font-serif text-[26px] leading-tight lg:text-[34px]">{tr("rt", r.type.title)}</h1><p className="mt-1 text-sm text-muted">{t("requests.detail.meta", { number: i18n.name(r.number), date: f.dateTime(r.createdAt) })}</p>
           {r.assignee && <p className="mt-0.5 text-sm text-muted">{t("requests.detail.assignee")} <span className="font-medium text-fg">{name(r.assignee.lastName)} {name(r.assignee.firstName)[0]}. {r.assignee.middleName ? `${name(r.assignee.middleName)[0]}.` : ""}</span>{t("requests.detail.assigneeOffice")}</p>}</div>
         <StatusBadge status={r.status} className="text-sm" />
       </div>

@@ -72,7 +72,7 @@ export default async function TodayPage() {
     <div className="pt-2 lg:pt-0">
       {/* Правка капитана №2a: день недели и дата — крупно, «листком календаря». */}
       <div className="mb-5 flex items-center gap-3.5">
-        <div className="w-[68px] shrink-0 overflow-hidden rounded-2xl border border-line bg-surface text-center shadow-[var(--shadow-card)]" aria-hidden>
+        <div className="w-[68px] shrink-0 overflow-hidden card rounded-2xl border border-line bg-surface text-center" aria-hidden>
           <p className="bg-hero py-0.5 text-[11px] font-bold uppercase tracking-wider text-accent">{f.weekdayShort(at)}</p>
           <p className="pt-1 font-serif text-[30px] font-bold leading-none tabular">{mskParts(at).d}</p>
           <p className="pb-1.5 text-[11px] font-medium text-muted">{monthName}</p>
@@ -139,7 +139,7 @@ export default async function TodayPage() {
               { href: next ? mapHref(next.room, next.buildingCode) : "/map", icon: MapPinned, label: t("today.quick.map") },
             ].map((q) => (
               <li key={q.href}>
-                <Link href={q.href} className="quick-tile group flex h-full items-center gap-2.5 rounded-2xl border border-line bg-surface px-3 py-2.5 text-[13.5px] font-semibold leading-tight shadow-[var(--shadow-card)] lg:px-4 lg:py-3 lg:text-sm">
+                <Link href={q.href} className="quick-tile group flex h-full items-center gap-2.5 card rounded-2xl border border-line bg-surface px-3 py-2.5 text-[13.5px] font-semibold leading-tight lg:px-4 lg:py-3 lg:text-sm">
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-110 dark:text-accent-text" aria-hidden><q.icon className="h-[18px] w-[18px]" /></span>
                   <span className="min-w-0">{q.label}</span>
                 </Link>
@@ -147,7 +147,7 @@ export default async function TodayPage() {
             ))}
           </ul>
           {activeReqs[0] && (
-            <Link href={`/requests/${activeReqs[0].id}`} className="mt-2 flex items-center gap-2 rounded-2xl border border-line bg-surface px-3 py-2.5 text-[13px] shadow-[var(--shadow-card)] hover:border-primary/40 lg:hidden">
+            <Link href={`/requests/${activeReqs[0].id}`} className="mt-2 flex items-center gap-2 card rounded-2xl border border-line bg-surface px-3 py-2.5 text-[13px] hover:border-primary/40 lg:hidden">
               <FileText className="h-4 w-4 shrink-0 text-muted" aria-hidden />
               <span className="min-w-0 flex-1 truncate font-semibold">{tr("rt", activeReqs[0].title)}</span>
               <StatusBadge status={activeReqs[0].status} />

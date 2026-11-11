@@ -30,7 +30,7 @@ export default async function MorePage() {
   return (
     <div className="pt-2">
       <PageHeader title={t("common.nav.more")} />
-      <ul className="overflow-hidden rounded-2xl border border-line bg-surface">
+      <ul className="overflow-hidden card rounded-2xl border border-line bg-surface">
         {items.map((it) => (
           <li key={it.href} className="border-b border-line last:border-0">
             <Link href={it.href} className="flex items-center gap-3 px-4 py-3.5 hover:bg-surface-2">
@@ -45,8 +45,8 @@ export default async function MorePage() {
       <div className="mt-4 flex flex-wrap gap-2">
         <LanguageSwitcher />
         <ThemeToggle withLabel />
-        <TourButton className="inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-medium hover:bg-surface-2" />
-        <form action={logoutAction}><button className="inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-medium text-danger hover:bg-surface-2"><LogOut className="h-5 w-5" aria-hidden />{t("common.nav.logout")}</button></form>
+        <TourButton className="inline-flex h-11 items-center gap-2 control rounded-xl border border-line bg-surface px-4 text-sm font-medium hover:bg-surface-2" />
+        <form action={logoutAction}><button className="inline-flex h-11 items-center gap-2 control rounded-xl border border-line bg-surface px-4 text-sm font-medium text-danger hover:bg-surface-2"><LogOut className="h-5 w-5" aria-hidden />{t("common.nav.logout")}</button></form>
       </div>
     </div>
   );

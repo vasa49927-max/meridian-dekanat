@@ -21,7 +21,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
       <aside className="sticky top-0 hidden h-dvh flex-col gap-6 side-surface px-4 py-6 text-side-fg lg:flex">
         <div className="px-2"><Logo className="[&_svg]:h-9 [&_svg]:w-9" /><p className="mt-1 pl-12 text-xs uppercase tracking-widest text-accent">Деканат</p></div>
         <SideNav role="STAFF" />
-        <dl className="grid grid-cols-2 gap-2 text-xs">
+        <dl className="side-stats grid grid-cols-2 gap-2 text-xs">
           <div className="rounded-xl bg-side-on px-3 py-2"><dt className="opacity-75">Новых заявок</dt><dd className="text-lg font-bold">{counts.newRequests}</dd></div>
           <div className="rounded-xl bg-side-on px-3 py-2"><dt className="opacity-75">Записей на приём</dt><dd className="text-lg font-bold">{counts.upcomingAppointments}</dd></div>
         </dl>
@@ -37,7 +37,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           {STAFF_NAV.map((n) => <Link key={n.href} href={n.href} className="whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-sm font-medium">{n.label}</Link>)}
           <form action={logoutAction}><button className="whitespace-nowrap rounded-full border border-line bg-surface px-3 py-1.5 text-sm font-medium text-danger">Выйти</button></form>
         </nav>
-        <main id="main" tabIndex={-1} className="mx-auto min-h-dvh max-w-[1240px] px-4 pb-6 outline-none lg:px-9">{children}</main>
+        <main id="main" tabIndex={-1} className="mx-auto min-h-dvh max-w-[1240px] px-4 pb-6 pt-1 outline-none lg:px-9 lg:pt-4">{children}</main>
         <footer className="mx-auto max-w-[1240px] px-4 pb-8 lg:px-9"><Disclaimer /></footer>
       </div>
     </div>

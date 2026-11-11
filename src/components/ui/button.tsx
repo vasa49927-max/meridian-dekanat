@@ -7,10 +7,10 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-primary text-primary-fg hover:opacity-90",
-        secondary: "bg-surface text-fg border border-line hover:bg-surface-2",
+        primary: "btn-primary bg-primary text-primary-fg",
+        secondary: "control bg-surface text-fg border border-line hover:bg-surface-2",
         ghost: "text-fg hover:bg-surface-2",
-        danger: "bg-danger-bg text-danger border border-danger/30 hover:opacity-90",
+        danger: "control bg-danger-bg text-danger border border-danger/30 hover:opacity-90",
         soft: "bg-primary-soft text-primary hover:opacity-90 dark:text-accent-text",
       },
       size: { sm: "h-9 px-3 text-sm", md: "h-11 px-4 text-[15px]", lg: "h-12 px-5 text-base", icon: "h-11 w-11" },

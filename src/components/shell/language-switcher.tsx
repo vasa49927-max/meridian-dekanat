@@ -11,7 +11,7 @@ export function LanguageSwitcher({ className, compact }: { className?: string; c
   const { locale, t } = useI18n();
   const [pending, start] = useTransition();
   return (
-    <label className={cn("relative inline-flex h-11 items-center gap-1.5 rounded-xl border border-line bg-surface pl-3 pr-2 text-sm font-medium hover:bg-surface-2", pending && "opacity-60", className)}>
+    <label className={cn("relative inline-flex h-11 items-center gap-1.5 control rounded-xl border border-line bg-surface pl-3 pr-2 text-sm font-medium hover:bg-surface-2", pending && "opacity-60", className)}>
       <Languages className="h-4 w-4 shrink-0 text-muted" aria-hidden />
       <span className="sr-only">{t("common.lang.label")}</span>
       <select value={locale} disabled={pending} onChange={(e) => start(() => setLocaleAction(e.target.value))}

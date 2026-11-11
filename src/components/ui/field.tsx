@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 
-const base = "w-full rounded-xl border border-line bg-surface px-3.5 text-[15px] text-fg placeholder:text-muted/80 focus:border-primary focus:outline-none focus-visible:outline-2 aria-[invalid=true]:border-danger";
+const base = "control w-full rounded-xl border border-line bg-surface px-3.5 text-[15px] text-fg placeholder:text-muted/80 focus:border-primary focus:outline-none focus-visible:outline-2 aria-[invalid=true]:border-danger";
 
 export function Input({ className, ...p }: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(base, "h-11", className)} {...p} />;

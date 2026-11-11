@@ -35,7 +35,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
   return (
     <div className="pt-2 lg:pt-0">
       <PageHeader title={tt("campus.title")} subtitle={tt("campus.subtitle")} />
-      <form method="get" action="/map" aria-label={tt("campus.form.aria")} className="mb-4 flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4">
+      <form method="get" action="/map" aria-label={tt("campus.form.aria")} className="mb-4 flex flex-wrap items-end gap-3 card rounded-2xl border border-line bg-surface p-4">
         <div className="w-36"><Label htmlFor="m-room">{tt("campus.form.room")}</Label><Input id="m-room" name="room" defaultValue={room} placeholder={tt("campus.form.roomPlaceholder")} inputMode="numeric" maxLength={12} /></div>
         <div className="min-w-48 flex-1 sm:flex-none"><Label htmlFor="m-b">{tt("campus.form.building")}</Label>
           <Select id="m-b" name="b" defaultValue={code || "А"}>

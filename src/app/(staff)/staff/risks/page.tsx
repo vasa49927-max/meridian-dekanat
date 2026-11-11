@@ -39,7 +39,7 @@ export default async function RisksPage({ searchParams }: { searchParams: Promis
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <nav aria-label="Уровень риска" className="inline-flex rounded-xl border border-line bg-surface p-1">
+        <nav aria-label="Уровень риска" className="seg inline-flex rounded-xl border border-line p-1">
           {([["all", "Все"], ["high", "Высокий"], ["watch", "Наблюдение"]] as const).map(([k, l]) => (
             <Link key={k} href={q({ level: k === "all" ? undefined : k })} aria-current={level === k ? "page" : undefined} className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold", level === k ? "bg-primary text-primary-fg" : "text-muted hover:text-fg")}>{l}</Link>
           ))}

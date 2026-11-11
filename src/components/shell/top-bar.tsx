@@ -36,14 +36,14 @@ export function TopBar({ unread, index, home = "/" }: { unread: number; index: P
           <span className="font-serif text-lg font-bold">{t("common.brand")}</span>
         </Link>
         <button type="button" onClick={() => show(true)} aria-label={t("common.top.searchAria")}
-          className="inline-flex h-11 w-11 items-center justify-center gap-3 rounded-xl border border-line bg-surface text-muted hover:bg-surface-2 lg:ml-auto lg:w-80 lg:justify-start lg:px-3.5">
+          className="inline-flex h-11 w-11 items-center justify-center gap-3 control rounded-xl border border-line bg-surface text-muted hover:bg-surface-2 lg:ml-auto lg:w-80 lg:justify-start lg:px-3.5">
           <Search className="h-5 w-5 shrink-0" aria-hidden />
           <span className="hidden flex-1 text-left text-sm lg:inline">{t("common.top.search")}</span>
           <kbd className="hidden rounded-md border border-line px-1.5 text-[11px] lg:inline">Ctrl K</kbd>
         </button>
         {index.role === "STUDENT" && (
           <Link href="/notifications" aria-label={unread ? t("common.top.notificationsUnread", { n: unread }) : t("common.top.notifications")}
-            className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-line bg-surface hover:bg-surface-2">
+            className="relative inline-flex h-11 w-11 items-center justify-center control rounded-xl border border-line bg-surface hover:bg-surface-2">
             <Bell className="h-5 w-5" aria-hidden />
             {unread > 0 && <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full border-2 border-bg bg-danger-solid px-1 text-[11px] font-bold text-white">{unread > 99 ? "99+" : unread}</span>}
           </Link>

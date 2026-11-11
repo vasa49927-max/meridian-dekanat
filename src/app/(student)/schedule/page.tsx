@@ -92,15 +92,15 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
         action={<LinkButton href="/schedule/calendar" variant="secondary" size="sm" className="max-sm:h-11 max-sm:w-11 max-sm:px-0" aria-label={t("schedule.toCalendar")}><CalendarArrowDown className="h-4 w-4" aria-hidden /><span className="max-sm:hidden">{t("schedule.toCalendar")}</span></LinkButton>} />
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <nav aria-label={t("schedule.views.label")} className="inline-flex rounded-xl border border-line bg-surface p-1">
+        <nav aria-label={t("schedule.views.label")} className="seg inline-flex rounded-xl border border-line p-1">
           {(["day", "week", "session"] as const).map((vv) => (
             <Link key={vv} aria-current={view === vv ? "page" : undefined} href={q(selected, vv)} className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold sm:px-3.5", view === vv ? "bg-primary text-primary-fg" : "text-muted hover:text-fg")}>{t(`schedule.views.${vv}`)}</Link>
           ))}
         </nav>
         {view !== "session" && <div className="ml-auto flex items-center gap-1">
-          <Link href={q(addDays(view === "week" ? week : selected, view === "week" ? -7 : -1))} className="grid h-10 w-9 place-items-center rounded-xl border border-line bg-surface hover:bg-surface-2" aria-label={view === "week" ? t("schedule.nav.prevWeek") : t("schedule.nav.prevDay")}><ChevronLeft className="h-5 w-5" aria-hidden /></Link>
-          <Link href={q(startOfDay(at))} className="h-10 rounded-xl border border-line bg-surface px-2.5 text-sm font-semibold leading-10 hover:bg-surface-2">{t("schedule.nav.today")}</Link>
-          <Link href={q(addDays(view === "week" ? week : selected, view === "week" ? 7 : 1))} className="grid h-10 w-9 place-items-center rounded-xl border border-line bg-surface hover:bg-surface-2" aria-label={view === "week" ? t("schedule.nav.nextWeek") : t("schedule.nav.nextDay")}><ChevronRight className="h-5 w-5" aria-hidden /></Link>
+          <Link href={q(addDays(view === "week" ? week : selected, view === "week" ? -7 : -1))} className="grid h-10 w-9 place-items-center control rounded-xl border border-line bg-surface hover:bg-surface-2" aria-label={view === "week" ? t("schedule.nav.prevWeek") : t("schedule.nav.prevDay")}><ChevronLeft className="h-5 w-5" aria-hidden /></Link>
+          <Link href={q(startOfDay(at))} className="h-10 control rounded-xl border border-line bg-surface px-2.5 text-sm font-semibold leading-10 hover:bg-surface-2">{t("schedule.nav.today")}</Link>
+          <Link href={q(addDays(view === "week" ? week : selected, view === "week" ? 7 : 1))} className="grid h-10 w-9 place-items-center control rounded-xl border border-line bg-surface hover:bg-surface-2" aria-label={view === "week" ? t("schedule.nav.nextWeek") : t("schedule.nav.nextDay")}><ChevronRight className="h-5 w-5" aria-hidden /></Link>
         </div>}
       </div>
 

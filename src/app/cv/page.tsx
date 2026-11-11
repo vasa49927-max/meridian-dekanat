@@ -38,7 +38,7 @@ export default async function CvPage() {
         <LinkButton href="/portfolio" variant="ghost"><ArrowLeft className="h-4 w-4" aria-hidden />{t("portfolio.cvPage.back")}</LinkButton>
         <PrintButton label={t("portfolio.cvPage.print")} />
       </div>
-      <article className="paper rounded-2xl border border-line bg-surface p-5 text-fg shadow-[var(--shadow-card)] sm:p-10">
+      <article className="paper card rounded-2xl border border-line bg-surface p-5 text-fg sm:p-10">
         <header className="border-b-2 border-primary pb-4">
           <h1 className="font-serif text-2xl leading-tight sm:text-3xl">{full}</h1>
           <p className="mt-1 text-muted">{t("portfolio.cvPage.student", { suffix, course: p.group.course })} · {tr("faculties", p.faculty.name)}</p>

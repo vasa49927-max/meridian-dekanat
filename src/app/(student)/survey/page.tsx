@@ -21,7 +21,7 @@ export default async function SurveyPage() {
   return (
     <div className="pt-2 lg:pt-0">
       <PageHeader title={t("survey.title")} subtitle={t("survey.subtitle")} />
-      <section aria-labelledby="how-h" className="mb-4 rounded-2xl border border-line bg-surface p-4 text-sm">
+      <section aria-labelledby="how-h" className="mb-4 card rounded-2xl border border-line bg-surface p-4 text-sm">
         <h2 id="how-h" className="mb-2 flex items-center gap-2 font-semibold"><ShieldCheck className="h-5 w-5 text-ok" aria-hidden />{t("survey.how.title")}</h2>
         <ul className="list-disc space-y-1 pl-5 text-muted"><li>{t("survey.how.p1")}</li><li>{t("survey.how.p2")}</li><li>{t("survey.how.p3")}</li></ul>
       </section>
@@ -43,7 +43,7 @@ export default async function SurveyPage() {
             ))}
           </div>
           {courses.some((c) => c.voted) && (
-            <ul className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface text-sm">
+            <ul className="mt-4 overflow-hidden card rounded-2xl border border-line bg-surface text-sm">
               {courses.filter((c) => c.voted).map((c) => (
                 <li key={c.id} className="flex items-center justify-between gap-3 border-b border-line px-4 py-3 last:border-0"><span>{tr("subjects", c.name)}</span><span className="inline-flex shrink-0 items-center gap-1 text-ok"><CheckCircle2 className="h-4 w-4" aria-hidden />{t("survey.voted")}</span></li>
               ))}

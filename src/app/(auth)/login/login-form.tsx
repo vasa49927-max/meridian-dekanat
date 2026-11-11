@@ -57,7 +57,7 @@ export function LoginForm({ next }: { next?: string }) {
         <ul className="grid gap-2 sm:grid-cols-2">
           {DEMO.map((d) => (
             <li key={d.login}>
-              <button type="button" onClick={() => { setLogin(d.login); setPassword(d.password); }} className="w-full rounded-xl border border-line bg-surface px-3 py-1.5 text-left hover:border-primary">
+              <button type="button" onClick={() => { setLogin(d.login); setPassword(d.password); }} className="w-full control rounded-xl border border-line bg-surface px-3 py-1.5 text-left hover:border-primary">
                 <span className="block text-sm font-semibold">{d.login}</span>
                 <span className="block truncate text-xs text-muted">{who(d)}</span>
               </button>

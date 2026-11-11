@@ -16,7 +16,7 @@ export function SideNav({ role, unread = 0 }: { role: "STUDENT" | "STAFF"; unrea
   const root = role === "STUDENT" ? "/" : "/staff";
   const groups = [...new Set(items.map((it) => it.group))];
   return (
-    <nav aria-label={t("common.nav.sections")} className="-mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1 [scrollbar-width:thin]">
+    <nav aria-label={t("common.nav.sections")} className="side-scroll -mx-1 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-1">
       {groups.map((g) => (
         <div key={g} role="group" aria-labelledby={`nav-g-${g}`}>
           <p id={`nav-g-${g}`} className="mb-1 px-3 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-side-fg/50">{t(`common.nav.groups.${g}`)}</p>

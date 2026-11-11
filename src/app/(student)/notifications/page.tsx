@@ -64,7 +64,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
               </section>
             ))}
           </div>
-          {next && <div className="mt-4 text-center"><Link href={`${q(filter)}${filter === "all" ? "?" : "&"}before=${+next.createdAt}_${next.id}`} className="inline-flex h-11 items-center rounded-xl border border-line bg-surface px-4 font-semibold hover:bg-surface-2">{t("common.actions.showMore")}</Link></div>}
+          {next && <div className="mt-4 text-center"><Link href={`${q(filter)}${filter === "all" ? "?" : "&"}before=${+next.createdAt}_${next.id}`} className="inline-flex h-11 items-center control rounded-xl border border-line bg-surface px-4 font-semibold hover:bg-surface-2">{t("common.actions.showMore")}</Link></div>}
         </>
       ) : <EmptyState icon={<BellOff />} title={filter === "unread" ? t("notifications.emptyUnread") : t("notifications.empty")}>{t("notifications.emptyText")}</EmptyState>}
     </div>

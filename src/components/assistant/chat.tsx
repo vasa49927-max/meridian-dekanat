@@ -43,16 +43,16 @@ export function Chat({ firstName, initialQuestion, llm }: { firstName: string; i
   return (
     <div className="flex min-h-[calc(100dvh-220px)] flex-col">
       <div className="mb-4 flex items-start gap-3">
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-hero text-accent" aria-hidden><Sparkles className="h-6 w-6" /></span>
+        <span className="hero-surface grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-accent" aria-hidden><Sparkles className="h-6 w-6" /></span>
         <div>
-          <h1 className="font-serif text-[26px] leading-tight">{t("assistant.title")}</h1>
+          <h1 className="font-serif text-[26px] leading-tight lg:text-[34px]">{t("assistant.title")}</h1>
           <p className="text-sm text-muted">{llm ? t("assistant.modeLlm") : t("assistant.modeOffline")}{t("assistant.subtitle")}{!llm && locale !== "ru" ? ` ${t("assistant.offlineLang")}` : null}</p>
         </div>
       </div>
 
       <div className="flex-1 space-y-3" aria-live="polite" aria-busy={busy}>
         {msgs.length === 0 && (
-          <div className="rounded-2xl border border-line bg-surface p-4">
+          <div className="card rounded-2xl border border-line bg-surface p-4">
             <p className="font-medium">{t("assistant.hello", { name: name(firstName) })}</p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {SUGGEST.map((k) => { const s = t(`assistant.suggest.${k}`); return <li key={k}><button type="button" onClick={() => send(s)} className="rounded-full border border-line bg-bg px-3 py-1.5 text-sm hover:border-primary">{s}</button></li>; })}
@@ -79,7 +79,7 @@ export function Chat({ firstName, initialQuestion, llm }: { firstName: string; i
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); void send(input); }} className="sticky bottom-[84px] mt-4 flex gap-2 rounded-2xl border border-line bg-surface p-2 shadow-[var(--shadow-card)] lg:bottom-4">
+      <form onSubmit={(e) => { e.preventDefault(); void send(input); }} className="sticky bottom-[84px] mt-4 flex gap-2 card rounded-2xl border border-line bg-surface p-2 lg:bottom-4">
         <label htmlFor="ask" className="sr-only">{t("assistant.inputLabel")}</label>
         <textarea id="ask" rows={1} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(input); } }}
           maxLength={1200} placeholder={t("assistant.placeholder")} className="max-h-32 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-[15px] outline-none placeholder:text-muted" />

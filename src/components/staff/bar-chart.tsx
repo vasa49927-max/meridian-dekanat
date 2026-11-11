@@ -35,7 +35,7 @@ export function BarChart({ data, label, unit, height = 160 }: { data: { key: str
           })}
         </svg>
         {hover !== null && (
-          <div className="pointer-events-none absolute -translate-x-1/2 rounded-lg border border-line bg-surface px-2 py-1 text-xs shadow-[var(--shadow-card)]"
+          <div className="pointer-events-none absolute -translate-x-1/2 control rounded-lg border border-line bg-surface px-2 py-1 text-xs shadow-[var(--shadow-card)]"
             style={{ left: `calc(2rem + (100% - 4rem) * ${(hover + 0.5) / data.length})`, bottom: `${(data[hover].value / nice) * (height - 20) + 26}px` }}>
             <b className="tabular">{data[hover].value}</b> {unit} · {data[hover].label}
           </div>

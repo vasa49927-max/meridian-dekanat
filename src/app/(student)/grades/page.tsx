@@ -91,7 +91,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
         </Card>
       </div>
 
-      <nav aria-label={t("grades.tabs.aria")} className="mb-4 inline-flex rounded-xl border border-line bg-surface p-1">
+      <nav aria-label={t("grades.tabs.aria")} className="mb-4 seg inline-flex rounded-xl border border-line p-1">
         <Link aria-current={!isPast ? "page" : undefined} href="/grades" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", !isPast ? "bg-primary text-primary-fg" : "text-muted")}>{t("grades.tabs.current")}</Link>
         <Link aria-current={isPast ? "page" : undefined} href="/grades?tab=record" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", isPast ? "bg-primary text-primary-fg" : "text-muted")}>{t("grades.tabs.record")}</Link>
       </nav>
@@ -99,7 +99,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
       {!isPast ? (
         <>
           {/* Как это работает — в три шага, всегда на виду */}
-          <ol aria-label={t("grades.how.aria")} className="mb-4 grid gap-2 rounded-2xl border border-line bg-surface p-3 text-sm sm:grid-cols-3">
+          <ol aria-label={t("grades.how.aria")} className="mb-4 grid gap-2 card rounded-2xl border border-line bg-surface p-3 text-sm sm:grid-cols-3">
             <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">1</span><span><b>{t("grades.how.s1b")}</b> {t("grades.how.s1", { max: BRS.currentMax })}</span></li>
             <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">2</span><span><b>{t("grades.how.s2b")}</b> {t("grades.how.s2", { max: BRS.finalMax, credit: BRS.autoCredit, excellent: BRS.autoExcellent })}</span></li>
             <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">3</span><span><b>{t("grades.how.s3b")}</b> {t("grades.how.s3")}</span></li>
@@ -179,7 +179,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
           <p className="mt-3 text-xs text-muted">{t("grades.card.rules")}</p>
           {/* Раунд 6: приглашение пройти анонимный опрос, пока есть неоценённые курсы */}
           {surveyLeft > 0 && (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4 text-sm">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 card rounded-2xl border border-line bg-surface p-4 text-sm">
               <p className="flex items-center gap-2"><MessageSquareHeart className="h-5 w-5 shrink-0 text-primary dark:text-accent-text" aria-hidden />{t("survey.banner.text")}</p>
               <Link href="/survey" className="font-semibold text-primary underline-offset-2 hover:underline dark:text-accent-text">{t("survey.banner.cta")}</Link>
             </div>

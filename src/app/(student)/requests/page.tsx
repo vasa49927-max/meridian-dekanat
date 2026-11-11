@@ -39,7 +39,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
         </div>
       </section>
       <div className="mb-3 flex items-center gap-2">
-        <nav aria-label={t("requests.list.filter")} className="inline-flex rounded-xl border border-line bg-surface p-1">
+        <nav aria-label={t("requests.list.filter")} className="seg inline-flex rounded-xl border border-line p-1">
           <Link aria-current={!all ? "page" : undefined} href="/requests" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", !all ? "bg-primary text-primary-fg" : "text-muted")}>{t("requests.list.active", { n: active.length })}</Link>
           <Link aria-current={all ? "page" : undefined} href="/requests?all=1" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", all ? "bg-primary text-primary-fg" : "text-muted")}>{t("requests.list.history", { n: items.length })}</Link>
         </nav>

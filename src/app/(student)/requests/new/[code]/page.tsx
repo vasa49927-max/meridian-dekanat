@@ -44,7 +44,7 @@ export default async function NewRequestForm({ params, searchParams }: { params:
       <nav aria-label={t("requests.nav.label")} className="mb-2 text-sm"><Link href="/requests/new" className="tap text-muted hover:text-fg">{t("requests.nav.allTypes")}</Link></nav>
       <div className="mb-5 flex items-start gap-3">
         <RequestIcon name={type.icon} className="h-12 w-12" />
-        <div><h1 className="font-serif text-[26px] leading-tight">{tr("rt", type.title)}</h1><p className="mt-1 text-muted">{tr("rt", type.description)}</p></div>
+        <div><span aria-hidden className="mb-2.5 block h-[3px] w-9 rounded-full bg-gradient-to-r from-accent to-accent/30" /><h1 className="font-serif text-[26px] leading-tight lg:text-[34px]">{tr("rt", type.title)}</h1><p className="mt-1 text-muted">{tr("rt", type.description)}</p></div>
       </div>
       <ul className="mb-5 flex flex-wrap gap-2 text-sm">
         <li className="flex items-center gap-2 rounded-xl bg-surface-2 px-3 py-1.5"><Clock className="h-4 w-4 text-accent-text" aria-hidden />{type.slaDays === 1 ? t("requests.sla.oneWorkDay") : tn("requests.sla.upToWorkDays", type.slaDays)}</li>

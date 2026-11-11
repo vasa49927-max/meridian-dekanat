@@ -29,7 +29,7 @@ export default async function VerifyPage({ params }: { params: Promise<{ code: s
   return (
     <main className="mx-auto flex min-h-dvh max-w-lg flex-col gap-6 px-5 py-8">
       <Logo className="text-primary dark:text-fg" />
-      <section className="rounded-2xl border border-line bg-surface p-6 text-center">
+      <section className="card rounded-2xl border border-line bg-surface p-6 text-center">
         {d ? (
           <>
             {valid ? <BadgeCheck className="mx-auto h-14 w-14 text-ok" aria-hidden /> : <ShieldX className="mx-auto h-14 w-14 text-danger" aria-hidden />}

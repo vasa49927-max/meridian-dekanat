@@ -40,7 +40,7 @@ export default async function StaffQueuePage({ searchParams }: { searchParams: P
       <PageHeader title="Очередь заявок" subtitle={`Здравствуйте, ${v.firstName} ${v.middleName ?? ""}. Сначала — с ближайшим сроком.`} />
       {/* Раунд 3: обратная связь студентов — видно, как работает офис */}
       {fb.n > 0 && (
-        <details className="mb-4 rounded-2xl border border-line bg-surface px-4 py-3 text-sm">
+        <details className="mb-4 card rounded-2xl border border-line bg-surface px-4 py-3 text-sm">
           <summary className="flex cursor-pointer flex-wrap items-center gap-x-4 gap-y-1">
             <span className="flex items-center gap-1.5"><Star className="h-4 w-4 fill-accent text-accent" aria-hidden /><b className="tabular">{fb.avg?.toLocaleString("ru-RU")}</b> из 5 — оценка студентов за 30 дней ({fb.n} {plural(fb.n, "отзыв", "отзыва", "отзывов")})</span>
             {fb.mineN > 0 && <span className="text-muted">ваши заявки: <b className="text-fg tabular">{fb.mineAvg?.toLocaleString("ru-RU")}</b> ({fb.mineN})</span>}
@@ -63,7 +63,7 @@ export default async function StaffQueuePage({ searchParams }: { searchParams: P
       </nav>
       <form className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_0.8fr_0.6fr_auto]" role="search" aria-label="Фильтры очереди">
         {status !== "active" && <input type="hidden" name="status" value={status} />}
-        <label className="relative"><span className="sr-only">Поиск</span><Search className="absolute left-3 top-3 h-5 w-5 text-muted" aria-hidden /><input name="q" defaultValue={sp.q} placeholder="Фамилия, № заявки, зачётка" className="h-11 w-full rounded-xl border border-line bg-surface pl-10 pr-3 text-[15px] placeholder:text-muted focus:border-primary focus:outline-none" /></label>
+        <label className="relative"><span className="sr-only">Поиск</span><Search className="absolute left-3 top-3 h-5 w-5 text-muted" aria-hidden /><input name="q" defaultValue={sp.q} placeholder="Фамилия, № заявки, зачётка" className="h-11 w-full control rounded-xl border border-line bg-surface pl-10 pr-3 text-[15px] placeholder:text-muted focus:border-primary focus:outline-none" /></label>
         <label><span className="sr-only">Вид</span><Select name="type" defaultValue={sp.type ?? ""}><option value="">Все виды</option>{types.map((t) => <option key={t.code} value={t.code}>{t.title}</option>)}</Select></label>
         <label><span className="sr-only">Факультет</span><Select name="faculty" defaultValue={sp.faculty ?? ""}><option value="">Все факультеты</option>{["МЭО", "МП", "ФЛМК"].map((f) => <option key={f}>{f}</option>)}</Select></label>
         <label><span className="sr-only">Курс</span><Select name="course" defaultValue={sp.course ?? ""}><option value="">Курс</option>{[1, 2, 3, 4].map((c) => <option key={c} value={c}>{c} курс</option>)}</Select></label>
@@ -71,7 +71,7 @@ export default async function StaffQueuePage({ searchParams }: { searchParams: P
       </form>
       {items.length ? (
         <Card className="p-0 lg:p-0">
-          <table className="w-full text-sm">
+          <table className="data-table w-full text-sm">
             <caption className="sr-only">Заявки</caption>
             <thead className="hidden border-b border-line text-left text-xs uppercase tracking-wider text-muted md:table-header-group">
               <tr><th className="px-4 py-3 font-semibold">Заявка</th><th className="px-4 py-3 font-semibold">Студент</th><th className="px-4 py-3 font-semibold">Срок</th><th className="px-4 py-3 font-semibold">Статус</th><th className="px-4 py-3 font-semibold">Ведёт</th></tr>
