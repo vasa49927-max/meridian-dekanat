@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { ArrowLeftRight, MapPin, UserRound } from "lucide-react";
 import { useI18n } from "@/i18n/client";
 
 type Props = {
-  title: string; type: string; startsAt: string; endsAt: string; room: string; building: string; address: string; hint: string | null;
+  mapHref?: string; title: string; type: string; startsAt: string; endsAt: string; room: string; building: string; address: string; hint: string | null;
   teacher: string | null; teacherFull?: string | null; teacherPosition?: string | null; teacherInitials: string; serverNow: string; moved: boolean; prevText: string | null;
 };
 
@@ -88,7 +89,8 @@ export function NextLessonCard(p: Props) {
 
       <p className="mt-3 flex items-start gap-1.5 text-[13px] text-hero-muted">
         <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-        <span>{p.type}{p.teacher && !p.teacherFull ? ` · ${p.teacher}` : ""} · {p.address}{p.hint && <span className="hidden sm:inline"> · {p.hint}</span>}</span>
+        <span>{p.type}{p.teacher && !p.teacherFull ? ` · ${p.teacher}` : ""} · {p.address}{p.hint && <span className="hidden sm:inline"> · {p.hint}</span>}
+          {p.mapHref && <> · <Link href={p.mapHref} className="font-semibold text-hero-fg underline underline-offset-2">{t("campus.link")}</Link></>}</span>
       </p>
       {progress !== null && <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-hero-2" role="progressbar" aria-label={t("today.next.progress")} aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}><div className="h-full rounded-full bg-accent" style={{ width: `${progress}%` }} /></div>}
     </section>

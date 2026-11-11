@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, CalendarClock, ChevronRight, LogOut, Sparkles, UserRound } from "lucide-react";
+import { Award, Bell, CalendarClock, MapPinned, MessageSquareHeart, ChevronRight, LogOut, Sparkles, UserRound } from "lucide-react";
 import { requireStudent } from "@/server/auth/guards";
 import { countMyUnread } from "@/server/dal/student";
 import { PageHeader } from "@/components/ui/page-header";
@@ -21,6 +21,9 @@ export default async function MorePage() {
     { href: "/notifications", label: t("common.nav.notifications"), hint: unread ? tn("today.more.unread", unread) : t("today.more.allRead"), icon: Bell, badge: unread },
     { href: "/assistant", label: t("today.more.assistant"), hint: t("today.more.assistantHint"), icon: Sparkles },
     { href: "/appointments", label: t("common.nav.appointments"), hint: t("today.more.appointmentsHint"), icon: CalendarClock },
+    { href: "/portfolio", label: t("portfolio.title"), hint: t("portfolio.subtitle"), icon: Award },
+    { href: "/survey", label: t("survey.title"), hint: t("survey.banner.text"), icon: MessageSquareHeart },
+    { href: "/map", label: t("campus.title"), hint: t("campus.subtitle"), icon: MapPinned },
     { href: "/profile", label: t("common.nav.profile"), hint: t("today.more.profileHint"), icon: UserRound },
   ];
   return (

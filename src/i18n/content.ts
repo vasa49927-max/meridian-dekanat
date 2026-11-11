@@ -40,6 +40,7 @@ export function makeContentTr(locale: Locale, lex: Lex | null, ctx: { tr: (g: st
       return `${ctx.tr("rt", m[1])}: ${locale === "zh" ? st : st.charAt(0).toLowerCase() + st.slice(1)}`;
     }
     if ((m = s.match(/^(Перенос|Отмена|Новая аудитория): (.+)$/))) return `${W[{ Перенос: "move", Отмена: "cancel", "Новая аудитория": "roomChange" }[m[1]] as "move"]}: ${ctx.tr("subjects", m[2])}`;
+    if ((m = s.match(/^Приглашение на консультацию: (.+)$/))) return `${W.invite}: ${ctx.tr("subjects", m[1])}`;
     if ((m = s.match(/^Через 2 дня: (.+) — (.+)$/))) return `${W.in2days}: ${ctx.tr("assessments", m[1])} — ${ctx.tr("short", m[2])}`;
     if ((m = s.match(/^(.+)\. Максимум (\d+) баллов\. Срок — (\d{1,2}) ([а-я]+)\.$/))) return W.deadlineBody.replace("{name}", ctx.tr("subjects", m[1])).replace("{max}", m[2]).replace("{date}", date(m[3], m[4], false));
     if ((m = s.match(/^Заявка (\S+) принята\. Срок — (.+)\. Статус будет обновляться здесь\.$/))) return W.accepted.replace("{num}", m[1]).replace("{sla}", generic(m[2]));
@@ -55,8 +56,25 @@ export type StatusKey = keyof typeof REV;
 /** Словари содержимого: демо-тексты деканата и служебные слова для шаблонов. */
 export const CONTENT: Record<"en" | "zh" | "fr", Lex> = {
   en: {
-    words: { room: "room {r}", was: "Was", now: "Now", cancelled: "class cancelled", move: "Rescheduled", cancel: "Cancelled", roomChange: "New room", in2days: "In 2 days", deadlineBody: "{name}. Up to {max} points. Due {date}.", accepted: "Request {num} received. Processing time — {sla}. Status updates will appear here.", workdays: "{n} working days", topic: "Topic" },
+    // раунд 6: приглашение на консультацию
+    words: { invite: "Consultation invitation", room: "room {r}", was: "Was", now: "Now", cancelled: "class cancelled", move: "Rescheduled", cancel: "Cancelled", roomChange: "New room", in2days: "In 2 days", deadlineBody: "{name}. Up to {max} points. Due {date}.", accepted: "Request {num} received. Processing time — {sla}. Status updates will appear here.", workdays: "{n} working days", topic: "Topic" },
     exact: {
+      // раунд 6: демо-портфолио
+      "Олимпиада по экономике «Меридиан-2026», призёр (2-е место)": "Meridian-2026 Economics Olympiad, prize winner (2nd place)",
+      "Вымышленный экономический клуб": "Fictional economics club",
+      "Командный кейс по монетарной политике.": "Team case on monetary policy.",
+      "Доклад «Цифровые валюты центробанков»": "Talk “Central bank digital currencies”",
+      "Студенческая научная конференция": "Student research conference",
+      "Испанский язык, уровень A2": "Spanish, level A2",
+      "Языковой центр (вымышленный)": "Language centre (fictional)",
+      "Стажировка в юридической фирме": "Internship at a law firm",
+      "ООО «Право и Партнёры» (вымышленная)": "Pravo i Partnery LLC (fictional)",
+      "Договорная работа, подготовка правовых заключений.": "Contract work, drafting legal opinions.",
+      "Волонтёр международного форума": "Volunteer at an international forum",
+      "Студенческий совет": "Student Council",
+      "ТРКИ-1 (русский как иностранный)": "TORFL-1 (Russian as a foreign language)",
+      "Тестовый центр (вымышленный)": "Testing centre (fictional)",
+      "В деканате видят, что по этой дисциплине есть риск не набрать нужные баллы. Запишитесь на консультацию в студенческий офис — вместе составим план.": "The dean's office sees a risk of not scoring enough points in this course. Book a consultation at the student office and we will make a plan together.",
       // объявления
       "Запись на курсы по выбору на весенний семестр": "Electives sign-up for the spring semester",
       "Запись открыта в разделе «Успеваемость → Курсы по выбору» до 15 ноября включительно. После этой даты поменять выбор можно только заявлением.": "Sign-up is open in “Grades → Electives” until 15 November inclusive. After that, changes are possible only by application.",
@@ -111,8 +129,25 @@ export const CONTENT: Record<"en" | "zh" | "fr", Lex> = {
     },
   },
   zh: {
-    words: { room: "{r} 教室", was: "原定", now: "现改为", cancelled: "课程取消", move: "调课", cancel: "停课", roomChange: "更换教室", in2days: "2天后截止", deadlineBody: "{name}。满分 {max} 分。截止日期：{date}。", accepted: "申请 {num} 已受理。办理时限：{sla}。状态将在此处更新。", workdays: "{n} 个工作日", topic: "事由" },
+    // раунд 6: приглашение на консультацию
+    words: { invite: "咨询邀请", room: "{r} 教室", was: "原定", now: "现改为", cancelled: "课程取消", move: "调课", cancel: "停课", roomChange: "更换教室", in2days: "2天后截止", deadlineBody: "{name}。满分 {max} 分。截止日期：{date}。", accepted: "申请 {num} 已受理。办理时限：{sla}。状态将在此处更新。", workdays: "{n} 个工作日", topic: "事由" },
     exact: {
+      // раунд 6: демо-портфолио
+      "Олимпиада по экономике «Меридиан-2026», призёр (2-е место)": "“子午线-2026”经济学竞赛获奖（第二名）",
+      "Вымышленный экономический клуб": "虚构的经济学俱乐部",
+      "Командный кейс по монетарной политике.": "货币政策团队案例。",
+      "Доклад «Цифровые валюты центробанков»": "报告《央行数字货币》",
+      "Студенческая научная конференция": "学生科研会议",
+      "Испанский язык, уровень A2": "西班牙语 A2 级",
+      "Языковой центр (вымышленный)": "语言中心（虚构）",
+      "Стажировка в юридической фирме": "律师事务所实习",
+      "ООО «Право и Партнёры» (вымышленная)": "“法律与合伙人”有限责任公司（虚构）",
+      "Договорная работа, подготовка правовых заключений.": "合同工作，撰写法律意见。",
+      "Волонтёр международного форума": "国际论坛志愿者",
+      "Студенческий совет": "学生会",
+      "ТРКИ-1 (русский как иностранный)": "俄语等级考试 ТРКИ-1（对外俄语）",
+      "Тестовый центр (вымышленный)": "考试中心（虚构）",
+      "В деканате видят, что по этой дисциплине есть риск не набрать нужные баллы. Запишитесь на консультацию в студенческий офис — вместе составим план.": "教务处注意到你在这门课程上有分数不足的风险。请预约学生办公室的咨询，我们一起制定计划。",
       "Запись на курсы по выбору на весенний семестр": "春季学期选修课报名", "Запись открыта в разделе «Успеваемость → Курсы по выбору» до 15 ноября включительно. После этой даты поменять выбор можно только заявлением.": "报名在“成绩 → 选修课”开放至11月15日（含）。此后只能通过申请更改。",
       "Продление приёма заявлений на стажировки до 20 ноября": "实习申请延长至11月20日", "Студенты 2–4 курсов могут подать заявку на зимнюю стажировку в международных организациях. Нужна выписка из зачётки — закажите её в «Заявках», это занимает до 5 дней.": "2–4年级学生可申请国际组织冬季实习。需要成绩单——请在“申请”中办理，最多需要5天。",
       "Модель ООН: открыта регистрация делегатов": "模拟联合国：代表报名开始", "Ежегодная модель ООН пройдёт в весеннем семестре. Регистрация делегатов и волонтёров — до 1 декабря на странице студсовета.": "年度模拟联合国将于春季学期举行。代表和志愿者请于12月1日前在学生会页面报名。",
@@ -143,8 +178,25 @@ export const CONTENT: Record<"en" | "zh" | "fr", Lex> = {
     },
   },
   fr: {
-    words: { room: "salle {r}", was: "Avant", now: "Désormais", cancelled: "cours annulé", move: "Cours déplacé", cancel: "Cours annulé", roomChange: "Nouvelle salle", in2days: "Dans 2 jours", deadlineBody: "{name}. Jusqu’à {max} points. Échéance : {date}.", accepted: "Demande {num} reçue. Délai : {sla}. Le statut sera mis à jour ici.", workdays: "{n} jours ouvrés", topic: "Objet" },
+    // раунд 6: приглашение на консультацию
+    words: { invite: "Invitation à une consultation", room: "salle {r}", was: "Avant", now: "Désormais", cancelled: "cours annulé", move: "Cours déplacé", cancel: "Cours annulé", roomChange: "Nouvelle salle", in2days: "Dans 2 jours", deadlineBody: "{name}. Jusqu’à {max} points. Échéance : {date}.", accepted: "Demande {num} reçue. Délai : {sla}. Le statut sera mis à jour ici.", workdays: "{n} jours ouvrés", topic: "Objet" },
     exact: {
+      // раунд 6: демо-портфолио
+      "Олимпиада по экономике «Меридиан-2026», призёр (2-е место)": "Olympiade d’économie « Meridian-2026 », lauréate (2e place)",
+      "Вымышленный экономический клуб": "Club d’économie fictif",
+      "Командный кейс по монетарной политике.": "Étude de cas en équipe sur la politique monétaire.",
+      "Доклад «Цифровые валюты центробанков»": "Exposé « Les monnaies numériques de banque centrale »",
+      "Студенческая научная конференция": "Conférence scientifique étudiante",
+      "Испанский язык, уровень A2": "Espagnol, niveau A2",
+      "Языковой центр (вымышленный)": "Centre de langues (fictif)",
+      "Стажировка в юридической фирме": "Stage dans un cabinet d’avocats",
+      "ООО «Право и Партнёры» (вымышленная)": "SARL « Pravo i Partnery » (fictive)",
+      "Договорная работа, подготовка правовых заключений.": "Travail contractuel, rédaction d’avis juridiques.",
+      "Волонтёр международного форума": "Bénévole d’un forum international",
+      "Студенческий совет": "Conseil des étudiants",
+      "ТРКИ-1 (русский как иностранный)": "TORFL-1 (russe langue étrangère)",
+      "Тестовый центр (вымышленный)": "Centre d’examen (fictif)",
+      "В деканате видят, что по этой дисциплине есть риск не набрать нужные баллы. Запишитесь на консультацию в студенческий офис — вместе составим план.": "Le décanat constate un risque de ne pas obtenir assez de points dans cette matière. Prenez rendez-vous au bureau des étudiants : nous ferons un plan ensemble.",
       "Запись на курсы по выбору на весенний семестр": "Inscription aux options du semestre de printemps", "Запись открыта в разделе «Успеваемость → Курсы по выбору» до 15 ноября включительно. После этой даты поменять выбор можно только заявлением.": "Inscriptions ouvertes dans « Résultats → Options » jusqu’au 15 novembre inclus. Ensuite, tout changement se fait sur demande.",
       "Продление приёма заявлений на стажировки до 20 ноября": "Candidatures aux stages prolongées jusqu’au 20 novembre", "Студенты 2–4 курсов могут подать заявку на зимнюю стажировку в международных организациях. Нужна выписка из зачётки — закажите её в «Заявках», это занимает до 5 дней.": "Les étudiants de 2e à 4e année peuvent postuler à un stage d’hiver dans une organisation internationale. Un relevé de notes est requis — commandez-le dans « Demandes » (jusqu’à 5 jours).",
       "Модель ООН: открыта регистрация делегатов": "Simulation de l’ONU : inscription des délégués ouverte", "Ежегодная модель ООН пройдёт в весеннем семестре. Регистрация делегатов и волонтёров — до 1 декабря на странице студсовета.": "La simulation annuelle de l’ONU aura lieu au printemps. Inscription des délégués et bénévoles jusqu’au 1er décembre sur la page du conseil étudiant.",

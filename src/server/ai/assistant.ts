@@ -66,7 +66,7 @@ async function gigachatToken() {
   return token.value;
 }
 
-async function gigachat(messages: { role: string; content: string }[]) {
+export async function gigachat(messages: { role: string; content: string }[]) {
   const res = await fetch("https://gigachat.devices.sberbank.ru/api/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${await gigachatToken()}`, "Content-Type": "application/json", Accept: "application/json" },

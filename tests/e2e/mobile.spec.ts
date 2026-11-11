@@ -29,6 +29,7 @@ async function expectNoHorizontalScroll(page: Page, path: string) {
 const STUDENT_PAGES = [
   "/", "/schedule", "/schedule?view=week", "/schedule?d=2026-11-14", "/grades", "/grades?tab=record",
   "/requests", "/requests/new", "/requests/new/STUDY_CERT_EN", "/notifications", "/assistant", "/appointments", "/profile", "/more",
+  "/survey", "/portfolio", "/cv", "/map", "/map?room=412&b=%D0%91", "/map?room=214&b=%D0%9E", // раунд 6 (схема листается внутри своей карточки)
 ];
 
 test("студент: на 360 px у ключевых страниц нет горизонтального скролла", async ({ page }) => {
@@ -42,7 +43,7 @@ test("студент: на 360 px у ключевых страниц нет го
 
 test("деканат: на 360 px у ключевых страниц нет горизонтального скролла", async ({ page }) => {
   await login(page, "staff");
-  for (const path of ["/staff", "/staff/announcements", "/staff/schedule", "/staff/appointments"]) await expectNoHorizontalScroll(page, path);
+  for (const path of ["/staff", "/staff/announcements", "/staff/schedule", "/staff/appointments", "/staff/analytics", "/staff/risks", "/staff/surveys"]) await expectNoHorizontalScroll(page, path);
 });
 
 test("вход: на 360 px нет горизонтального скролла", async ({ page }) => {

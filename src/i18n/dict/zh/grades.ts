@@ -81,5 +81,6 @@ const grades: Shape<typeof ru> = {
     autoCredit: "免考通过", passed: "总评 {total} — 通过", failed: "总评 {total} — 未通过",
     autoExcellent: "优秀（免考）", totalMark: "{total} — {mark}",
   },
+  invite: { text: "教务处邀请你参加咨询（{date}），一起制定提高分数的计划。", cta: "预约" },
 };
 export default grades;

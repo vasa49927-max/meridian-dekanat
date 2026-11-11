@@ -356,6 +356,47 @@ export const messengerLinks = pgTable("messenger_links", {
   createdAt: createdAt(),
 }, (t) => [uniqueIndex("messenger_links_provider_ext_uq").on(t.provider, t.externalUserId), index("messenger_links_user_idx").on(t.userId)]);
 
+// ───────────── Раунд 6: раннее предупреждение, опрос о курсах, портфолио ─────────────
+/** Деканат пригласил студента на консультацию из-за риска по предмету. */
+export const riskInvites = pgTable("risk_invites", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id").notNull().references(() => students.id, { onDelete: "cascade" }),
+  offeringId: uuid("offering_id").notNull().references(() => courseOfferings.id, { onDelete: "cascade" }),
+  staffId: uuid("staff_id").notNull().references(() => staff.id),
+  createdAt: createdAt(),
+}, (t) => [index("risk_invites_student_idx").on(t.studentId)]);
+
+/**
+ * Анонимный опрос о курсе. Ответ НЕ связан со студентом: в survey_responses нет studentId,
+ * а повторное голосование блокирует отдельная таблица с хэшем (студент+курс+секрет). Дата — только день.
+ */
+export const surveyResponses = pgTable("survey_responses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  offeringId: uuid("offering_id").notNull().references(() => courseOfferings.id, { onDelete: "cascade" }),
+  clarity: smallint("clarity").notNull(),
+  teacher: smallint("teacher").notNull(),
+  workload: smallint("workload").notNull(),
+  comment: text("comment"),
+  day: text("day").notNull(), // YYYY-MM-DD, без времени — чтобы нельзя было сопоставить с отметкой о голосовании
+}, (t) => [index("survey_responses_offering_idx").on(t.offeringId), check("survey_scores_chk", sql`${t.clarity} between 1 and 5 and ${t.teacher} between 1 and 5 and ${t.workload} between 1 and 5`)]);
+
+export const surveyVotes = pgTable("survey_votes", {
+  voterHash: text("voter_hash").primaryKey(),
+});
+
+/** Портфолио студента: олимпиады, конференции, стажировки, сертификаты, волонтёрство, публикации. */
+export const portfolioItems = pgTable("portfolio_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id").notNull().references(() => students.id, { onDelete: "cascade" }),
+  kind: text("kind").$type<"OLYMPIAD" | "CONFERENCE" | "INTERNSHIP" | "CERTIFICATE" | "VOLUNTEER" | "PUBLICATION">().notNull(),
+  title: text("title").notNull(),
+  org: text("org"),
+  date: text("date").notNull(), // YYYY-MM
+  description: text("description"),
+  verified: boolean("verified").notNull().default(false),
+  createdAt: createdAt(),
+}, (t) => [index("portfolio_student_idx").on(t.studentId)]);
+
 // ───────────── Уведомления и объявления ─────────────
 export const notificationKindEnum = pgEnum("notification_kind", ["SCHEDULE", "REQUEST", "ANNOUNCEMENT", "DEADLINE", "APPOINTMENT", "GRADE"]);
 export const audienceEnum = pgEnum("audience", ["ALL", "FACULTY", "COURSE", "GROUP"]);

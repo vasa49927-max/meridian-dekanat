@@ -9,7 +9,7 @@ const common = {
     sections: "Разделы", mainSections: "Основные разделы", today: "Сегодня", schedule: "Расписание", grades: "Успеваемость", requests: "Заявки и справки",
     requestsShort: "Заявки", notifications: "Уведомления", assistant: "Помощник", appointments: "Запись к методисту", profile: "Профиль", more: "Ещё",
     unreadCount: { one: "{n} непрочитанное", few: "{n} непрочитанных", many: "{n} непрочитанных", other: "{n} непрочитанных" },
-    staffQueue: "Очередь заявок", staffAnnouncements: "Объявления", staffLessons: "Переносы пар", staffReception: "Приём студентов", staffDemo: "Демо-данные",
+    staffAnalytics: "Панель руководителя", staffRisks: "Риски студентов", survey: "Оценка курсов", map: "Как пройти", portfolio: "Портфолио", staffSurveys: "Опросы о курсах", staffQueue: "Очередь заявок", staffAnnouncements: "Объявления", staffLessons: "Переносы пар", staffReception: "Приём студентов", staffDemo: "Демо-данные",
     hasUnread: "Есть непрочитанные уведомления", skip: "Перейти к содержимому", logout: "Выйти", studentRole: "{course} курс · студент",
   },
   top: { search: "Поиск и действия", searchAria: "Поиск и действия (Ctrl+K)", notifications: "Уведомления", notificationsUnread: "Уведомления: {n} непрочитанных" },

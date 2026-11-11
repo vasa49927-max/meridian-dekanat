@@ -30,7 +30,7 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
   const rand = rng(20261106);
 
   await db.transaction(async (tx) => {
-    await tx.execute(sql`TRUNCATE TABLE bot_link_codes, messenger_links, request_feedback, attachments, calendar_feeds, push_subscriptions, notify_prefs, appointments, slots, notifications, announcements, documents, request_events, requests, request_types,
+    await tx.execute(sql`TRUNCATE TABLE risk_invites, survey_responses, survey_votes, portfolio_items, bot_link_codes, messenger_links, request_feedback, attachments, calendar_feeds, push_subscriptions, notify_prefs, appointments, slots, notifications, announcements, documents, request_events, requests, request_types,
       deadlines, final_grades, scores, assessments, lessons, course_offerings, disciplines, teachers, staff, students, groups, buildings,
       programs, faculties, rate_events, sessions, users RESTART IDENTITY CASCADE`);
 
@@ -183,15 +183,19 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
     log(`расписание: ${lessonRows.length} занятий`);
 
     // Баллы
+    const WEAK = new Set(["Кравец:macro", "Захаров:civproc", "Захаров:mchp", "Осипов:ling"]);
     const scoreRows: (typeof s.scores.$inferInsert)[] = [];
     for (const st of studentsAll) {
       for (const { offering, def } of offeringsByGroup[st.groupKey]) {
         if (def.week.every((w) => w.subgroup && w.subgroup !== st.subgroup)) continue; // чужая языковая подгруппа
         const asm = assessmentByOffering[offering.id].filter((a) => a.kind !== "FINAL");
         const preset = st.demo?.scores[def.key];
+        // Несколько вымышленных студентов «проседают» по одной дисциплине — для раздела «Риски студентов» (раунд 6).
+        // Число вызовов rand() не меняется, поэтому остальные демо-данные остаются прежними.
+        const weak = WEAK.has(`${st.lastName}:${def.key}`);
         asm.forEach((a, i) => {
           let pts: number | null = preset ? (preset[i] ?? null) : null;
-          if (!preset && a.dueAt && a.dueAt < NOW && a.kind === "CONTROL") pts = Math.round(a.maxPoints * (0.5 + rand() * 0.5));
+          if (!preset && a.dueAt && a.dueAt < NOW && a.kind === "CONTROL") pts = Math.round(a.maxPoints * (weak ? 0.15 + rand() * 0.3 : 0.5 + rand() * 0.5));
           if (pts !== null) scoreRows.push({ studentId: st.id, assessmentId: a.id, points: pts, gradedAt: a.dueAt ? addDays(a.dueAt, 3) : NOW });
         });
       }
@@ -298,6 +302,34 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
     const FEEDBACK: [number, string | null][] = [[5, "Справку сделали за день, спасибо!"], [4, null], [5, null], [3, "Долго не брали в работу, пришлось писать в чат группы"], [5, "Всё понятно объяснили, что дополнить"], [4, null]];
     const closed = extraRows.filter((x) => x.last[0] === "ISSUED" || x.last[0] === "REJECTED" || (x.last[0] === "READY" && !rtypes[x.code].producesDocument));
     if (closed.length) await tx.insert(s.requestFeedback).values(closed.slice(0, FEEDBACK.length).map((x, i) => ({ requestId: x.r.id, studentId: x.st.id, rating: FEEDBACK[i][0], comment: FEEDBACK[i][1], createdAt: hoursAgo(x.last[1] - 2) })));
+    // ── Раунд 6: история обращений за 60 дней — для панели руководителя (поток, сроки, методисты, оценки).
+    let rnd = 42;
+    const hrand = () => ((rnd = (rnd * 1103515245 + 12345) % 2147483648) / 2147483648);
+    const HIST: [string, Record<string, string>][] = [
+      ["STUDY_CERT", { purpose: "Работодатель", copies: "1" }], ["STUDY_CERT", { purpose: "Банк", copies: "1" }], ["STUDY_CERT_EN", { country: "Италия", purpose: "Виза", dates: "С 20.12.2026 по 06.01.2027" }],
+      ["STIPEND_CERT", { period: "Последние 3 месяца", purpose: "Соцзащита" }], ["RECORD_EXTRACT", { language: "Английский", purpose: "Стажировка" }], ["MILITARY_CERT", { commissariat: "Военный комиссариат Обручевского района г. Москвы" }],
+      ["INDIVIDUAL_PLAN", { reason: "Спортивные сборы", period: "С 01.02.2027 по 15.03.2027", details: "Сборы сборной по фехтованию." }], ["RETAKE", { discipline: "Микроэкономика", reason: "Болезнь, есть справка" }],
+      ["TUITION_PAYMENT", { kind: "Рассрочка платежа", term: "Весенний семестр 2026/27", reason: "Прошу разбить оплату на 3 платежа." }],
+    ];
+    const FB_COMMENTS = [null, null, "Быстро и понятно", null, "Хотелось бы уведомление, когда можно забрать бумажный экземпляр", null, "Отлично", "Долго ждал ответа", null];
+    const histFeedback: (typeof s.requestFeedback.$inferInsert)[] = [];
+    for (let i = 0; i < 64; i++) {
+      const [code, payload] = HIST[Math.floor(hrand() * HIST.length)];
+      const age = 4 + Math.floor(hrand() * 56) * 24 + Math.floor(hrand() * 10); // часов назад: 0–60 дней
+      const work = 2 + Math.floor(hrand() * (code === "STUDY_CERT" ? 20 : 90)); // часов до готовности
+      const rejected = hrand() < 0.1;
+      const ev: Ev[] = rejected ? [["SUBMITTED", age], ["IN_PROGRESS", age - 1], ["REJECTED", Math.max(1, age - work), "Не хватает данных — подайте заявку повторно с номером договора"]]
+        : age - work < 2 ? [["SUBMITTED", age], ["IN_PROGRESS", Math.max(1, age - 2)]]
+        : [["SUBMITTED", age], ["IN_PROGRESS", age - 1], ["READY", age - work], ...(hrand() < 0.7 ? [["ISSUED", Math.max(1, age - work - 20)] as Ev] : [])];
+      const st = extras[i % extras.length];
+      const r = await addRequest(st, code, payload, ev);
+      const last = ev[ev.length - 1][0];
+      if ((last === "ISSUED" || last === "REJECTED" || (last === "READY" && !rtypes[code].producesDocument)) && hrand() < 0.55) {
+        const rating = rejected ? 2 + Math.floor(hrand() * 2) : 3 + Math.round(hrand() * 2);
+        histFeedback.push({ requestId: r.id, studentId: st.id, rating, comment: FB_COMMENTS[Math.floor(hrand() * FB_COMMENTS.length)], createdAt: hoursAgo(Math.max(1, ev[ev.length - 1][1] - 3)) });
+      }
+    }
+    if (histFeedback.length) await tx.insert(s.requestFeedback).values(histFeedback);
     log("заявки");
 
     // ── Объявления → уведомления адресатам
@@ -353,6 +385,29 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
       await tx.update(s.slots).set({ isBooked: true }).where(sql`id = ${sl.id}`);
       await tx.insert(s.appointments).values({ slotId: sl.id, studentId: st.id, topic, createdAt: hoursAgo(20) });
     }
+    // ── Раунд 6: портфолио демо-студентов
+    await tx.insert(s.portfolioItems).values([
+      { studentId: anna.id, kind: "OLYMPIAD", title: "Олимпиада по экономике «Меридиан-2026», призёр (2-е место)", org: "Вымышленный экономический клуб", date: "2026-04", description: "Командный кейс по монетарной политике.", verified: true },
+      { studentId: anna.id, kind: "CONFERENCE", title: "Доклад «Цифровые валюты центробанков»", org: "Студенческая научная конференция", date: "2026-05", verified: true },
+      { studentId: anna.id, kind: "CERTIFICATE", title: "Испанский язык, уровень A2", org: "Языковой центр (вымышленный)", date: "2026-06" },
+      { studentId: timur.id, kind: "INTERNSHIP", title: "Стажировка в юридической фирме", org: "ООО «Право и Партнёры» (вымышленная)", date: "2026-07", description: "Договорная работа, подготовка правовых заключений.", verified: true },
+      { studentId: timur.id, kind: "VOLUNTEER", title: "Волонтёр международного форума", org: "Студенческий совет", date: "2025-10" },
+      { studentId: mei.id, kind: "CERTIFICATE", title: "ТРКИ-1 (русский как иностранный)", org: "Тестовый центр (вымышленный)", date: "2026-08", verified: true },
+    ]);
+    // ── Раунд 6: ответы анонимного опроса о курсах (от «однокурсников» Анны; сама Анна ещё не голосовала)
+    let srnd = 7;
+    const srand = () => ((srnd = (srnd * 1103515245 + 12345) % 2147483648) / 2147483648);
+    const COMMENTS = [null, "Хорошие примеры из практики", null, "Слишком много материала за одну пару", null, "Понятные критерии оценки", null, "Хотелось бы больше разборов кейсов"];
+    const surveyRows: (typeof s.surveyResponses.$inferInsert)[] = [];
+    for (const { offering } of offeringsByGroup[anna.groupKey]) {
+      const n = 3 + Math.floor(srand() * 6);
+      for (let i = 0; i < n; i++) {
+        const base = 3 + srand() * 2;
+        surveyRows.push({ offeringId: offering.id, clarity: Math.min(5, Math.round(base)), teacher: Math.min(5, Math.round(base + srand() * 0.8)), workload: Math.max(1, Math.min(5, Math.round(base - srand() * 1.5))),
+          comment: COMMENTS[Math.floor(srand() * COMMENTS.length)], day: dayKeyOf(addDays(NOW, -Math.floor(srand() * 10)) as Date) });
+      }
+    }
+    await tx.insert(s.surveyResponses).values(surveyRows);
     log("запись к методисту");
   });
 }

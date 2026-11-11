@@ -11,7 +11,7 @@ const common: Shape<typeof ru> = {
     sections: "栏目", mainSections: "主要栏目", today: "今天", schedule: "课表", grades: "成绩", requests: "申请与证明",
     requestsShort: "申请", notifications: "通知", assistant: "助手", appointments: "预约教务员", profile: "个人资料", more: "更多",
     unreadCount: { other: "{n} 条未读" },
-    staffQueue: "申请队列", staffAnnouncements: "公告", staffLessons: "调课", staffReception: "学生接待", staffDemo: "演示数据",
+    staffAnalytics: "管理看板", staffRisks: "风险学生", survey: "课程评价", map: "怎么走", portfolio: "个人档案", staffSurveys: "课程问卷", staffQueue: "申请队列", staffAnnouncements: "公告", staffLessons: "调课", staffReception: "学生接待", staffDemo: "演示数据",
     hasUnread: "有未读通知", skip: "跳到正文", logout: "退出", studentRole: "{course} 年级 · 学生",
   },
   top: { search: "搜索与操作", searchAria: "搜索与操作（Ctrl+K）", notifications: "通知", notificationsUnread: "通知：{n} 条未读" },

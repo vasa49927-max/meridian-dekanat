@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, CalendarCheck2, Coffee, FileText, Megaphone, Sparkles } from "lucide-react";
+import { mapHref } from "@/lib/campus";
 import { requireStudent } from "@/server/auth/guards";
 import { getMyGrades, getNextLesson, listMyDeadlines, listMyLessons, listMyNotifications, listMyUpcomingChanges } from "@/server/dal/student";
 import { listMyRequests } from "@/server/dal/requests";
@@ -87,7 +88,7 @@ export default async function TodayPage() {
           {next ? (
             <NextLessonCard
               title={tr("subjects", next.title)} type={t(`common.lessonType.${next.type}`)} startsAt={next.startsAt.toISOString()} endsAt={next.endsAt.toISOString()}
-              room={next.room} building={tr("buildings", next.buildingName)} address={tr("addresses", next.buildingAddress)} hint={next.buildingHint ? tr("hints", next.buildingHint) : null}
+              mapHref={mapHref(next.room, next.buildingCode)} room={next.room} building={tr("buildings", next.buildingName)} address={tr("addresses", next.buildingAddress)} hint={next.buildingHint ? tr("hints", next.buildingHint) : null}
               teacher={teacher} teacherFull={teacherFull} teacherPosition={teacherPosition} teacherInitials={`${name(next.teacherLast)[0] ?? ""}${name(next.teacherFirst)[0] ?? ""}`} serverNow={at.toISOString()}
               moved={next.status === "MOVED"} prevText={next.prevStartsAt ? t("today.next.prev", { day: f.shortDay(next.prevStartsAt), time: f.time(next.prevStartsAt), room: next.prevRoom ?? "" }) : null}
             />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowLeftRight, Ban, CalendarArrowDown, ChevronLeft, ChevronRight, MapPin, Shield } from "lucide-react";
+import { mapHref } from "@/lib/campus";
 import { requireStudent } from "@/server/auth/guards";
 import { listMyLessons, type LessonView } from "@/server/dal/student";
 import { addDays, dayKey, isSameDay, mskParts, now, parseDayKey, startOfDay, startOfWeek } from "@/lib/time";
@@ -56,7 +57,8 @@ async function LessonCard({ l, at, compact }: { l: LessonView; at: Date; compact
           </div>
           <h3 className="font-semibold leading-snug">{title}</h3>
           {!compact && <p className="mt-0.5 text-[13px] text-muted">{teacherShortI18n(l, tr, name)}</p>}
-          <p className="mt-1 flex items-center gap-1 text-[13px]"><MapPin className="h-3.5 w-3.5 shrink-0 text-muted" aria-hidden />{t("schedule.lesson.room", { room: l.room })} · {tr("buildings", l.buildingName)}{l.campus === "ODINTSOVO" ? t("schedule.lesson.odintsovo") : ""}</p>
+          <p className="mt-1 flex items-center gap-1 text-[13px]"><MapPin className="h-3.5 w-3.5 shrink-0 text-muted" aria-hidden />{t("schedule.lesson.room", { room: l.room })} · {tr("buildings", l.buildingName)}{l.campus === "ODINTSOVO" ? t("schedule.lesson.odintsovo") : ""}
+            {l.status !== "CANCELLED" && <Link href={mapHref(l.room, l.buildingCode)} className="ml-1 font-semibold text-primary underline-offset-2 hover:underline dark:text-accent-text">{t("campus.link")}</Link>}</p>
           {kind && <p className="mt-1.5 rounded-lg bg-warn-bg/70 px-2.5 py-1.5 text-sm"><ChangeLines l={l} /></p>}
         </div>
       </div>

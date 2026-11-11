@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { AlertTriangle, BookOpen, CalendarClock, CheckCircle2, CircleDot, Flag, Target } from "lucide-react";
+import { AlertTriangle, BookOpen, CalendarClock, CalendarHeart, MessageSquareHeart, CheckCircle2, CircleDot, Flag, Target } from "lucide-react";
 import { requireStudent } from "@/server/auth/guards";
 import { getMyGrades } from "@/server/dal/student";
+import { listMyRiskInvites } from "@/server/dal/risks";
+import { listMySurveyCourses } from "@/server/dal/survey";
 import { BRS, averagePoints, markFor, planFor } from "@/lib/brs";
 import { now } from "@/lib/time";
 import { getI18n } from "@/i18n/server";
@@ -46,7 +48,8 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
   const i18n = await getI18n();
   const { t, tn, tr, name, f, locale } = i18n;
   const num = (n: number) => n.toLocaleString(INTL_LOCALE[locale]);
-  const { current, past } = await getMyGrades(v);
+  const [{ current, past }, invites, survey] = await Promise.all([getMyGrades(v), listMyRiskInvites(v), listMySurveyCourses(v)]);
+  const surveyLeft = survey.filter((c) => !c.voted).length;
   const cards = current.map((d) => {
     const plan = planFor(d.control, d.summary);
     const next = d.items.find((a) => a.kind !== "FINAL" && a.points === null && a.dueAt && a.dueAt > at);
@@ -137,6 +140,13 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
                     <p className={cn("flex items-center gap-2 font-semibold", T.text)}><T.icon className="h-5 w-5 shrink-0" aria-hidden />{text.headline}</p>
                     <p className="mt-1 text-sm">{text.detail}</p>
                   </div>
+                  {/* Раунд 6: деканат пригласил на консультацию по этой дисциплине */}
+                  {invites.has(d.id) && (
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-info/30 bg-info-bg p-3 text-sm">
+                      <p className="flex items-center gap-2"><CalendarHeart className="h-4 w-4 shrink-0 text-info" aria-hidden />{t("grades.invite.text", { date: f.dayMonth(invites.get(d.id)!) })}</p>
+                      <Link href="/appointments" className="font-semibold text-info underline-offset-2 hover:underline">{t("grades.invite.cta")}</Link>
+                    </div>
+                  )}
 
                   {/* 2. Где я сейчас */}
                   <PointsBar earned={s.earned} remaining={s.remainingMax} target={target} targetLabel={d.control === "CREDIT" ? t("grades.card.autoCredit") : t("grades.card.autoExcellent")} />
@@ -167,6 +177,13 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
             })}
           </div>
           <p className="mt-3 text-xs text-muted">{t("grades.card.rules")}</p>
+          {/* Раунд 6: приглашение пройти анонимный опрос, пока есть неоценённые курсы */}
+          {surveyLeft > 0 && (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4 text-sm">
+              <p className="flex items-center gap-2"><MessageSquareHeart className="h-5 w-5 shrink-0 text-primary dark:text-accent-text" aria-hidden />{t("survey.banner.text")}</p>
+              <Link href="/survey" className="font-semibold text-primary underline-offset-2 hover:underline dark:text-accent-text">{t("survey.banner.cta")}</Link>
+            </div>
+          )}
         </>
       ) : past.length ? (
         <div className="space-y-4">

@@ -10,5 +10,8 @@ import notifications from "./notifications";
 import profile from "./profile";
 import appointments from "./appointments";
 import assistant from "./assistant";
+import campus from "./campus";
+import survey from "./survey";
+import portfolio from "./portfolio";
 
-export const zh: Shape<Dict> = { common, auth, today, schedule, grades, requests, notifications, profile, appointments, assistant };
+export const zh: Shape<Dict> = { common, auth, today, schedule, grades, requests, notifications, profile, appointments, assistant, campus, survey, portfolio };

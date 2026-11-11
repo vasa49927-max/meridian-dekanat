@@ -163,3 +163,22 @@ input:-webkit-autofill:focus {
   box-shadow: 0 0 0 1000px var(--surface) inset;
   transition: background-color 9999s ease-out 0s;
 }
+
+/* Раунд 6: «бумага» для резюме — всегда светлые токены (как документ), в любой теме и при печати */
+.paper {
+  --surface: #ffffff;
+  --surface-2: #f4f1ea;
+  --fg: #141b2d;
+  --muted: #4f5564;
+  --line: #ddd6c6;
+  --primary: #14244b;
+  --primary-fg: #f8f4ea;
+  --accent-text: #7a5a1c;
+  --ok: #1e6b3a;
+  color-scheme: light;
+}
+@media print {
+  @page { size: A4; margin: 14mm; }
+  html, body { background: #fff !important; }
+  .paper { box-shadow: none !important; border: 0 !important; padding: 0 !important; }
+}

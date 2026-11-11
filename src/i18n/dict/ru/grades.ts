@@ -82,5 +82,6 @@ const grades = {
     autoCredit: "Зачёт автоматом", passed: "Итог {total} — зачтено", failed: "Итог {total} — не зачтено",
     autoExcellent: "отлично (автомат)", totalMark: "{total} — {mark}",
   },
+  invite: { text: "Деканат приглашает на консультацию ({date}) — разберём, как подтянуть баллы.", cta: "Записаться" },
 };
 export default grades;

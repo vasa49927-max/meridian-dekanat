@@ -1,4 +1,4 @@
-import { Bell, CalendarDays, FileText, GraduationCap, Sparkles, Sun, UserRound, CalendarClock, Inbox, Megaphone, CalendarCog, RotateCcw } from "lucide-react";
+import { Award, MapPinned, BarChart3, ShieldAlert, MessageSquareHeart, Bell, CalendarDays, FileText, GraduationCap, Sparkles, Sun, UserRound, CalendarClock, Inbox, Megaphone, CalendarCog, RotateCcw } from "lucide-react";
 
 export const STUDENT_NAV = [
   { href: "/", label: "Сегодня", key: "today", icon: Sun },
@@ -8,6 +8,9 @@ export const STUDENT_NAV = [
   { href: "/notifications", label: "Уведомления", key: "notifications", icon: Bell, badge: "unread" as const },
   { href: "/assistant", label: "Помощник", key: "assistant", icon: Sparkles },
   { href: "/appointments", label: "Запись к методисту", key: "appointments", icon: CalendarClock },
+  { href: "/portfolio", label: "Портфолио", key: "portfolio", icon: Award },
+  { href: "/survey", label: "Оценка курсов", key: "survey", icon: MessageSquareHeart },
+  { href: "/map", label: "Как пройти", key: "map", icon: MapPinned },
   { href: "/profile", label: "Профиль", key: "profile", icon: UserRound },
 ] as const;
 
@@ -21,6 +24,9 @@ export const STUDENT_TABS = [
 
 export const STAFF_NAV = [
   { href: "/staff", label: "Очередь заявок", key: "staffQueue", icon: Inbox },
+  { href: "/staff/analytics", label: "Панель руководителя", key: "staffAnalytics", icon: BarChart3 },
+  { href: "/staff/risks", label: "Риски студентов", key: "staffRisks", icon: ShieldAlert },
+  { href: "/staff/surveys", label: "Опросы о курсах", key: "staffSurveys", icon: MessageSquareHeart },
   { href: "/staff/announcements", label: "Объявления", key: "staffAnnouncements", icon: Megaphone },
   { href: "/staff/schedule", label: "Переносы пар", key: "staffLessons", icon: CalendarCog },
   { href: "/staff/appointments", label: "Приём студентов", key: "staffReception", icon: CalendarClock },

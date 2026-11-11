@@ -81,5 +81,6 @@ const grades: Shape<typeof ru> = {
     autoCredit: "Validation automatique", passed: "Total {total} — validé", failed: "Total {total} — non validé",
     autoExcellent: "excellent (automatique)", totalMark: "{total} — {mark}",
   },
+  invite: { text: "Le décanat vous invite à une consultation ({date}) pour voir comment remonter vos points.", cta: "Prendre rendez-vous" },
 };
 export default grades;

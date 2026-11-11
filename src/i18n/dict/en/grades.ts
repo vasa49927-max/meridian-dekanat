@@ -81,5 +81,6 @@ const grades: Shape<typeof ru> = {
     autoCredit: "Automatic credit", passed: "Final {total} — passed", failed: "Final {total} — not passed",
     autoExcellent: "excellent (automatic)", totalMark: "{total} — {mark}",
   },
+  invite: { text: "The dean's office invites you to a consultation ({date}) to plan how to raise your points.", cta: "Book a slot" },
 };
 export default grades;
