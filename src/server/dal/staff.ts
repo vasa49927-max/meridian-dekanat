@@ -48,7 +48,10 @@ export async function staffQueue(v: StaffViewer, f: QueueFilter, page = 0, size 
     .innerJoin(t.groups, eq(t.groups.id, t.students.groupId))
     .innerJoin(t.faculties, eq(t.faculties.id, t.groups.facultyId))
     .where(and(...conds));
-  const items = await base.orderBy(asc(t.requests.dueAt), asc(t.requests.createdAt)).limit(size + 1).offset(page * size);
+  // Раунд 7 (аудит): сначала то, что требует действия — новые, в работе, ждут студента (по сроку);
+  // «Готовы к выдаче» — в конце: раньше старые готовые справки занимали верх «Активных», а просрочки терялись в середине.
+  const needsAction = sql`case when ${t.requests.status} = 'READY' then 1 else 0 end`;
+  const items = await base.orderBy(needsAction, asc(t.requests.dueAt), asc(t.requests.createdAt)).limit(size + 1).offset(page * size);
   const [stats] = await db.select({
     submitted: sql<number>`count(*) filter (where ${t.requests.status} = 'SUBMITTED')`.mapWith(Number),
     inProgress: sql<number>`count(*) filter (where ${t.requests.status} = 'IN_PROGRESS')`.mapWith(Number),

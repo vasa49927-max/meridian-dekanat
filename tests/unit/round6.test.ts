@@ -136,3 +136,13 @@ describe("Панель руководителя и ИИ-черновик", () =>
     expect(await draftReply(staff, "00000000-0000-0000-0000-000000000000", "READY")).toBeNull();
   });
 });
+
+describe("Раунд 7: совпадение номера заявки", () => {
+  it("ошибка уникальности приходит с кодом 23505 в cause — по нему createMyRequest повторяет попытку", async () => {
+    const [r] = await db.select().from(t.requests).limit(1);
+    let err: unknown = null;
+    try { await db.insert(t.requests).values({ ...r, id: undefined as unknown as string }); } catch (e) { err = e; }
+    const pg = err as { code?: string; cause?: { code?: string } };
+    expect(pg.code === "23505" || pg.cause?.code === "23505").toBe(true);
+  });
+});

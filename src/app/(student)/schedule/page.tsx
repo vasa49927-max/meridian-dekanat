@@ -88,13 +88,13 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
   return (
     <div className="pt-2 lg:pt-0">
       {/* Правка капитана №3a: даты недели — крупно, номер недели — подписью. */}
-      <PageHeader title={t("schedule.title")} subtitle={view === "session" ? <span className="block font-serif text-xl font-bold text-fg lg:text-2xl">{t("schedule.sessionTitle", { y: p.y, y2: String(p.y + 1).slice(2) })}</span> : <><span className="block font-serif text-xl font-bold text-fg lg:text-2xl">{t("schedule.weekRange", { d: p.d, start: f.dayMonth(week), end: f.dayMonth(addDays(week, 5)), y: p.y })}</span>{weekNo > 0 && weekNo < 30 ? <span className="text-sm">{t("schedule.weekNo", { n: weekNo })}</span> : null}</>}
-        action={<LinkButton href="/schedule/calendar" variant="secondary" size="sm"><CalendarArrowDown className="h-4 w-4" aria-hidden />{t("schedule.toCalendar")}</LinkButton>} />
+      <PageHeader title={t("schedule.title")} subtitle={view === "session" ? <span className="block font-serif text-xl font-bold text-fg lg:text-2xl">{t("schedule.sessionTitle", { y: p.y, y2: String(p.y + 1).slice(2) })}</span> : <><span className="block font-serif text-xl font-bold text-fg lg:text-2xl">{t("schedule.weekRange", { d: p.d, start: f.dayMonth(week), end: f.dayMonth(addDays(week, 5)), y: p.y })}</span>{weekNo > 0 && weekNo < 30 ? <span className="text-sm max-sm:text-[13px]">{t("schedule.weekNo", { n: weekNo })}</span> : null}</>}
+        action={<LinkButton href="/schedule/calendar" variant="secondary" size="sm" className="max-sm:h-11 max-sm:w-11 max-sm:px-0" aria-label={t("schedule.toCalendar")}><CalendarArrowDown className="h-4 w-4" aria-hidden /><span className="max-sm:hidden">{t("schedule.toCalendar")}</span></LinkButton>} />
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <nav aria-label={t("schedule.views.label")} className="inline-flex rounded-xl border border-line bg-surface p-1">
           {(["day", "week", "session"] as const).map((vv) => (
-            <Link key={vv} aria-current={view === vv ? "page" : undefined} href={q(selected, vv)} className={cn("rounded-lg px-3.5 py-1.5 text-sm font-semibold", view === vv ? "bg-primary text-primary-fg" : "text-muted hover:text-fg")}>{t(`schedule.views.${vv}`)}</Link>
+            <Link key={vv} aria-current={view === vv ? "page" : undefined} href={q(selected, vv)} className={cn("rounded-lg px-3 py-1.5 text-sm font-semibold sm:px-3.5", view === vv ? "bg-primary text-primary-fg" : "text-muted hover:text-fg")}>{t(`schedule.views.${vv}`)}</Link>
           ))}
         </nav>
         {view !== "session" && <div className="ml-auto flex items-center gap-1">
@@ -106,7 +106,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
 
       {view === "session" ? <SessionView v={v} at={at} /> : <>
       {changesCount > 0 && (
-        <p className="mb-4 flex items-center gap-2 rounded-xl border border-warn-line bg-warn-bg px-3.5 py-2.5 text-sm font-medium text-warn"><ArrowLeftRight className="h-4 w-4 shrink-0" aria-hidden />{t("schedule.changesNote", { n: changesCount })}</p>
+        <p className="mb-4 flex items-center gap-2 rounded-xl border border-warn-line bg-warn-bg px-3.5 py-2 text-[13px] font-medium leading-snug text-warn sm:py-2.5 sm:text-sm"><ArrowLeftRight className="h-4 w-4 shrink-0" aria-hidden />{t("schedule.changesNote", { n: changesCount })}</p>
       )}
 
       {view === "day" ? (

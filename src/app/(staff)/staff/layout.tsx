@@ -18,7 +18,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   return (
     <div className="lg:grid lg:grid-cols-[272px_minmax(0,1fr)] lg:bg-[linear-gradient(to_right,var(--side)_272px,transparent_272px)]">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-fg">Перейти к содержимому</a>
-      <aside className="sticky top-0 hidden h-dvh flex-col gap-6 bg-side px-4 py-6 text-side-fg lg:flex">
+      <aside className="sticky top-0 hidden h-dvh flex-col gap-6 side-surface px-4 py-6 text-side-fg lg:flex">
         <div className="px-2"><Logo className="[&_svg]:h-9 [&_svg]:w-9" /><p className="mt-1 pl-12 text-xs uppercase tracking-widest text-accent">Деканат</p></div>
         <SideNav role="STAFF" />
         <dl className="grid grid-cols-2 gap-2 text-xs">

@@ -39,6 +39,16 @@
   --info-bg: #e6eefa;
   --focus: #b8892f;
   --shadow: 0 1px 2px rgb(20 27 45 / 0.04), 0 6px 20px rgb(20 27 45 / 0.05);
+  /* Раунд 7, «Посольство 2.0»: глубина, стекло, мягкие градиенты */
+  --shadow-lift: 0 2px 4px rgb(20 27 45 / 0.05), 0 18px 40px -12px rgb(20 27 45 / 0.18);
+  --ring-hi: inset 0 1px 0 rgb(255 255 255 / 0.7);
+  --glass: rgb(246 243 236 / 0.72);
+  --glass-line: rgb(20 36 75 / 0.08);
+  --bg-glow-1: rgb(184 137 47 / 0.10);
+  --bg-glow-2: rgb(20 36 75 / 0.07);
+  --hero-grad: radial-gradient(120% 140% at 100% 0%, #2c4485 0%, rgb(44 68 133 / 0) 55%), radial-gradient(90% 120% at 0% 100%, rgb(184 137 47 / 0.13) 0%, rgb(184 137 47 / 0) 50%), linear-gradient(135deg, #172a57 0%, #0f1c3f 100%);
+  --side-grad: linear-gradient(180deg, #1d3368 0%, #172a57 35%, #14244b 80%);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   color-scheme: light;
 }
 
@@ -72,7 +82,15 @@
   --info: #9cc0ff;
   --info-bg: #18233a;
   --focus: #e0b65c;
-  --shadow: none;
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 10px 30px -14px rgb(0 0 0 / 0.7);
+  --shadow-lift: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 22px 44px -16px rgb(0 0 0 / 0.85);
+  --ring-hi: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  --glass: rgb(11 16 32 / 0.72);
+  --glass-line: rgb(255 255 255 / 0.06);
+  --bg-glow-1: rgb(224 182 92 / 0.06);
+  --bg-glow-2: rgb(70 100 190 / 0.12);
+  --hero-grad: radial-gradient(120% 140% at 100% 0%, #314c96 0%, rgb(49 76 150 / 0) 55%), radial-gradient(90% 120% at 0% 100%, rgb(224 182 92 / 0.16) 0%, rgb(224 182 92 / 0) 50%), linear-gradient(135deg, #1c2d5c 0%, #111c3d 100%);
+  --side-grad: linear-gradient(180deg, #16224a 0%, #111a3a 40%, #0e1530 80%);
   color-scheme: dark;
 }
 
@@ -108,7 +126,7 @@
   --color-info-bg: var(--info-bg);
   --font-sans: "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-serif: "PT Serif", Georgia, serif;
-  --radius-card: 16px;
+  --radius-card: 18px;
   --shadow-card: var(--shadow);
 }
 
@@ -117,7 +135,11 @@ html {
   scroll-padding-top: 80px;
 }
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(60rem 40rem at 100% -10%, var(--bg-glow-1), transparent 60%),
+    radial-gradient(50rem 36rem at -10% 10%, var(--bg-glow-2), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--fg);
   font-family: var(--font-sans);
   font-size: 15px;
@@ -129,6 +151,52 @@ body {
   outline-offset: 2px;
   border-radius: 6px;
 }
+::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+h1, h2 { letter-spacing: -0.012em; }
+
+/* ───────── Раунд 7: «Посольство 2.0» ─────────
+   Принцип: та же айдентика (тёмно-синий, латунь, засечки), но с глубиной и движением.
+   Движение умеренное и отключается настройкой «уменьшить движение» (правило выше). */
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes pulse-dot { 0%, 100% { box-shadow: 0 0 0 0 rgb(224 182 92 / 0.55); } 60% { box-shadow: 0 0 0 7px rgb(224 182 92 / 0); } }
+
+/* Появление страницы: при переходе между разделами содержимое мягко «поднимается» */
+main > * { animation: rise 0.42s var(--ease-out) both; }
+/* Каскад для сеток карточек: каждая следующая — на 40 мс позже (не дольше 0,3 с в сумме) */
+.stagger > * { animation: rise 0.5s var(--ease-out) both; }
+.stagger > *:nth-child(2) { animation-delay: 40ms; } .stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 120ms; } .stagger > *:nth-child(5) { animation-delay: 160ms; }
+.stagger > *:nth-child(6) { animation-delay: 200ms; } .stagger > *:nth-child(n+7) { animation-delay: 240ms; }
+
+/* Карточки: тонкий блик сверху + многослойная тень; интерактивные приподнимаются при наведении */
+.card { box-shadow: var(--ring-hi), var(--shadow); }
+.lift, .quick-tile { transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), border-color 0.2s; }
+@media (hover: hover) {
+  .lift:hover, .quick-tile:hover { transform: translateY(-2px); box-shadow: var(--ring-hi), var(--shadow-lift); border-color: color-mix(in srgb, var(--primary) 25%, var(--line)); }
+}
+.lift:active, .quick-tile:active { transform: translateY(0) scale(0.985); }
+
+/* Герой (следующая пара, вход): глубокий градиент вместо плоской заливки; глобус медленно вращается */
+.hero-surface { background: var(--hero-grad); box-shadow: 0 24px 48px -24px rgb(15 28 63 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.08); }
+.globe-spin { animation: spin-slow 120s linear infinite; transform-origin: 50% 50%; }
+.live-dot { animation: pulse-dot 2.2s ease-out infinite; }
+.hero-tile { background: rgb(255 255 255 / 0.07); border: 1px solid rgb(255 255 255 / 0.08); backdrop-filter: blur(6px); }
+
+/* Стекло: верхняя панель и нижнее меню телефона */
+.glass { background: var(--glass); border-color: var(--glass-line); -webkit-backdrop-filter: saturate(160%) blur(16px); backdrop-filter: saturate(160%) blur(16px); }
+
+/* Боковое меню: градиент + латунная метка активного пункта */
+.side-surface { background: var(--side-grad); }
+.nav-item-active::before { content: ""; position: absolute; left: -4px; top: 9px; bottom: 9px; width: 3px; border-radius: 3px; background: var(--accent); animation: fade 0.3s var(--ease-out) both; }
+
+/* Кнопки: отклик на нажатие */
+button:not(:disabled):active, a.btn-press:active { transform: scale(0.98); }
+button { transition: transform 0.15s var(--ease-out), background-color 0.2s, opacity 0.2s, box-shadow 0.2s; }
+
+/* Тонкая полоса прокрутки в стиле темы */
+* { scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }

@@ -29,7 +29,7 @@ export function TopBar({ unread, index, home = "/" }: { unread: number; index: P
     return () => window.removeEventListener("keydown", onKey);
   }, []);
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur lg:static lg:border-0 lg:bg-transparent lg:backdrop-blur-none">
+    <header className="glass sticky top-0 z-30 border-b">
       <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-2 px-4 lg:h-20 lg:px-9">
         <Link href={home} className="mr-auto flex items-center gap-2 text-primary lg:hidden dark:text-fg" aria-label={t("common.brandHome")}>
           <LogoMark className="h-9 w-9" />

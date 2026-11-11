@@ -32,7 +32,7 @@ export default async function NewRequestPage() {
             <ul className="grid gap-2.5 md:grid-cols-2">
               {g.list.map((x) => (
                 <li key={x.code}>
-                  <Link href={`/requests/new/${x.code}`} className="flex h-full items-start gap-3 rounded-2xl border border-line bg-surface p-4 hover:border-primary">
+                  <Link href={`/requests/new/${x.code}`} className="lift card flex h-full items-start gap-3 rounded-2xl border border-line bg-surface p-4 hover:border-primary">
                     <RequestIcon name={x.icon} />
                     <span className="min-w-0 flex-1">
                       <span className="block font-semibold leading-snug">{tr("rt", x.title)}</span>

@@ -11,7 +11,7 @@ const common: Shape<typeof ru> = {
     sections: "Rubriques", mainSections: "Rubriques principales", today: "Aujourd’hui", schedule: "Planning", grades: "Résultats", requests: "Demandes et attestations",
     requestsShort: "Demandes", notifications: "Notifications", assistant: "Assistant", appointments: "Rendez-vous", profile: "Profil", more: "Plus",
     unreadCount: { one: "{n} non lue", other: "{n} non lues" },
-    staffAnalytics: "Tableau de bord", staffRisks: "Étudiants à risque", survey: "Évaluation des cours", map: "Comment y aller", portfolio: "Portfolio", staffSurveys: "Enquêtes de cours", staffQueue: "File des demandes", staffAnnouncements: "Annonces", staffLessons: "Changements de cours", staffReception: "Accueil des étudiants", staffDemo: "Données de démo",
+    groups: {"study": "Études", "office": "Décanat", "me": "Mon espace", "work": "Travail", "analytics": "Analyse", "service": "Service"}, staffAnalytics: "Tableau de bord", staffRisks: "Étudiants à risque", survey: "Évaluation des cours", map: "Comment y aller", portfolio: "Portfolio", staffSurveys: "Enquêtes de cours", staffQueue: "File des demandes", staffAnnouncements: "Annonces", staffLessons: "Changements de cours", staffReception: "Accueil des étudiants", staffDemo: "Données de démo",
     hasUnread: "Vous avez des notifications non lues", skip: "Aller au contenu", logout: "Se déconnecter", studentRole: "{course}e année · étudiant",
   },
   top: { search: "Recherche et actions", searchAria: "Recherche et actions (Ctrl+K)", notifications: "Notifications", notificationsUnread: "Notifications : {n} non lues" },
@@ -27,7 +27,7 @@ const common: Shape<typeof ru> = {
   lang: { label: "Langue", note: "Les messages du décanat s’affichent dans leur langue d’origine." },
   tour: {
     step: "Astuce {i} sur {n}", welcome: "bienvenue, {name}", close: "Fermer les astuces", start: "Compris, c’est parti", reopen: "Astuces",
-    s1t: "L’essentiel est sur « Aujourd’hui »", s1: "Votre prochain cours avec la salle et le compte à rebours, et juste en dessous les changements de la semaine. Plus besoin de fouiller le chat du groupe.",
+    s1t: "L’essentiel est sur « Aujourd’hui »", s1: "Votre prochain cours avec la salle et le compte à rebours ; en dessous, les actions rapides (attestation, semaine, rendez-vous, itinéraire) et les changements de la semaine. Plus besoin de fouiller le chat du groupe.",
     s2t: "« Résultats » vous dit par où commencer", s2: "Vos points, ce qu’il manque pour la note automatique et le prochain devoir. Le calculateur « et si » est dans chaque carte.",
     s3t: "Des attestations sans file d’attente", s3: "« Demandes » → choisissez un document → un formulaire d’une minute. Le statut s’affiche ici, et l’attestation arrive avec un QR code de vérification.",
     s4t: "Recherche et assistant", s4: "Ctrl+K (ou la loupe en haut) mène partout. L’« Assistant » répond selon le règlement et peut préremplir une demande — c’est vous qui l’envoyez.",

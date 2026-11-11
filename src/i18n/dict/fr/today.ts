@@ -40,5 +40,6 @@ const today: Shape<typeof ru> = {
     allRead: "tout est lu", assistant: "Assistant du décanat", assistantHint: "L’IA répond selon le règlement et vos données",
     appointmentsHint: "sans file d’attente", profileHint: "données, langues, sessions",
   },
+  quick: {"aria": "Actions rapides", "cert": "Demander une attestation", "week": "Emploi du temps de la semaine", "appointment": "Prendre rendez-vous", "map": "Itinéraire vers le cours", "request": "Demande"},
 };
 export default today;

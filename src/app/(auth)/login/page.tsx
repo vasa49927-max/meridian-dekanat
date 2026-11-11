@@ -21,7 +21,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { t } = await getI18n();
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1fr_minmax(480px,560px)]">
-      <section className="relative hidden overflow-hidden bg-hero p-10 text-hero-fg lg:flex lg:flex-col xl:p-12" aria-label={t("auth.login.about")}>
+      <section className="hero-surface relative hidden overflow-hidden p-10 text-hero-fg lg:flex lg:flex-col xl:p-12" aria-label={t("auth.login.about")}>
         <svg className="absolute -right-40 -top-24 h-[720px] w-[720px] opacity-[0.08]" viewBox="0 0 40 40" aria-hidden>
           <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" strokeWidth=".4" />
           <path d="M20 3c-6.5 4.5-9.5 10.2-9.5 17s3 12.5 9.5 17M20 3c6.5 4.5 9.5 10.2 9.5 17s-3 12.5-9.5 17M3 20h34M5 26h30M5 14h30" fill="none" stroke="currentColor" strokeWidth=".4" />

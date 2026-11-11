@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarCheck2, Coffee, FileText, Megaphone, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarCheck2, CalendarClock, CalendarRange, Coffee, FilePlus2, FileText, MapPinned, Megaphone, Sparkles } from "lucide-react";
 import { mapHref } from "@/lib/campus";
 import { requireStudent } from "@/server/auth/guards";
 import { getMyGrades, getNextLesson, listMyDeadlines, listMyLessons, listMyNotifications, listMyUpcomingChanges } from "@/server/dal/student";
@@ -83,7 +83,7 @@ export default async function TodayPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-3 lg:gap-4">
+      <div className="stagger grid gap-3 lg:grid-cols-3 lg:gap-4">
         <div className="lg:col-span-2">
           {next ? (
             <NextLessonCard
@@ -97,7 +97,7 @@ export default async function TodayPage() {
           )}
         </div>
 
-        <Card aria-labelledby="grades-h" className="max-lg:order-1 lg:row-span-1">
+        <Card aria-labelledby="grades-h" className="max-lg:order-3 lg:row-span-1">
           <CardTitle id="grades-h" action={<Link href="/grades" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">{t("common.actions.more")}</Link>}>{t("today.grades.title")}</CardTitle>
           <div className="flex items-end gap-3">
             <p className="font-serif text-[44px] leading-none tabular">{pace !== null ? `${pace}%` : "—"}</p>
@@ -128,14 +128,41 @@ export default async function TodayPage() {
           </ul>
         </Card>
 
+        {/* Раунд 7 (аудит удобства): частые задачи — в одно касание с главного экрана.
+            До: «Заказать справку» и статус заявки на телефоне были в 4 экранах прокрутки (≈ 8–11 с). */}
+        <nav aria-label={t("today.quick.aria")} className="min-w-0 lg:col-span-3">
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:gap-3">
+            {[
+              { href: "/requests/new", icon: FilePlus2, label: t("today.quick.cert") },
+              { href: "/schedule?view=week", icon: CalendarRange, label: t("today.quick.week") },
+              { href: "/appointments", icon: CalendarClock, label: t("today.quick.appointment") },
+              { href: next ? mapHref(next.room, next.buildingCode) : "/map", icon: MapPinned, label: t("today.quick.map") },
+            ].map((q) => (
+              <li key={q.href}>
+                <Link href={q.href} className="quick-tile group flex h-full items-center gap-2.5 rounded-2xl border border-line bg-surface px-3 py-2.5 text-[13.5px] font-semibold leading-tight shadow-[var(--shadow-card)] lg:px-4 lg:py-3 lg:text-sm">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-110 dark:text-accent-text" aria-hidden><q.icon className="h-[18px] w-[18px]" /></span>
+                  <span className="min-w-0">{q.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {activeReqs[0] && (
+            <Link href={`/requests/${activeReqs[0].id}`} className="mt-2 flex items-center gap-2 rounded-2xl border border-line bg-surface px-3 py-2.5 text-[13px] shadow-[var(--shadow-card)] hover:border-primary/40 lg:hidden">
+              <FileText className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+              <span className="min-w-0 flex-1 truncate font-semibold">{tr("rt", activeReqs[0].title)}</span>
+              <StatusBadge status={activeReqs[0].status} />
+            </Link>
+          )}
+        </nav>
+
         {/* Обзор раунда 2: изменения — боль №1 по опросу (11 из 11), на телефоне показываем их сразу после карточки пары */}
         <div className="lg:col-span-3"><ChangeBanner changes={changes} /></div>
 
         {/* Раунд 3: нижняя часть — три колонки-стопки без растягивания карточек (на телефоне колонки «растворяются» — порядок задают order-классы) */}
         <div className="max-lg:contents lg:col-span-3 lg:grid lg:grid-cols-3 lg:items-start lg:gap-4">
           <div className="max-lg:contents lg:flex lg:flex-col lg:gap-4">
-            <Card aria-labelledby="day-h" className="max-lg:order-2">
-              <CardTitle id="day-h" action={<Link href="/schedule" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">{t("today.day.week")}</Link>}>
+            <Card aria-labelledby="day-h" className="max-lg:order-1">
+              <CardTitle id="day-h" action={<Link href="/schedule?view=week" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">{t("today.day.week")}</Link>}>
                 {dayTitle} · {(() => { const n = dayList.filter((l) => l.status !== "CANCELLED").length; return n ? tn("today.day.lessons", n) : t("today.day.none"); })()}
               </CardTitle>
               {showNextDay && <p className="-mt-1 mb-1 text-[13px] text-muted">{t("today.day.nextDayNote")}</p>}
@@ -162,7 +189,7 @@ export default async function TodayPage() {
               ) : <EmptyState icon={<CalendarCheck2 />} title={t("today.day.empty")} className="py-6">{next ? t("today.day.nearest", { day: f.rel(next.startsAt, at), time: f.time(next.startsAt) }) : null}</EmptyState>}
             </Card>
 
-            <Card aria-labelledby="ai-h" className="max-lg:order-2 lg:col-span-1">
+            <Card aria-labelledby="ai-h" className="max-lg:order-1 lg:col-span-1">
               <CardTitle id="ai-h">{t("today.ai.title")}</CardTitle>
               <p className="text-sm text-muted">{t("today.ai.text")}</p>
               <form action="/assistant" className="mt-3 flex gap-2">
@@ -174,7 +201,7 @@ export default async function TodayPage() {
 
           </div>
           <div className="max-lg:contents lg:flex lg:flex-col lg:gap-4">
-            <Card aria-labelledby="dl-h" className="max-lg:order-2">
+            <Card aria-labelledby="dl-h" className="max-lg:order-1">
               <CardTitle id="dl-h">{t("today.deadlines.title")}</CardTitle>
               {deadlines.length ? (
                 <ul className="divide-y divide-line">
@@ -215,7 +242,7 @@ export default async function TodayPage() {
               <Link href="/requests/new" className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline dark:text-accent-text"><FileText className="h-4 w-4" aria-hidden />{t("today.requests.order")}</Link>
             </Card>
 
-            <Card aria-labelledby="news-h" className="max-lg:order-2 lg:col-span-1">
+            <Card aria-labelledby="news-h" className="max-lg:order-3 lg:col-span-1">
               <CardTitle id="news-h" action={<Link href="/notifications?f=ANNOUNCEMENT" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">{t("common.actions.all")}</Link>}>{t("today.news.title")}</CardTitle>
               {news.items.length ? (
                 <ul className="divide-y divide-line">

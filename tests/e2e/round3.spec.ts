@@ -255,8 +255,9 @@ test.describe("Раунд 4: правки капитана", () => {
   test("карточка пары: плашка с должностью и ФИО преподавателя", async ({ page }) => {
     await login(page, "anna");
     const next = page.getByRole("region", { name: /^Следующая пара/ });
-    await expect(next.getByRole("definition").filter({ hasText: /^Ковалёва Марина Романовна$/ })).toBeVisible();
-    await expect(next.getByRole("definition").filter({ hasText: /^Доцент$/ })).toBeVisible();
+    // Раунд 7: плашка вынесена из <dl> (axe: definition-list) — проверяем по тексту
+    await expect(next.getByText("Ковалёва Марина Романовна", { exact: true })).toBeVisible();
+    await expect(next.getByText("Доцент", { exact: true })).toBeVisible();
   });
 
   test("экран входа на компьютере помещается без прокрутки (1440×760 и 1366×680)", async ({ browser }) => {

@@ -27,7 +27,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   return (
     <div className="lg:grid lg:grid-cols-[272px_minmax(0,1fr)] lg:bg-[linear-gradient(to_right,var(--side)_272px,transparent_272px)]">
       <a href="#main" className="sr-only z-50 rounded-lg bg-primary px-4 py-2 text-primary-fg focus:not-sr-only focus:fixed focus:left-3 focus:top-3">{t("common.nav.skip")}</a>
-      <aside className="sticky top-0 hidden h-dvh flex-col gap-6 bg-side px-4 py-6 text-side-fg lg:flex">
+      <aside className="sticky top-0 hidden h-dvh flex-col gap-6 side-surface px-4 py-6 text-side-fg lg:flex">
         <Logo className="px-2 [&_svg]:h-9 [&_svg]:w-9" />
         <SideNav role="STUDENT" unread={unread} />
         <div className="flex items-center gap-3 rounded-2xl bg-side-on p-3">

@@ -38,5 +38,6 @@ const today = {
     allRead: "всё прочитано", assistant: "Помощник деканата", assistantHint: "ИИ отвечает по Положению и вашим данным",
     appointmentsHint: "без живой очереди", profileHint: "данные, языки, сессии",
   },
+  quick: {"aria": "Быстрые действия", "cert": "Заказать справку", "week": "Расписание на неделю", "appointment": "Записаться к методисту", "map": "Как пройти на пару", "request": "Заявка"},
 };
 export default today;

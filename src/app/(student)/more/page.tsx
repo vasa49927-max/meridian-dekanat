@@ -4,6 +4,7 @@ import { requireStudent } from "@/server/auth/guards";
 import { countMyUnread } from "@/server/dal/student";
 import { PageHeader } from "@/components/ui/page-header";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
+import { LanguageSwitcher } from "@/components/shell/language-switcher";
 import { TourButton } from "@/components/shell/onboarding";
 import { logoutAction } from "../../(auth)/login/actions";
 import { getI18n } from "@/i18n/server";
@@ -42,6 +43,7 @@ export default async function MorePage() {
         ))}
       </ul>
       <div className="mt-4 flex flex-wrap gap-2">
+        <LanguageSwitcher />
         <ThemeToggle withLabel />
         <TourButton className="inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-medium hover:bg-surface-2" />
         <form action={logoutAction}><button className="inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-medium text-danger hover:bg-surface-2"><LogOut className="h-5 w-5" aria-hidden />{t("common.nav.logout")}</button></form>

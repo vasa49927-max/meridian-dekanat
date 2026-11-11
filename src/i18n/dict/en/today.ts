@@ -40,5 +40,6 @@ const today: Shape<typeof ru> = {
     allRead: "all read", assistant: "Dean’s office assistant", assistantHint: "AI answers using the regulations and your data",
     appointmentsHint: "no waiting in line", profileHint: "details, languages, sessions",
   },
+  quick: {"aria": "Quick actions", "cert": "Order a certificate", "week": "This week’s timetable", "appointment": "Book a coordinator", "map": "Route to class", "request": "Request"},
 };
 export default today;

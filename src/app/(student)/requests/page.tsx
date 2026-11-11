@@ -31,7 +31,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
         <h2 id="pop-h" className="mb-2 text-sm font-semibold text-muted">{t("requests.list.popular")}</h2>
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0">
           {types.filter((x) => x.popular).map((x) => (
-            <Link key={x.code} href={`/requests/new/${x.code}`} className="flex min-w-[240px] items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 hover:border-primary">
+            <Link key={x.code} href={`/requests/new/${x.code}`} className="lift card flex min-w-[240px] items-center gap-3 rounded-2xl border border-line bg-surface p-3.5 hover:border-primary">
               <RequestIcon name={x.icon} />
               <span className="min-w-0"><span className="block text-sm font-semibold leading-snug">{tr("rt", x.title)}</span><span className="block text-xs text-muted">{x.slaDays === 1 ? t("requests.list.slaOneDay") : tn("requests.list.slaUpTo", x.slaDays)} · {t("requests.list.withQr")}</span></span>
             </Link>
@@ -49,7 +49,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
           {shown.map((r) => (
             <li key={r.id}>
               <Link href={`/requests/${r.id}`} className="block">
-                <Card as="div" className="flex flex-wrap items-start gap-3 transition-colors hover:border-primary sm:flex-nowrap">
+                <Card as="div" className="lift flex flex-wrap items-start gap-3 hover:border-primary sm:flex-nowrap">
                   <RequestIcon name={r.icon} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold leading-snug">{tr("rt", r.title)}</h3>{r.documentId && <span className="inline-flex items-center gap-1 text-xs text-ok"><QrCode className="h-3.5 w-3.5" aria-hidden />{t("requests.list.eDoc")}</span>}</div>

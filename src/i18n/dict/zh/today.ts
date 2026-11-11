@@ -40,5 +40,6 @@ const today: Shape<typeof ru> = {
     allRead: "已全部阅读", assistant: "教务助手", assistantHint: "AI 依据规章和你的数据作答",
     appointmentsHint: "无需排队", profileHint: "个人信息、语言、登录会话",
   },
+  quick: {"aria": "快捷操作", "cert": "申请证明", "week": "本周课表", "appointment": "预约教务员", "map": "去教室的路线", "request": "申请"},
 };
 export default today;

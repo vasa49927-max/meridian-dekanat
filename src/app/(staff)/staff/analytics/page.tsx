@@ -116,7 +116,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
 
       <Card className="mt-4">
         <CardTitle>Методисты</CardTitle>
-        <div className="-mx-4 overflow-x-auto px-4">
+        <div className="-mx-4 overflow-x-auto px-4" tabIndex={0} role="region" aria-label="Таблица методистов">
           <table className="w-full min-w-[560px] text-sm">
             <thead className="text-left text-xs uppercase tracking-wider text-muted"><tr><th className="py-2 font-semibold">Сотрудник</th><th className="py-2 text-right font-semibold">Закрыто</th><th className="py-2 text-right font-semibold">Среднее время</th><th className="py-2 text-right font-semibold">В срок</th><th className="py-2 text-right font-semibold">В работе</th><th className="py-2 text-right font-semibold">Оценка</th></tr></thead>
             <tbody className="divide-y divide-line">

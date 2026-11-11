@@ -11,7 +11,7 @@ const common: Shape<typeof ru> = {
     sections: "栏目", mainSections: "主要栏目", today: "今天", schedule: "课表", grades: "成绩", requests: "申请与证明",
     requestsShort: "申请", notifications: "通知", assistant: "助手", appointments: "预约教务员", profile: "个人资料", more: "更多",
     unreadCount: { other: "{n} 条未读" },
-    staffAnalytics: "管理看板", staffRisks: "风险学生", survey: "课程评价", map: "怎么走", portfolio: "个人档案", staffSurveys: "课程问卷", staffQueue: "申请队列", staffAnnouncements: "公告", staffLessons: "调课", staffReception: "学生接待", staffDemo: "演示数据",
+    groups: {"study": "学习", "office": "教务处", "me": "我的", "work": "工作", "analytics": "分析", "service": "服务"}, staffAnalytics: "管理看板", staffRisks: "风险学生", survey: "课程评价", map: "怎么走", portfolio: "个人档案", staffSurveys: "课程问卷", staffQueue: "申请队列", staffAnnouncements: "公告", staffLessons: "调课", staffReception: "学生接待", staffDemo: "演示数据",
     hasUnread: "有未读通知", skip: "跳到正文", logout: "退出", studentRole: "{course} 年级 · 学生",
   },
   top: { search: "搜索与操作", searchAria: "搜索与操作（Ctrl+K）", notifications: "通知", notificationsUnread: "通知：{n} 条未读" },
@@ -27,7 +27,7 @@ const common: Shape<typeof ru> = {
   lang: { label: "语言", note: "教务处发布的消息以原文显示。" },
   tour: {
     step: "提示 {i} / {n}", welcome: "{name}，欢迎", close: "关闭提示", start: "知道了，开始", reopen: "使用提示",
-    s1t: "重要信息都在“今天”", s1: "下一节课的教室和倒计时，下方就是本周的调课和停课。不必再翻群聊。",
+    s1t: "重要信息都在“今天”", s1: "下一节课的教室和倒计时；下方是快捷操作（证明、本周课表、预约、路线）和本周调课。不必再翻群聊。",
     s2t: "“成绩”告诉你从哪里开始", s2: "已有多少分、离免考还差多少、下一项作业是什么。每张卡片里都有“如果……”计算器。",
     s3t: "办证明不用排队", s3: "“申请”→ 选择文件 → 一分钟填完表。状态在这里更新，办好的证明附带验证二维码。",
     s4t: "搜索与助手", s4: "Ctrl+K（或顶部放大镜）可快速前往任何页面。“助手”依据校规回答，并可代填申请——由你提交。",

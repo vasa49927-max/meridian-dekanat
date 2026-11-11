@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 
 export function Card({ className, as: Tag = "section", ...p }: React.HTMLAttributes<HTMLElement> & { as?: "section" | "div" | "article" | "li" }) {
-  return <Tag className={cn("rounded-[var(--radius-card)] border border-line bg-surface p-4 shadow-[var(--shadow-card)] lg:p-5", className)} {...p} />;
+  return <Tag className={cn("card rounded-[var(--radius-card)] border border-line bg-surface p-4 lg:p-5", className)} {...p} />;
 }
 
 export function CardTitle({ children, action, className, id }: { children: React.ReactNode; action?: React.ReactNode; className?: string; id?: string }) {

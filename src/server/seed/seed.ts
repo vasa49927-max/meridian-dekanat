@@ -237,6 +237,9 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
     const statusText: Record<string, string> = { SUBMITTED: "подана", IN_PROGRESS: "в работе", NEEDS_INFO: "нужно дополнить", READY: "готова", ISSUED: "выдана", REJECTED: "отклонена" };
 
     let reqNo = 0, colleagueTurn = 0;
+    // Раунд 7: номера заявок — случайные 5 цифр; при ~100 демо-заявках совпадение случалось примерно в 5% сбросов
+    const usedNumbers = new Set<string>();
+    const uniqueNumber = () => { let n = newRequestNumber(); while (usedNumbers.has(n)) n = newRequestNumber(); usedNumbers.add(n); return n; };
     async function addRequest(st: Stu, code: string, payload: Record<string, string>, events: Ev[], comment?: string) {
       const t = rtypes[code];
       // Заявки трёх демо-студентов (первые 8) ведёт Белова — её кабинет показываем жюри; часть остальных — коллега.
@@ -245,7 +248,7 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
       const created = hoursAgo(events[0][1]);
       const last = events[events.length - 1];
       const [r] = await tx.insert(s.requests).values({
-        number: newRequestNumber(), studentId: st.id, typeId: t.id, status: last[0], payload, studentComment: comment ?? null,
+        number: uniqueNumber(), studentId: st.id, typeId: t.id, status: last[0], payload, studentComment: comment ?? null,
         staffComment: last[2] ?? null, assigneeStaffId: events.length > 1 ? who.id : null,
         dueAt: addDays(created, t.slaDays), createdAt: created, updatedAt: hoursAgo(last[1]),
       }).returning();

@@ -89,7 +89,11 @@ export async function createMyRequest(v: StudentViewer, code: string, raw: Recor
       });
       return { ok: true as const, id };
     } catch (e) {
-      if (attempt === 2 || !(e instanceof Error) || !e.message.includes("requests_number_unique")) throw e;
+      // Раунд 7: Drizzle оборачивает ошибку PostgreSQL («Failed query: …»), код 23505 лежит в cause —
+      // прежняя проверка по тексту сообщения не срабатывала, и повтор при совпадении номера не выполнялся.
+      const pg = (e as { code?: string; cause?: { code?: string; constraint?: string } });
+      const unique = pg.code === "23505" || pg.cause?.code === "23505";
+      if (attempt === 2 || !unique) throw e;
     }
   }
   return { ok: false as const, error: m.createFailed };

@@ -49,7 +49,7 @@ export default async function StaffQueuePage({ searchParams }: { searchParams: P
         </details>
       )}
       <nav aria-label="Статус" className="-mx-4 mb-3 flex gap-1.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-wrap lg:px-0">
-        <Link href={qs({ mine: mine ? undefined : "1", page: undefined })} aria-pressed={mine}
+        <Link href={qs({ mine: mine ? undefined : "1", page: undefined })} aria-current={mine ? "page" : undefined}
           className={cn("whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-semibold", mine ? "border-accent bg-accent text-[#14182a]" : "border-line bg-surface text-fg hover:bg-surface-2")}>
           Мои · {stats.mine}
         </Link>

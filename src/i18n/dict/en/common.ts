@@ -11,7 +11,7 @@ const common: Shape<typeof ru> = {
     sections: "Sections", mainSections: "Main sections", today: "Today", schedule: "Timetable", grades: "Grades", requests: "Requests & certificates",
     requestsShort: "Requests", notifications: "Notifications", assistant: "Assistant", appointments: "Book a coordinator", profile: "Profile", more: "More",
     unreadCount: { one: "{n} unread", other: "{n} unread" },
-    staffAnalytics: "Management dashboard", staffRisks: "Students at risk", survey: "Course feedback", map: "How to get there", portfolio: "Portfolio", staffSurveys: "Course surveys", staffQueue: "Request queue", staffAnnouncements: "Announcements", staffLessons: "Class changes", staffReception: "Student reception", staffDemo: "Demo data",
+    groups: {"study": "Studies", "office": "Dean’s office", "me": "My space", "work": "Work", "analytics": "Analytics", "service": "Service"}, staffAnalytics: "Management dashboard", staffRisks: "Students at risk", survey: "Course feedback", map: "How to get there", portfolio: "Portfolio", staffSurveys: "Course surveys", staffQueue: "Request queue", staffAnnouncements: "Announcements", staffLessons: "Class changes", staffReception: "Student reception", staffDemo: "Demo data",
     hasUnread: "You have unread notifications", skip: "Skip to content", logout: "Log out", studentRole: "Year {course} · student",
   },
   top: { search: "Search and actions", searchAria: "Search and actions (Ctrl+K)", notifications: "Notifications", notificationsUnread: "Notifications: {n} unread" },
@@ -27,7 +27,7 @@ const common: Shape<typeof ru> = {
   lang: { label: "Language", note: "Messages from the dean’s office are shown in the original language." },
   tour: {
     step: "Tip {i} of {n}", welcome: "welcome, {name}", close: "Close tips", start: "Got it, let’s start", reopen: "Tips for the app",
-    s1t: "Everything important is on “Today”", s1: "Your next class with room and countdown, and right below it — this week’s changes and cancellations. No more searching the group chat.",
+    s1t: "Everything important is on “Today”", s1: "Your next class with room and countdown; below it — quick actions (certificate, week, booking, route) and this week’s changes. No more searching the group chat.",
     s2t: "“Grades” tells you where to start", s2: "How many points you have, how many you need for an automatic grade, and what’s due next. The “what if” calculator is in every card.",
     s3t: "Certificates without queues", s3: "“Requests” → choose a document → a one-minute form. The status updates right here, and the certificate comes with a verification QR code.",
     s4t: "Search and assistant", s4: "Ctrl+K (or the magnifier at the top) takes you anywhere. The “Assistant” answers using the regulations and can fill in a request — you send it.",

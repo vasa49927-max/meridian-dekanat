@@ -48,37 +48,37 @@ export function NextLessonCard(p: Props) {
     [t("today.next.room"), p.room, p.building],
   ];
   return (
-    <section aria-label={t("today.next.aria", { label, title: p.title, weekday: dayLine, date: f.dayMonth(start), time: f.time(start), room: p.room })} className="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] bg-hero p-4 text-hero-fg sm:p-5 lg:p-6">
-      <svg className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 opacity-[0.07]" viewBox="0 0 40 40" aria-hidden>
+    <section aria-label={t("today.next.aria", { label, title: p.title, weekday: dayLine, date: f.dayMonth(start), time: f.time(start), room: p.room })} className="hero-surface relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] p-4 text-hero-fg sm:p-5 lg:p-6">
+      <svg className="globe-spin pointer-events-none absolute -right-16 -top-16 h-64 w-64 opacity-[0.09]" viewBox="0 0 40 40" aria-hidden>
         <circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" strokeWidth=".6" /><path d="M20 3c-6.5 4.5-9.5 10.2-9.5 17s3 12.5 9.5 17M20 3c6.5 4.5 9.5 10.2 9.5 17s-3 12.5-9.5 17M5 26h30M5 14h30" fill="none" stroke="currentColor" strokeWidth=".6" />
       </svg>
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold text-[#14182a]">{label}</span>
-        {countdown && <span className="rounded-full bg-hero-2 px-3 py-1 text-sm font-semibold" aria-live="polite">{countdown}</span>}
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-bold text-[#14182a]">{(ongoing || soon) && <i className="live-dot h-1.5 w-1.5 rounded-full bg-[#14182a]" aria-hidden />}{label}</span>
+        {countdown && <span className="hero-tile rounded-full px-3 py-1 text-sm font-semibold" aria-live="polite">{countdown}</span>}
       </div>
       <h2 className="font-serif text-[26px] leading-[1.15] lg:text-[32px]">{p.title}</h2>
 
       {/* Плитка «День» шире остальных: дата «28 сентября» должна влезать без переноса посреди слова */}
       <dl className="mt-4 grid grid-cols-[1.4fr_1fr_1fr] gap-1.5 sm:grid-cols-3 sm:gap-3 lg:mt-auto lg:pt-5">
         {tiles.map(([k, val, sub]) => (
-          <div key={k} className="min-w-0 rounded-xl bg-hero-2/70 px-2.5 py-2.5 sm:px-3">
+          <div key={k} className="hero-tile min-w-0 rounded-xl px-2.5 py-2.5 sm:px-3">
             <dt className="text-[10px] font-semibold uppercase tracking-wider text-hero-muted sm:text-[11px]">{k}</dt>
             <dd className="mt-0.5 text-[17px] font-bold leading-tight tabular min-[420px]:text-xl sm:whitespace-nowrap sm:text-[26px]">{val}</dd>
             <dd className="mt-0.5 text-xs leading-snug text-hero-muted sm:text-[13px]">{sub}</dd>
           </div>
         ))}
+      </dl>
         {/* Правка капитана (раунд 4): плашка с должностью и ФИО преподавателя — на всю ширину под тремя плитками */}
         {p.teacherFull && (
-          <div className="col-span-3 flex min-w-0 items-center gap-3 rounded-xl bg-hero-2/70 px-2.5 py-2.5 sm:px-3">
+          <div className="hero-tile mt-1.5 flex sm:mt-3 min-w-0 items-center gap-3 rounded-xl px-2.5 py-2.5 sm:px-3">
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-hero/60 text-accent" aria-hidden><UserRound className="h-5 w-5" /></span>
             <div className="min-w-0">
-              <dt className="text-[10px] font-semibold uppercase tracking-wider text-hero-muted sm:text-[11px]">{t("today.next.teacher")}</dt>
-              <dd className="text-[15px] font-bold leading-tight sm:text-lg">{p.teacherFull}</dd>
-              {p.teacherPosition && <dd className="text-xs text-hero-muted sm:text-[13px]">{p.teacherPosition}</dd>}
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-hero-muted sm:text-[11px]">{t("today.next.teacher")}</p>
+              <p className="text-[15px] font-bold leading-tight sm:text-lg">{p.teacherFull}</p>
+              {p.teacherPosition && <p className="text-xs text-hero-muted sm:text-[13px]">{p.teacherPosition}</p>}
             </div>
           </div>
         )}
-      </dl>
 
       {p.moved && p.prevText && (
         <p className="mt-3 flex flex-wrap items-center gap-2 text-sm">
