@@ -93,5 +93,16 @@ const profile: Shape<typeof ru> = {
     save: "Enregistrer",
     saved: "Enregistré",
   },
+  max: {
+    title: "Chatbot MAX",
+    sleeping: "Le bot est prêt à être connecté. Il lui faut une clé de la plateforme MAX, délivrée aux organisations, entrepreneurs individuels ou auto-entrepreneurs après vérification. Dès que l’université ajoutera la clé, un bouton d’association apparaîtra ici.",
+    what: "Ce que fait le bot : envoie les changements de cours et les statuts des demandes, répond à /today, /tomorrow, /requests.",
+    linked: "Compte associé à MAX",
+    unlink: "Dissocier",
+    getCode: "Obtenir un code d’association",
+    codeHint: "Envoyez ce code au bot dans MAX dans les 10 minutes :",
+    openBot: "Ouvrir le bot dans MAX",
+    telegram: "Pas de bot Telegram : en 2026, l’API Telegram n’est pas accessible depuis des serveurs en Russie.",
+  },
 };
 export default profile;

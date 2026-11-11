@@ -239,3 +239,14 @@ test.describe("Часть 3: языки интерфейса", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
   });
 });
+
+test("Часть 4: бот MAX «спит» без ключа — честный статус в профиле, вебхук отвечает 404", async ({ page, playwright }) => {
+  await login(page, "anna");
+  await page.goto("/profile");
+  await expect(page.getByRole("heading", { name: "Чат-бот в MAX" })).toBeVisible();
+  await expect(page.getByText(/Бот готов к подключению/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Получить код привязки" })).toHaveCount(0);
+  const anon = await playwright.request.newContext({ baseURL: "http://localhost:3000" });
+  expect((await anon.post("/api/bot/max", { data: { update_type: "message_created" } })).status()).toBe(404);
+  await anon.dispose();
+});

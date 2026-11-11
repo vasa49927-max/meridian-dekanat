@@ -93,5 +93,16 @@ const profile: Shape<typeof ru> = {
     save: "保存",
     saved: "已保存",
   },
+  max: {
+    title: "MAX 聊天机器人",
+    sleeping: "机器人已准备就绪。启用它需要 MAX 平台密钥，该密钥只发放给经过验证的机构、个体经营者或自雇人士。学校添加密钥后，这里会出现绑定按钮。",
+    what: "机器人功能：推送调课和申请状态，响应 /today、/tomorrow、/requests 命令。",
+    linked: "账号已绑定 MAX",
+    unlink: "解除绑定",
+    getCode: "获取绑定码",
+    codeHint: "请在 10 分钟内把此代码发送给 MAX 中的机器人：",
+    openBot: "在 MAX 中打开机器人",
+    telegram: "不提供 Telegram 机器人：2026 年起俄罗斯境内服务器无法访问 Telegram API。",
+  },
 };
 export default profile;

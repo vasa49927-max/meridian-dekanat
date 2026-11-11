@@ -4,6 +4,7 @@ import { requireStudent } from "@/server/auth/guards";
 import { changePassword, endOtherSessions } from "@/server/auth/change-password";
 import { revalidatePath } from "next/cache";
 import { savePrefs } from "@/server/push";
+import { createLinkCode, maxEnabled, unlinkMax } from "@/server/bot/max";
 import { getI18n } from "@/i18n/server";
 
 export type PwState = { ok?: boolean; error?: string; field?: "current" | "next" | "repeat" };
@@ -38,4 +39,17 @@ export async function savePushPrefsAction(_: { ok?: boolean }, form: FormData): 
   await savePrefs(v.userId, { schedule: form.get("schedule") === "on", requests: form.get("requests") === "on", announcements: form.get("announcements") === "on", morning: form.get("morning") === "on" });
   revalidatePath("/profile");
   return { ok: true };
+}
+
+/** Чат-бот MAX: одноразовый код привязки (10 минут). */
+export async function createMaxCodeAction(): Promise<{ code?: string; error?: string }> {
+  const v = await requireStudent();
+  if (!maxEnabled()) return { error: "disabled" };
+  return { code: await createLinkCode(v.userId) };
+}
+
+export async function unlinkMaxAction(): Promise<void> {
+  const v = await requireStudent();
+  await unlinkMax(v.userId);
+  revalidatePath("/profile");
 }

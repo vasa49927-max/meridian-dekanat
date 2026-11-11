@@ -2,6 +2,7 @@ import "server-only";
 import { createECDH, createPrivateKey, generateKeyPairSync, hkdfSync, randomBytes, sign, createCipheriv, type KeyObject } from "node:crypto";
 import { and, eq, inArray } from "drizzle-orm";
 import { db, schema as t } from "@/server/db";
+import { maxNotify } from "@/server/bot/max";
 
 /**
  * Web Push без сторонних библиотек (D-032): VAPID (RFC 8292) + шифрование aes128gcm (RFC 8291) на node:crypto.
@@ -94,23 +95,31 @@ async function sendOne(sub: { id: string; endpoint: string; p256dh: string; auth
   }
 }
 
-/** Разослать уведомление на все устройства пользователей с учётом их настроек. Ошибки не роняют основное действие. */
+/**
+ * Разослать уведомление пользователям с учётом их настроек: Web Push на все устройства
+ * и (если бот подключён) сообщение в MAX. Ошибки не роняют основное действие.
+ */
 export async function pushToUsers(userIds: string[], kind: PushKind, msg: PushMessage) {
   if (!userIds.length) return;
   try {
-    const subs = await db.select({ id: t.pushSubscriptions.id, userId: t.pushSubscriptions.userId, endpoint: t.pushSubscriptions.endpoint, p256dh: t.pushSubscriptions.p256dh, auth: t.pushSubscriptions.auth })
-      .from(t.pushSubscriptions).where(inArray(t.pushSubscriptions.userId, [...new Set(userIds)]));
-    if (!subs.length) return;
-    const prefs = await db.select().from(t.notifyPrefs).where(inArray(t.notifyPrefs.userId, [...new Set(subs.map((s) => s.userId))]));
+    const ids = [...new Set(userIds)];
+    const prefs = await db.select().from(t.notifyPrefs).where(inArray(t.notifyPrefs.userId, ids));
     const pref = new Map(prefs.map((p) => [p.userId, p]));
     const wants = (uid: string) => {
-      const p = pref.get(uid);
       if (kind === "test") return true;
+      const p = pref.get(uid);
       if (!p) return kind !== "morning";
       return p[kind];
     };
-    const keys = await vapidKeys();
-    await Promise.all(subs.filter((s) => wants(s.userId)).map((s) => sendOne(s, msg, keys)));
+    const wanted = ids.filter(wants);
+    if (!wanted.length) return;
+    const subs = await db.select({ id: t.pushSubscriptions.id, userId: t.pushSubscriptions.userId, endpoint: t.pushSubscriptions.endpoint, p256dh: t.pushSubscriptions.p256dh, auth: t.pushSubscriptions.auth })
+      .from(t.pushSubscriptions).where(inArray(t.pushSubscriptions.userId, wanted));
+    const keys = subs.length ? await vapidKeys() : null;
+    await Promise.all([
+      ...subs.map((s) => sendOne(s, msg, keys!)),
+      kind === "test" ? Promise.resolve() : maxNotify(wanted, msg), // тест — только про это устройство
+    ]);
   } catch (e) {
     console.warn("[push] рассылка не удалась:", (e as Error).message);
   }

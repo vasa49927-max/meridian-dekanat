@@ -30,7 +30,7 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
   const rand = rng(20261106);
 
   await db.transaction(async (tx) => {
-    await tx.execute(sql`TRUNCATE TABLE request_feedback, attachments, calendar_feeds, push_subscriptions, notify_prefs, appointments, slots, notifications, announcements, documents, request_events, requests, request_types,
+    await tx.execute(sql`TRUNCATE TABLE bot_link_codes, messenger_links, request_feedback, attachments, calendar_feeds, push_subscriptions, notify_prefs, appointments, slots, notifications, announcements, documents, request_events, requests, request_types,
       deadlines, final_grades, scores, assessments, lessons, course_offerings, disciplines, teachers, staff, students, groups, buildings,
       programs, faculties, rate_events, sessions, users RESTART IDENTITY CASCADE`);
 

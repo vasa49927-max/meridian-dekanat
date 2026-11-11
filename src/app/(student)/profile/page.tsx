@@ -18,6 +18,8 @@ import { getSession } from "@/server/auth/session";
 import { deviceLabel } from "@/lib/device";
 import { getPrefs } from "@/server/push";
 import { PushSettings } from "@/components/profile/push-settings";
+import { MaxBot } from "@/components/profile/max-bot";
+import { getMaxLink, maxConfig, maxEnabled } from "@/server/bot/max";
 import { ConfirmForm } from "@/components/ui/confirm";
 import { logoutOthersAction } from "./actions";
 import { getI18n } from "@/i18n/server";
@@ -36,6 +38,7 @@ export default async function ProfilePage() {
   const { t, tr, name, f } = await getI18n();
   const current = await getSession();
   const pushPrefs = await getPrefs(v.userId);
+  const maxLink = await getMaxLink(v.userId);
   const p = await getMyProfile(v);
   const s = p.student;
   const sessions = await db.select({ id: tbl.sessions.id, createdAt: tbl.sessions.createdAt, lastSeenAt: tbl.sessions.lastSeenAt, userAgent: tbl.sessions.userAgent })
@@ -85,6 +88,10 @@ export default async function ProfilePage() {
           <Card id="push">
             <CardTitle>{t("profile.push")}</CardTitle>
             <PushSettings prefs={pushPrefs} />
+          </Card>
+          <Card id="max">
+            <CardTitle>{t("profile.max.title")}</CardTitle>
+            <MaxBot enabled={maxEnabled()} linked={!!maxLink} botName={maxConfig().botName} />
           </Card>
           <Card>
             <CardTitle>{t("profile.security")}</CardTitle>

@@ -340,6 +340,22 @@ export const appSettings = pgTable("app_settings", {
   value: text("value").notNull(),
 });
 
+/** Чат-бот MAX (раунд 3, D-031): одноразовые коды привязки (в БД — только хэш, живут 10 минут). */
+export const botLinkCodes = pgTable("bot_link_codes", {
+  codeHash: text("code_hash").primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
+/** Привязка аккаунта к мессенджеру: кому из пользователей MAX слать уведомления. */
+export const messengerLinks = pgTable("messenger_links", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  provider: text("provider").$type<"MAX">().notNull(),
+  externalUserId: text("external_user_id").notNull(),
+  createdAt: createdAt(),
+}, (t) => [uniqueIndex("messenger_links_provider_ext_uq").on(t.provider, t.externalUserId), index("messenger_links_user_idx").on(t.userId)]);
+
 // ───────────── Уведомления и объявления ─────────────
 export const notificationKindEnum = pgEnum("notification_kind", ["SCHEDULE", "REQUEST", "ANNOUNCEMENT", "DEADLINE", "APPOINTMENT", "GRADE"]);
 export const audienceEnum = pgEnum("audience", ["ALL", "FACULTY", "COURSE", "GROUP"]);

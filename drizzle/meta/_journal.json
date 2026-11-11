@@ -29,6 +29,13 @@
       "when": 1794383387863,
       "tag": "0003_calendar_push",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794386068689,
+      "tag": "0004_messenger",
+      "breakpoints": true
     }
   ]
 }
