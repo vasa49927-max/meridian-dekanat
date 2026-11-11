@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { CheckCircle2, Printer } from "lucide-react";
+import { CheckCircle2, Printer, RotateCcw } from "lucide-react";
 import { requireStudent } from "@/server/auth/guards";
 import { getMyRequest } from "@/server/dal/requests";
 import { qrSvg, verifyUrl } from "@/server/qr";
@@ -13,6 +13,7 @@ import { DocumentView } from "@/components/requests/document-view";
 import { AttachmentsList } from "@/components/requests/attachments-list";
 import { listAttachmentsMeta } from "@/server/attachments";
 import { ReplyForm, WithdrawButton } from "@/components/requests/request-actions";
+import { RateForm, RatingStars } from "@/components/requests/rate-form";
 import { cn } from "@/lib/cn";
 
 export const metadata: Metadata = { title: "Заявка" };
@@ -53,7 +54,8 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
       <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/requests" className="tap text-muted hover:text-fg">← Мои заявки</Link></nav>
       {created && <p role="status" className="mb-4 flex items-center gap-2 rounded-xl bg-ok-bg px-4 py-3 font-medium text-ok"><CheckCircle2 className="h-5 w-5" aria-hidden />Заявка отправлена. Статус будет меняться здесь и в уведомлениях.</p>}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div><h1 className="font-serif text-[26px] leading-tight">{r.type.title}</h1><p className="mt-1 text-sm text-muted">{r.number} · подана {fmt.dateTime(r.createdAt)}</p></div>
+        <div><h1 className="font-serif text-[26px] leading-tight">{r.type.title}</h1><p className="mt-1 text-sm text-muted">{r.number} · подана {fmt.dateTime(r.createdAt)}</p>
+          {r.assignee && <p className="mt-0.5 text-sm text-muted">Заявку ведёт: <span className="font-medium text-fg">{r.assignee.lastName} {r.assignee.firstName[0]}. {r.assignee.middleName ? `${r.assignee.middleName[0]}.` : ""}</span>, студенческий офис</p>}</div>
         <StatusBadge status={r.status} className="text-sm" />
       </div>
       <Card className="mb-4">
@@ -61,9 +63,19 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
         {["SUBMITTED", "IN_PROGRESS"].includes(r.status) && <p className="mt-4 text-sm text-muted">Ожидаемый срок готовности — <b className="text-fg">до {fmt.dayMonth(r.dueAt)}</b>.</p>}
         {r.status === "NEEDS_INFO" && <div className="mt-4 rounded-xl border border-warn-line bg-warn-bg p-3.5 text-sm text-warn"><p className="font-semibold">Деканат просит дополнить:</p><p className="mt-1">{r.staffComment}</p></div>}
         {r.status === "REJECTED" && r.staffComment && <div className="mt-4 rounded-xl bg-danger-bg p-3.5 text-sm text-danger"><p className="font-semibold">Причина отказа:</p><p className="mt-1">{r.staffComment}</p></div>}
+        {r.status === "REJECTED" && <div className="mt-3"><LinkButton href={`/requests/new/${r.type.code}?again=${r.id}`} variant="soft"><RotateCcw className="h-4 w-4" aria-hidden />Подать повторно</LinkButton><p className="mt-1.5 text-xs text-muted">Откроется форма с уже заполненными полями — останется исправить причину отказа.</p></div>}
         {r.status === "NEEDS_INFO" && <div className="mt-4"><ReplyForm id={r.id} /></div>}
         {r.status === "SUBMITTED" && <div className="mt-4"><WithdrawButton id={r.id} /></div>}
       </Card>
+
+      {/* Раунд 3: оценка работы деканата — когда заявка закрыта; отозванную самим студентом не оцениваем */}
+      {(r.status === "ISSUED" || (r.status === "REJECTED" && r.staffComment !== "Отозвана студентом") || (r.status === "READY" && !r.type.producesDocument)) && (
+        <Card className="mb-4">
+          {r.feedback ? (
+            <p className="flex flex-wrap items-center gap-2 text-sm"><span className="text-muted">Спасибо! Ваша оценка работы деканата:</span><RatingStars rating={r.feedback.rating} />{r.feedback.comment && <span className="text-muted">— «{r.feedback.comment}»</span>}</p>
+          ) : <RateForm id={r.id} />}
+        </Card>
+      )}
 
       {doc && qr && (
         <section aria-labelledby="doc-h" className="mb-4">

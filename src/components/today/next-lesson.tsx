@@ -47,7 +47,7 @@ export function NextLessonCard(p: Props) {
       <h2 className="font-serif text-[26px] leading-[1.15] lg:text-[32px]">{p.title}</h2>
 
       {/* Плитка «День» шире остальных: дата «28 сентября» должна влезать без переноса посреди слова */}
-      <dl className="mt-4 grid grid-cols-[1.4fr_1fr_1fr] gap-1.5 sm:grid-cols-3 sm:gap-3">
+      <dl className="mt-4 grid grid-cols-[1.4fr_1fr_1fr] gap-1.5 sm:grid-cols-3 sm:gap-3 lg:mt-auto lg:pt-5">
         {tiles.map(([k, val, sub]) => (
           <div key={k} className="min-w-0 rounded-xl bg-hero-2/70 px-2.5 py-2.5 sm:px-3">
             <dt className="text-[10px] font-semibold uppercase tracking-wider text-hero-muted sm:text-[11px]">{k}</dt>
@@ -64,7 +64,7 @@ export function NextLessonCard(p: Props) {
         </p>
       )}
 
-      <p className="mt-3 flex items-start gap-1.5 text-[13px] text-hero-muted lg:mt-auto lg:pt-3">
+      <p className="mt-3 flex items-start gap-1.5 text-[13px] text-hero-muted">
         <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
         <span>{p.type}{p.teacher ? ` · ${p.teacher}` : ""} · {p.address}{p.hint && <span className="hidden sm:inline"> · {p.hint}</span>}</span>
       </p>

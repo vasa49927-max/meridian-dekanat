@@ -41,12 +41,12 @@ test.describe("Сегодня", () => {
     // Правка капитана №2c: тип изменения ярлыком, «теперь» — крупно, «вместо» — мелко, без зачёркиваний
     const moved = banner.getByRole("listitem").filter({ hasText: "Испанский язык (второй иностранный)" });
     await expect(moved).toContainText("Перенос");
-    await expect(moved).toContainText("Теперь: чт, 19 нояб. · 17:40 · ауд. 1018");
-    await expect(moved).toContainText("вместо ср, 18 нояб. · 14:30 · ауд. 506");
+    await expect(moved).toContainText("Теперь: 19 ноября (чт) · 17:40 · ауд. 1018");
+    await expect(moved).toContainText("вместо 18 ноября (ср) · 14:30 · ауд. 506");
     await expect(banner.locator("s")).toHaveCount(0);
     // Отмена тоже в баннере
     // (staff.spec может добавить ещё один перенос «Макроэкономики» — поэтому фильтр по дате)
-    await expect(banner.getByRole("listitem").filter({ hasText: "Макроэкономика" }).filter({ hasText: "пн, 16 нояб. · 09:00" })).toContainText("пары не будет");
+    await expect(banner.getByRole("listitem").filter({ hasText: "Макроэкономика" }).filter({ hasText: "16 ноября (пн) · 09:00" })).toContainText("пары не будет");
 
     const study = page.getByRole("region", { name: "Как дела с учёбой" });
     await expect(study.getByText("Риск:")).toBeVisible();
@@ -71,7 +71,7 @@ test.describe("Расписание", () => {
     await expect(movedCard).toBeVisible();
     await expect(movedCard.getByText("Перенос", { exact: true })).toBeVisible();
     await expect(movedCard).toHaveClass(/border-warn-line/);
-    await expect(movedCard).toContainText("вместо вт, 10 нояб. · 09:00 · ауд. 1018");
+    await expect(movedCard).toContainText("вместо 10 ноября (вт) · 09:00 · ауд. 1018");
     await expect(movedCard.locator("s")).toHaveCount(0);
     // Смена аудитории — свой ярлык
     const roomCard = page.getByRole("region", { name: "Среда, 11 ноября" }).getByRole("article", { name: "10:40 Макроэкономика, другая аудитория" });
@@ -82,14 +82,14 @@ test.describe("Расписание", () => {
     await expect(page.getByRole("article", { name: "09:00 Макроэкономика, пара отменена" }).getByText("Пара отменена")).toBeVisible();
     await page.goto("/schedule?view=week");
 
-    // Обратно в день, следующий день → суббота без пар → «Показать пн, 16 нояб. →»
+    // Обратно в день, следующий день → суббота без пар → «Показать 16 ноября (пн) →»
     await views.getByRole("link", { name: "День" }).click();
     await expect(page).not.toHaveURL(/view=week/);
     await page.getByRole("link", { name: "Следующий день" }).click();
     await expect(page).toHaveURL(/d=2026-11-14/);
     await expect(page.getByRole("heading", { name: "Суббота, 14 ноября" })).toBeVisible();
     await expect(page.getByText("Занятий нет")).toBeVisible();
-    await page.getByRole("link", { name: "Показать пн, 16 нояб. →" }).click();
+    await page.getByRole("link", { name: "Показать 16 ноября (пн) →" }).click();
     await expect(page).toHaveURL(/d=2026-11-16/);
     await expect(page.getByRole("heading", { name: "Понедельник, 16 ноября" })).toBeVisible();
     await expect(page.getByRole("link", { name: /^Пн 16 — понедельник, 16 ноября/ })).toHaveAttribute("aria-current", "date");

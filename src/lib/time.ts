@@ -57,27 +57,31 @@ export function parseDayKey(key: string | undefined | null): Date | null {
 const f = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("ru-RU", { timeZone: TZ, ...o });
 const fTime = f({ hour: "2-digit", minute: "2-digit" });
 const fDayMonth = f({ day: "numeric", month: "long" });
-const fDayMonthShort = f({ day: "numeric", month: "short" });
 const fWeekday = f({ weekday: "long" });
 const fWeekdayShort = f({ weekday: "short" });
 const fFull = f({ day: "numeric", month: "long", year: "numeric" });
-const fDateTime = f({ day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 
+/**
+ * Единый формат дат (правка капитана, раунд 3): всегда число и месяц полностью — «16 ноября».
+ * День недели — только подписью: «16 ноября (пн)». Сокращения «нояб.» не используем.
+ */
 export const fmt = {
   time: (d: Date) => fTime.format(d),
+  /** «16 ноября» */
   dayMonth: (d: Date) => fDayMonth.format(d),
-  dayMonthShort: (d: Date) => fDayMonthShort.format(d).replace(".", ""),
   weekday: (d: Date) => fWeekday.format(d),
   weekdayShort: (d: Date) => fWeekdayShort.format(d),
+  /** «16 ноября 2026 г.» */
   full: (d: Date) => fFull.format(d),
-  dateTime: (d: Date) => fDateTime.format(d),
-  /** «Пятница, 6 ноября» */
+  /** «13 ноября, 07:15» */
+  dateTime: (d: Date) => `${fDayMonth.format(d)}, ${fTime.format(d)}`,
+  /** «Пятница, 6 ноября» — заголовки дней */
   longDay: (d: Date) => {
     const w = fWeekday.format(d);
     return `${w[0].toUpperCase()}${w.slice(1)}, ${fDayMonth.format(d)}`;
   },
-  /** «пт, 12 нояб.» */
-  shortDay: (d: Date) => `${fWeekdayShort.format(d)}, ${fDayMonthShort.format(d)}`,
+  /** «16 ноября (пн)» */
+  shortDay: (d: Date) => `${fDayMonth.format(d)} (${fWeekdayShort.format(d)})`,
 };
 
 /**

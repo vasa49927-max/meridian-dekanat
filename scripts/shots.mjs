@@ -11,6 +11,7 @@ const widths = (process.env.WIDTHS ?? "360,1440").split(",").map(Number);
 const browser = await chromium.launch();
 for (const w of widths) {
   const ctx = await browser.newContext({ viewport: { width: w, height: w < 800 ? 800 : 900 }, deviceScaleFactor: Number(process.env.DSF ?? 2), colorScheme: dark ? "dark" : "light", locale: "ru-RU", timezoneId: "Europe/Moscow" });
+  await ctx.addInitScript(() => { try { localStorage.setItem("meridian-tour-v1", "done"); } catch {} });
   const page = await ctx.newPage();
   const errors = [];
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));

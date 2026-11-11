@@ -21,7 +21,7 @@ export default async function StaffAppointmentsPage() {
           <ul className="divide-y divide-line">
             {list.map((a) => (
               <li key={a.id} className="flex flex-wrap items-start gap-3 px-4 py-3">
-                <div className="w-28 shrink-0"><p className="font-semibold tabular">{fmt.time(a.startsAt)}</p><p className="text-xs text-muted">{fmt.dayMonthShort(a.startsAt)}, {nearDay(a.startsAt, at) ?? fmt.weekdayShort(a.startsAt)}</p></div>
+                <div className="w-28 shrink-0"><p className="font-semibold tabular">{fmt.time(a.startsAt)}</p><p className="text-xs text-muted">{fmt.dayMonth(a.startsAt)}, {nearDay(a.startsAt, at) ?? fmt.weekdayShort(a.startsAt)}</p></div>
                 <div className="min-w-0 flex-1"><p className="font-medium">{a.lastName} {a.firstName} · {a.faculty}, гр. {a.group}</p><p className="text-sm text-muted">{a.topic}{a.comment ? ` — ${a.comment}` : ""}</p></div>
               </li>
             ))}

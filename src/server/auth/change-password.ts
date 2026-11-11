@@ -37,3 +37,10 @@ export async function changePassword(userId: string, sessionId: string, current:
   });
   return { ok: true as const };
 }
+
+/** Завершить все сессии пользователя, кроме текущей. Для общих демо-аккаунтов жюри — не трогаем (вернёт false). */
+export async function endOtherSessions(userId: string, keepSessionId: string, login: string): Promise<boolean> {
+  if (DEMO_LOGINS.has(login)) return false;
+  await db.delete(schema.sessions).where(and(eq(schema.sessions.userId, userId), ne(schema.sessions.id, keepSessionId)));
+  return true;
+}

@@ -21,7 +21,10 @@ export default async function StaffLayout({ children }: { children: React.ReactN
       <aside className="sticky top-0 hidden h-dvh flex-col gap-6 bg-side px-4 py-6 text-side-fg lg:flex">
         <div className="px-2"><Logo className="[&_svg]:h-9 [&_svg]:w-9" /><p className="mt-1 pl-12 text-xs uppercase tracking-widest text-accent">Деканат</p></div>
         <SideNav role="STAFF" />
-        <p className="rounded-xl bg-side-on px-3 py-2 text-xs">Новых заявок: <b>{counts.newRequests}</b> · записей на приём: <b>{counts.upcomingAppointments}</b></p>
+        <dl className="grid grid-cols-2 gap-2 text-xs">
+          <div className="rounded-xl bg-side-on px-3 py-2"><dt className="opacity-75">Новых заявок</dt><dd className="text-lg font-bold">{counts.newRequests}</dd></div>
+          <div className="rounded-xl bg-side-on px-3 py-2"><dt className="opacity-75">Записей на приём</dt><dd className="text-lg font-bold">{counts.upcomingAppointments}</dd></div>
+        </dl>
         <div className="flex items-center gap-3 rounded-2xl bg-side-on p-3">
           <Avatar name={`${v.firstName} ${v.lastName}`} hue={30} size={40} />
           <div className="min-w-0 flex-1"><p className="text-sm font-semibold leading-snug">{v.firstName} {v.middleName} {v.lastName}</p><p className="truncate text-xs opacity-75">{v.position}</p></div>

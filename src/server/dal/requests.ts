@@ -34,7 +34,7 @@ export async function getMyRequest(v: StudentViewer, id: string) {
   if (!z.uuid().safeParse(id).success) return null;
   const r = await db.query.requests.findFirst({
     where: and(eq(t.requests.id, id), eq(t.requests.studentId, v.studentId)),
-    with: { type: true, events: { orderBy: asc(t.requestEvents.createdAt) }, document: true },
+    with: { type: true, events: { orderBy: asc(t.requestEvents.createdAt) }, document: true, assignee: { columns: { lastName: true, firstName: true, middleName: true } }, feedback: { columns: { rating: true, comment: true } } },
   });
   return r ?? null;
 }
@@ -103,4 +103,19 @@ export async function withdrawMyRequest(v: StudentViewer, id: string) {
     await tx.insert(t.requestEvents).values({ requestId: id, status: "REJECTED", actor: "Студент", comment: "Отозвана студентом" });
   });
   return { ok: true as const };
+}
+
+export const feedbackSchema = z.object({
+  rating: z.coerce.number().int().min(1, "Поставьте оценку от 1 до 5").max(5),
+  comment: z.string().trim().max(500, "Не длиннее 500 символов").optional(),
+});
+
+/** Оценка работы деканата — только своя заявка, только закрытая (выдана/отклонена), один раз. */
+export async function rateMyRequest(v: StudentViewer, id: string, input: z.infer<typeof feedbackSchema>) {
+  const r = await getMyRequest(v, id);
+  if (!r) return { ok: false as const, notFound: true };
+  if (r.status !== "ISSUED" && r.status !== "REJECTED" && !(r.status === "READY" && !r.type.producesDocument)) return { ok: false as const, error: "Оценить можно, когда заявка закрыта" };
+  const res = await db.insert(t.requestFeedback).values({ requestId: r.id, studentId: v.studentId, rating: input.rating, comment: input.comment || null })
+    .onConflictDoNothing({ target: t.requestFeedback.requestId }).returning({ id: t.requestFeedback.id });
+  return res.length ? { ok: true as const } : { ok: false as const, error: "Вы уже оценили эту заявку" };
 }

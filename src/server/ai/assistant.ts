@@ -32,7 +32,7 @@ async function studentContext(v: StudentViewer) {
     }),
     grades.past.length ? `Средний балл зачётки: ${(grades.past.reduce((a, g) => a + g.points, 0) / grades.past.length).toFixed(1)}.` : "Завершённых семестров нет.",
     reqs.items.length ? `Заявки: ${reqs.items.map((r) => `${r.title} (${r.number}) — ${STATUS[r.status]}${r.status === "NEEDS_INFO" && r.staffComment ? ` [деканат: ${r.staffComment}]` : ""}`).join("; ")}.` : "Заявок нет.",
-    deadlines.length ? `Ближайшие сроки: ${deadlines.map((d) => `${d.title} — ${fmt.dayMonthShort(d.dueAt)}`).join("; ")}.` : "",
+    deadlines.length ? `Ближайшие сроки: ${deadlines.map((d) => `${d.title} — ${fmt.dayMonth(d.dueAt)}`).join("; ")}.` : "",
   ];
   return lines.filter(Boolean).join("\n");
 }

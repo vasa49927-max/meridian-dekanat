@@ -20,10 +20,11 @@ export const STATUS_FLOW: Record<Status, Status[]> = {
   REJECTED: [],
 };
 
-export type QueueFilter = { status?: Status | "active" | "overdue"; type?: string; faculty?: string; course?: number; q?: string };
+export type QueueFilter = { status?: Status | "active" | "overdue"; type?: string; faculty?: string; course?: number; q?: string; mine?: boolean };
 
-export async function staffQueue(_v: StaffViewer, f: QueueFilter, page = 0, size = 25) {
+export async function staffQueue(v: StaffViewer, f: QueueFilter, page = 0, size = 25) {
   const conds = [];
+  if (f.mine) conds.push(eq(t.requests.assigneeStaffId, v.staffId));
   if (f.status === "active" || !f.status) conds.push(inArray(t.requests.status, ["SUBMITTED", "IN_PROGRESS", "NEEDS_INFO", "READY"]));
   else if (f.status === "overdue") conds.push(inArray(t.requests.status, ["SUBMITTED", "IN_PROGRESS"]), lt(t.requests.dueAt, now()));
   else conds.push(eq(t.requests.status, f.status));
@@ -38,7 +39,9 @@ export async function staffQueue(_v: StaffViewer, f: QueueFilter, page = 0, size
     id: t.requests.id, number: t.requests.number, status: t.requests.status, createdAt: t.requests.createdAt, dueAt: t.requests.dueAt, updatedAt: t.requests.updatedAt,
     title: t.requestTypes.title, code: t.requestTypes.code, lastName: t.students.lastName, firstName: t.students.firstName, middleName: t.students.middleName,
     group: t.groups.name, course: t.groups.course, faculty: t.faculties.code,
+    assigneeId: t.requests.assigneeStaffId, assigneeLast: t.staff.lastName, assigneeFirst: t.staff.firstName, assigneeMiddle: t.staff.middleName,
   }).from(t.requests)
+    .leftJoin(t.staff, eq(t.staff.id, t.requests.assigneeStaffId))
     .innerJoin(t.requestTypes, eq(t.requestTypes.id, t.requests.typeId))
     .innerJoin(t.students, eq(t.students.id, t.requests.studentId))
     .innerJoin(t.groups, eq(t.groups.id, t.students.groupId))
@@ -51,6 +54,7 @@ export async function staffQueue(_v: StaffViewer, f: QueueFilter, page = 0, size
     needsInfo: sql<number>`count(*) filter (where ${t.requests.status} = 'NEEDS_INFO')`.mapWith(Number),
     ready: sql<number>`count(*) filter (where ${t.requests.status} = 'READY')`.mapWith(Number),
     overdue: sql<number>`count(*) filter (where ${t.requests.status} in ('SUBMITTED','IN_PROGRESS') and ${t.requests.dueAt} < ${now()})`.mapWith(Number),
+    mine: sql<number>`count(*) filter (where ${t.requests.assigneeStaffId} = ${v.staffId} and ${t.requests.status} in ('SUBMITTED','IN_PROGRESS','NEEDS_INFO','READY'))`.mapWith(Number),
   }).from(t.requests);
   return { items: items.slice(0, size), hasMore: items.length > size, stats };
 }
@@ -59,9 +63,32 @@ export async function staffGetRequest(_v: StaffViewer, id: string) {
   if (!z.uuid().safeParse(id).success) return null;
   const r = await db.query.requests.findFirst({
     where: eq(t.requests.id, id),
-    with: { type: true, events: { orderBy: asc(t.requestEvents.createdAt) }, document: true, student: { with: { group: { with: { faculty: true, program: true } } } } },
+    with: { type: true, events: { orderBy: asc(t.requestEvents.createdAt) }, document: true, student: { with: { group: { with: { faculty: true, program: true } } } }, assignee: { columns: { id: true, lastName: true, firstName: true, middleName: true } }, feedback: true },
   });
   return r ?? null;
+}
+
+/** «Взять себе»: заявка закрепляется за сотрудником. Студент видит, кто ведёт его заявку. */
+export async function staffTakeRequest(v: StaffViewer, id: string) {
+  if (!z.uuid().safeParse(id).success) return { ok: false as const, error: "Заявка не найдена" };
+  const res = await db.update(t.requests).set({ assigneeStaffId: v.staffId, updatedAt: new Date() })
+    .where(and(eq(t.requests.id, id), inArray(t.requests.status, ["SUBMITTED", "IN_PROGRESS", "NEEDS_INFO", "READY"]))).returning({ id: t.requests.id });
+  return res.length ? { ok: true as const } : { ok: false as const, error: "Заявка уже закрыта или не найдена" };
+}
+
+/** Оценки студентов за 30 дней: средняя, количество, последние комментарии. Для всего офиса и лично для сотрудника. */
+export async function staffFeedbackStats(v: StaffViewer) {
+  const since = new Date(+now() - 30 * 86400000);
+  const [all] = await db.select({
+    avg: sql<number | null>`round(avg(${t.requestFeedback.rating})::numeric, 1)`.mapWith((x) => (x === null ? null : Number(x))),
+    n: count(),
+    mineAvg: sql<number | null>`round(avg(${t.requestFeedback.rating}) filter (where ${t.requests.assigneeStaffId} = ${v.staffId}), 1)`.mapWith((x) => (x === null ? null : Number(x))),
+    mineN: sql<number>`count(*) filter (where ${t.requests.assigneeStaffId} = ${v.staffId})`.mapWith(Number),
+  }).from(t.requestFeedback).innerJoin(t.requests, eq(t.requests.id, t.requestFeedback.requestId)).where(gte(t.requestFeedback.createdAt, since));
+  const recent = await db.select({ rating: t.requestFeedback.rating, comment: t.requestFeedback.comment, createdAt: t.requestFeedback.createdAt, title: t.requestTypes.title })
+    .from(t.requestFeedback).innerJoin(t.requests, eq(t.requests.id, t.requestFeedback.requestId)).innerJoin(t.requestTypes, eq(t.requestTypes.id, t.requests.typeId))
+    .where(and(gte(t.requestFeedback.createdAt, since), sql`${t.requestFeedback.comment} is not null`)).orderBy(desc(t.requestFeedback.createdAt)).limit(3);
+  return { ...all, recent };
 }
 
 export const statusChangeSchema = z.object({

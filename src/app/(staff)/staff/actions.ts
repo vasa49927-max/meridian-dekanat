@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireStaff } from "@/server/auth/guards";
-import { announcementSchema, moveSchema, staffChangeLesson, staffChangeStatus, staffPublishAnnouncement, statusChangeSchema } from "@/server/dal/staff";
+import { announcementSchema, moveSchema, staffChangeLesson, staffChangeStatus, staffPublishAnnouncement, staffTakeRequest, statusChangeSchema } from "@/server/dal/staff";
 import { db } from "@/server/db";
 import { env } from "@/server/env";
 import { seedDemo } from "@/server/seed/seed";
@@ -20,6 +20,13 @@ export async function changeStatusAction(_: StaffState, form: FormData): Promise
   if (!r.ok) return { error: r.error };
   revalidatePath("/staff", "layout");
   return { ok: "Статус обновлён — студент уже получил уведомление." };
+}
+
+/** «Взять себе» — закрепить заявку за текущим сотрудником. */
+export async function takeRequestAction(form: FormData): Promise<void> {
+  const v = await requireStaff();
+  await staffTakeRequest(v, String(form.get("id") ?? ""));
+  revalidatePath("/staff", "layout");
 }
 
 export async function publishAnnouncementAction(_: StaffState, form: FormData): Promise<StaffState> {

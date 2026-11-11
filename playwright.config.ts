@@ -12,7 +12,11 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"], ["html", { open: "never" }]],
   globalSetup: "./tests/e2e/global-setup.ts",
-  use: { baseURL: `http://localhost:${PORT}`, locale: "ru-RU", timezoneId: "Europe/Moscow", trace: "retain-on-failure" },
+  use: {
+    baseURL: `http://localhost:${PORT}`, locale: "ru-RU", timezoneId: "Europe/Moscow", trace: "retain-on-failure",
+    // Подсказки первого входа считаем уже просмотренными; сами подсказки проверяет tests/e2e/round3.spec.ts.
+    storageState: { cookies: [], origins: [{ origin: `http://localhost:${PORT}`, localStorage: [{ name: "meridian-tour-v1", value: "done" }] }] },
+  },
   projects: [
     // mobile.spec.ts — только для 360 px (проверки ширины и нижнего таб-бара на desktop не имеют смысла).
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } }, testIgnore: /mobile\.spec\.ts/ },

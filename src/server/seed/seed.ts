@@ -1,10 +1,11 @@
 import "server-only";
+import { randomBytes } from "node:crypto";
 import { sql } from "drizzle-orm";
 import type { DB } from "@/server/db";
 import * as s from "@/server/db/schema";
 import { hashPassword } from "@/server/auth/password";
 import { buildDocument, newRequestNumber, newVerifyCode, type StudentForDoc } from "@/server/documents";
-import { addDays, msk, mskParts, now as nowFn, startOfDay, startOfWeek } from "@/lib/time";
+import { addDays, fmt, msk, mskParts, now as nowFn, startOfDay, startOfWeek } from "@/lib/time";
 import {
   ANNOUNCEMENTS, BUILDINGS, CURRICULA, DEMO_STAFF, DEMO_STUDENTS, EXTRA_STUDENTS, FACULTIES, PROGRAMS, REQUEST_TYPES, SEMESTER, SLOTS, TEACHERS,
 } from "./data";
@@ -29,7 +30,7 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
   const rand = rng(20261106);
 
   await db.transaction(async (tx) => {
-    await tx.execute(sql`TRUNCATE TABLE attachments, appointments, slots, notifications, announcements, documents, request_events, requests, request_types,
+    await tx.execute(sql`TRUNCATE TABLE request_feedback, attachments, appointments, slots, notifications, announcements, documents, request_events, requests, request_types,
       deadlines, final_grades, scores, assessments, lessons, course_offerings, disciplines, teachers, staff, students, groups, buildings,
       programs, faculties, rate_events, sessions, users RESTART IDENTITY CASCADE`);
 
@@ -53,6 +54,9 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
     // ── Пользователи
     const staffUser = (await tx.insert(s.users).values({ login: DEMO_STAFF.login, passwordHash: await hashPassword(DEMO_STAFF.password), role: "STAFF" }).returning())[0];
     const [staffRow] = await tx.insert(s.staff).values({ userId: staffUser.id, lastName: DEMO_STAFF.lastName, firstName: DEMO_STAFF.firstName, middleName: DEMO_STAFF.middleName, position: DEMO_STAFF.position, office: DEMO_STAFF.office }).returning();
+    // Коллега-методист (раунд 3: в очереди видно, кто ведёт заявку). Входа нет: пароль случайный и нигде не публикуется.
+    const colleagueUser = (await tx.insert(s.users).values({ login: "kravchenko", passwordHash: await hashPassword(randomBytes(24).toString("base64url")), role: "STAFF" }).returning())[0];
+    const [colleagueRow] = await tx.insert(s.staff).values({ userId: colleagueUser.id, lastName: "Кравченко", firstName: "Ольга", middleName: "Сергеевна", position: "Специалист единого студенческого офиса", office: DEMO_STAFF.office }).returning();
 
     type Stu = typeof s.students.$inferSelect & { groupKey: string; demo?: (typeof DEMO_STUDENTS)[number] };
     const studentsAll: Stu[] = [];
@@ -171,7 +175,7 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
     changeNotes.forEach((c, i) => {
       const orig = (c.lesson.prevStartsAt ?? c.lesson.startsAt) as Date;
       if (c.notifyAt > NOW && +orig < +NOW + 10 * 86400000) {
-        c.notifyAt = new Date(+NOW - (2 + (i % 5) * 7) * 3600 * 1000);
+        c.notifyAt = toWorkHours(new Date(+NOW - (2 + (i % 5) * 7) * 3600 * 1000));
         c.lesson.changedAt = c.notifyAt;
       }
     });
@@ -223,31 +227,25 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
       const p = Object.values(prog).find((x) => x.id === g.programId)!;
       return { lastName: st.lastName, firstName: st.firstName, middleName: st.middleName, gender: st.gender, course: g.course, facultyName: f.name, programCode: p.code, programName: p.name, basis: st.basis, enrollmentYear: st.enrollmentYear, recordBook: st.recordBook };
     };
-    // Деканат не работает ночью: время 21:00–09:00 монотонно «сжимаем» в 20:00–21:00 того же вечера.
-    // Порядок событий сохраняется, время только сдвигается в прошлое (обзор раунда 2: «отклонена в 00:15» выглядело странно).
-    const hoursAgo = (h: number) => {
-      const t = new Date(+NOW - h * 3600 * 1000);
-      const p = mskParts(t);
-      const mins = p.hh * 60 + p.mm;
-      if (mins >= 9 * 60 && mins < 21 * 60) return t;
-      const since21 = (mins >= 21 * 60 ? mins - 21 * 60 : mins + 3 * 60) * 60000; // сколько прошло с 21:00
-      const evening21 = new Date(+t - since21);
-      return new Date(+evening21 - 3600000 + since21 / 12);
-    };
+    const hoursAgo = (h: number) => toWorkHours(new Date(+NOW - h * 3600 * 1000));
     type Ev = [status: (typeof s.requestStatusEnum.enumValues)[number], hoursAgo: number, comment?: string];
     const notifRows: (typeof s.notifications.$inferInsert)[] = [];
     const statusText: Record<string, string> = { SUBMITTED: "подана", IN_PROGRESS: "в работе", NEEDS_INFO: "нужно дополнить", READY: "готова", ISSUED: "выдана", REJECTED: "отклонена" };
 
+    let reqNo = 0, colleagueTurn = 0;
     async function addRequest(st: Stu, code: string, payload: Record<string, string>, events: Ev[], comment?: string) {
       const t = rtypes[code];
+      // Заявки трёх демо-студентов (первые 8) ведёт Белова — её кабинет показываем жюри; часть остальных — коллега.
+      const byColleague = reqNo++ >= 8 && events.length > 1 && colleagueTurn++ % 2 === 1;
+      const who = byColleague ? { id: colleagueRow.id, actor: "Кравченко О. С., студенческий офис" } : { id: staffRow.id, actor: `${DEMO_STAFF.lastName} И. П., студенческий офис` };
       const created = hoursAgo(events[0][1]);
       const last = events[events.length - 1];
       const [r] = await tx.insert(s.requests).values({
         number: newRequestNumber(), studentId: st.id, typeId: t.id, status: last[0], payload, studentComment: comment ?? null,
-        staffComment: last[2] ?? null, assigneeStaffId: events.length > 1 ? staffRow.id : null,
+        staffComment: last[2] ?? null, assigneeStaffId: events.length > 1 ? who.id : null,
         dueAt: addDays(created, t.slaDays), createdAt: created, updatedAt: hoursAgo(last[1]),
       }).returning();
-      await tx.insert(s.requestEvents).values(events.map(([status, h, c], i) => ({ requestId: r.id, status, comment: c ?? null, actor: i === 0 ? "Студент" : `${DEMO_STAFF.lastName} И. П., студенческий офис`, createdAt: hoursAgo(h) })));
+      await tx.insert(s.requestEvents).values(events.map(([status, h, c], i) => ({ requestId: r.id, status, comment: c ?? null, actor: i === 0 ? "Студент" : who.actor, createdAt: hoursAgo(h) })));
       if (["READY", "ISSUED"].includes(last[0]) && t.producesDocument) {
         const doc = buildDocument(code, docStudent(st), payload);
         if (doc) await tx.insert(s.documents).values({ requestId: r.id, studentId: st.id, verifyCode: newVerifyCode(), title: doc.title, body: doc.body, issuedAt: hoursAgo(last[1]), validUntil: addDays(hoursAgo(last[1]), 90) });
@@ -284,7 +282,21 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
       ["MILITARY_CERT", { commissariat: "Военный комиссариат г. Одинцово" }, [["SUBMITTED", 160], ["IN_PROGRESS", 150]]],
       ["STUDENT_ID_DUP", { reason: "Утерян" }, [["SUBMITTED", 20]]],
     ];
-    for (const [i, [code, payload, ev]] of plan.entries()) await addRequest(extras[i % extras.length], code, payload, ev);
+    // Закрытые заявки прошлых недель — для истории «Выданы» и оценок работы деканата.
+    plan.push(
+      ["STUDY_CERT", { purpose: "Работодатель", copies: "1" }, [["SUBMITTED", 400], ["IN_PROGRESS", 396], ["READY", 380], ["ISSUED", 370]]],
+      ["STIPEND_CERT", { period: "Последние 6 месяцев", purpose: "Банк" }, [["SUBMITTED", 520], ["IN_PROGRESS", 470], ["READY", 450], ["ISSUED", 430]]],
+      ["STUDY_CERT_EN", { country: "Германия", purpose: "Виза", dates: "С 20.12.2026 по 08.01.2027" }, [["SUBMITTED", 300], ["IN_PROGRESS", 290], ["READY", 270], ["ISSUED", 250]]],
+      ["RETAKE", { discipline: "Микроэкономика", reason: "Болезнь, есть справка из поликлиники" }, [["SUBMITTED", 260], ["IN_PROGRESS", 200], ["NEEDS_INFO", 190, "Приложите, пожалуйста, медицинскую справку"], ["IN_PROGRESS", 170], ["READY", 150]]],
+      ["RECORD_EXTRACT", { language: "Русский", purpose: "Перевод в другой вуз" }, [["SUBMITTED", 600], ["IN_PROGRESS", 560], ["READY", 540], ["ISSUED", 500]]],
+      ["STUDENT_ID_DUP", { reason: "Утерян" }, [["SUBMITTED", 700], ["IN_PROGRESS", 690], ["REJECTED", 680, "Электронный студенческий уже выдан — дубликат пластиковой карты оформляется в бюро пропусков"]]],
+    );
+    const extraRows = [];
+    for (const [i, [code, payload, ev]] of plan.entries()) extraRows.push({ r: await addRequest(extras[i % extras.length], code, payload, ev), st: extras[i % extras.length], last: ev[ev.length - 1], code });
+    // Оценки работы деканата (раунд 3) — только у закрытых заявок «фоновых» студентов; заявки демо-студентов жюри оценит само.
+    const FEEDBACK: [number, string | null][] = [[5, "Справку сделали за день, спасибо!"], [4, null], [5, null], [3, "Долго не брали в работу, пришлось писать в чат группы"], [5, "Всё понятно объяснили, что дополнить"], [4, null]];
+    const closed = extraRows.filter((x) => x.last[0] === "ISSUED" || x.last[0] === "REJECTED" || (x.last[0] === "READY" && !rtypes[x.code].producesDocument));
+    if (closed.length) await tx.insert(s.requestFeedback).values(closed.slice(0, FEEDBACK.length).map((x, i) => ({ requestId: x.r.id, studentId: x.st.id, rating: FEEDBACK[i][0], comment: FEEDBACK[i][1], createdAt: hoursAgo(x.last[1] - 2) })));
     log("заявки");
 
     // ── Объявления → уведомления адресатам
@@ -304,9 +316,9 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
     for (const c of changeNotes) {
       const l = c.lesson;
       for (const st of studentsAll.filter((x) => x.groupId === c.groupId && (c.subgroup === null || c.subgroup === x.subgroup))) {
-        const when = `${new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(l.prevStartsAt ?? l.startsAt)}`;
+        const when = `${fmt.shortDay(l.prevStartsAt ?? l.startsAt)}, ${fmt.time(l.prevStartsAt ?? l.startsAt)}`;
         const title = c.text === "отмена" ? `Отмена: ${l.title}` : c.text === "аудитория" ? `Новая аудитория: ${l.title}` : `Перенос: ${l.title}`;
-        const body = c.text === "отмена" ? `${when} — занятие отменено. ${l.changeNote ?? ""}` : c.text === "аудитория" ? `${when}: ауд. ${l.prevRoom} → ауд. ${l.room}` : `Было: ${when}, ауд. ${l.prevRoom}. Стало: ${new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(l.startsAt)}, ауд. ${l.room}.`;
+        const body = c.text === "отмена" ? `${when} — занятие отменено. ${l.changeNote ?? ""}` : c.text === "аудитория" ? `${when}: ауд. ${l.prevRoom} → ауд. ${l.room}` : `Было: ${when}, ауд. ${l.prevRoom}. Стало: ${fmt.shortDay(l.startsAt)}, ${fmt.time(l.startsAt)}, ауд. ${l.room}.`;
         notifRows.push({ userId: st.userId, kind: "SCHEDULE", title, body, link: `/schedule?d=${dayKeyOf(l.startsAt as Date)}`, important: true, createdAt: c.notifyAt, readAt: +c.notifyAt < +NOW - 3 * 86400000 ? c.notifyAt : null });
       }
     }
@@ -315,7 +327,7 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
       for (const { offering, def } of list) {
         for (const a of assessmentByOffering[offering.id].filter((x) => x.kind === "CONTROL" && x.dueAt && x.dueAt > addDays(NOW, -7))) {
           for (const st of studentsAll.filter((x) => x.groupKey === groupKey && !def.week.every((w) => w.subgroup && w.subgroup !== x.subgroup))) {
-            notifRows.push({ userId: st.userId, kind: "DEADLINE", title: `Через 2 дня: ${a.title} — ${def.short}`, body: `${def.name}. Максимум ${a.maxPoints} баллов. Срок — ${new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", day: "numeric", month: "long" }).format(a.dueAt!)}.`, link: "/grades", important: false, createdAt: addDays(a.dueAt!, -2) });
+            notifRows.push({ userId: st.userId, kind: "DEADLINE", title: `Через 2 дня: ${a.title} — ${def.short}`, body: `${def.name}. Максимум ${a.maxPoints} баллов. Срок — ${fmt.dayMonth(a.dueAt!)}.`, link: "/grades", important: false, createdAt: addDays(a.dueAt!, -2) });
           }
         }
       }
@@ -360,4 +372,17 @@ function demoPdf(text: string) {
 function dayKeyOf(d: Date) {
   const p = mskParts(d);
   return `${p.y}-${String(p.m).padStart(2, "0")}-${String(p.d).padStart(2, "0")}`;
+}
+
+/**
+ * Деканат не работает ночью: время 21:00–09:00 монотонно «сжимаем» в 20:00–21:00 того же вечера.
+ * Порядок событий сохраняется, время только сдвигается в прошлое (обзор раунда 2: «отклонена в 00:15» выглядело странно).
+ */
+function toWorkHours(t: Date): Date {
+  const p = mskParts(t);
+  const mins = p.hh * 60 + p.mm;
+  if (mins >= 9 * 60 && mins < 21 * 60) return t;
+  const since21 = (mins >= 21 * 60 ? mins - 21 * 60 : mins + 3 * 60) * 60000; // сколько прошло с 21:00
+  const evening21 = new Date(+t - since21);
+  return new Date(+evening21 - 3600000 + since21 / 12);
 }

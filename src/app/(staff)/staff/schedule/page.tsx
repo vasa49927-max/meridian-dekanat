@@ -33,7 +33,7 @@ export default async function StaffSchedulePage({ searchParams }: { searchParams
         <Button variant="secondary" type="submit">Показать</Button>
         <div className="ml-auto flex items-center gap-1">
           <Link href={link(addDays(week, -7))} aria-label="Предыдущая неделя" className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface"><ChevronLeft className="h-5 w-5" aria-hidden /></Link>
-          <span className="px-2 text-sm font-semibold">{fmt.dayMonthShort(week)} — {fmt.dayMonthShort(addDays(week, 5))}</span>
+          <span className="px-2 text-sm font-semibold">{fmt.dayMonth(week)} — {fmt.dayMonth(addDays(week, 5))}</span>
           <Link href={link(addDays(week, 7))} aria-label="Следующая неделя" className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface"><ChevronRight className="h-5 w-5" aria-hidden /></Link>
         </div>
       </form>

@@ -73,14 +73,14 @@ test.describe("Деканат", () => {
     const anna = await studentPage(browser, "anna");
     await anna.goto("/notifications?f=SCHEDULE");
     const n = anna.getByRole("button", { name: /Перенос: Макроэкономика/ }).first();
-    await expect(n).toContainText("Было: ср, 18 нояб., 10:40, ауд. 3015. Стало: ср, 18 нояб., 16:10, ауд. 3020. Преподаватель на конференции");
+    await expect(n).toContainText("Было: 18 ноября (ср), 10:40, ауд. 3015. Стало: 18 ноября (ср), 16:10, ауд. 3020. Преподаватель на конференции");
     await expect(n).toContainText("важное");
 
     await anna.goto("/schedule?d=2026-11-18");
     const card = anna.getByRole("article", { name: "16:10 Макроэкономика, перенос" });
     await expect(card).toBeVisible();
     await expect(card.getByText("Перенос", { exact: true })).toBeVisible();
-    await expect(card).toContainText("вместо ср, 18 нояб. · 10:40 · ауд. 3015");
+    await expect(card).toContainText("вместо 18 ноября (ср) · 10:40 · ауд. 3015");
     await expect(card).toContainText("Преподаватель на конференции");
     await expect(anna.getByRole("article", { name: /^10:40 Макроэкономика/ })).toHaveCount(0);
     await anna.context().close();

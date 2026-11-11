@@ -45,6 +45,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
   const avg = averagePoints(past.map((p) => p.points));
   const semesters = [...new Set(past.map((p) => p.semester))].reverse();
   const isPast = tab === "record";
+  const focus = focusSteps(cards);
 
   return (
     <div className="pt-2 lg:pt-0">
@@ -64,7 +65,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
         </Card>
         <Card className="p-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted">Ближайшая работа</p>
-          <p className="mt-1 font-serif text-2xl leading-tight">{upcoming ? fmt.dayMonthShort(upcoming.dueAt!) : "—"}</p>
+          <p className="mt-1 font-serif text-2xl leading-tight">{upcoming ? fmt.dayMonth(upcoming.dueAt!) : "—"}</p>
           <p className="text-xs text-muted">{upcoming ? `${upcoming.title} · ${upcoming.short} · до ${upcoming.maxPoints} б.` : "в семестре всё сдано"}</p>
         </Card>
         <Card className="p-4">
@@ -87,6 +88,21 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
             <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">2</span><span><b>Экзамен или зачёт</b> — до {BRS.finalMax}. Автомат: зачёт от {BRS.autoCredit}, «отлично» от {BRS.autoExcellent} за семестр</span></li>
             <li className="flex gap-2.5"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg">3</span><span><b>Итог из 100:</b> 90+ «отлично», 75+ «хорошо», 60+ «удовл.»</span></li>
           </ol>
+
+          {/* Раунд 3: «С чего начать» — одна короткая очередь действий вместо одинаковых советов в каждой карточке */}
+          {focus.length > 0 && (
+            <section aria-labelledby="focus-h" className="mb-4 rounded-2xl border border-primary/25 bg-primary-soft p-4 dark:border-accent/30">
+              <h2 id="focus-h" className="mb-2 flex items-center gap-2 font-semibold"><Target className="h-5 w-5 text-primary dark:text-accent-text" aria-hidden />С чего начать</h2>
+              <ol className="space-y-1.5 text-sm">
+                {focus.map((f, i) => (
+                  <li key={i} className="flex gap-2.5">
+                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-fg dark:bg-accent dark:text-[#14182a]">{i + 1}</span>
+                    <span><a href={`#${encodeURIComponent(f.anchor)}`} className="font-semibold underline-offset-2 hover:underline">{f.lead}</a> {f.text}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
 
           <div className="grid gap-3 xl:grid-cols-2">
             {cards.map(({ d, plan, next }) => {
@@ -126,7 +142,7 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
                       {d.items.map((a) => (
                         <li key={a.id} className="flex items-center gap-2 py-1.5">
                           {a.points !== null ? <CheckCircle2 className="h-4 w-4 shrink-0 text-ok" aria-label="оценено" /> : <CircleDot className="h-4 w-4 shrink-0 text-muted" aria-label="ещё не оценено" />}
-                          <span className="min-w-0 flex-1">{a.title}<span className="text-muted"> · {a.dueAt ? fmt.dayMonthShort(a.dueAt) : "сессия"}</span></span>
+                          <span className="min-w-0 flex-1">{a.title}<span className="text-muted"> · {a.dueAt ? fmt.dayMonth(a.dueAt) : "сессия"}</span></span>
                           <span className="tabular">{a.points !== null ? <b>{a.points}</b> : <span className="text-muted">{a.dueAt && a.dueAt < at ? "проверяется" : "—"}</span>}<span className="text-muted"> / {a.maxPoints}</span></span>
                         </li>
                       ))}
@@ -162,4 +178,29 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
       ) : <EmptyState icon={<BookOpen />} title="Зачётка пока пустая">Итоги появятся после первой сессии. А текущие баллы уже видны во вкладке «Текущий семестр».</EmptyState>}
     </div>
   );
+}
+
+type FocusCard = { d: { name: string; short: string }; plan: { tone: "ok" | "goal" | "exam" | "risk"; headline: string; needPct: number | null }; next?: { title: string; dueAt: Date | null; maxPoints: number } };
+
+/**
+ * До трёх шагов «с чего начать»: 1) предмет с риском, 2) ближайшая работа с целью в баллах,
+ * 3) предмет, где автомат получить проще всего. Повторы предметов пропускаем.
+ */
+function focusSteps(cards: FocusCard[]) {
+  const out: { anchor: string; lead: string; text: string }[] = [];
+  const used = new Set<string>();
+  const risk = cards.find((c) => c.plan.tone === "risk");
+  if (risk) {
+    out.push({ anchor: risk.d.name, lead: `${risk.d.short}:`, text: `${risk.plan.headline.toLowerCase()} — разберитесь с этим предметом первым, запишитесь на консультацию.` });
+    used.add(risk.d.name);
+  }
+  const soon = cards.filter((c) => c.next?.dueAt && !used.has(c.d.name)).sort((a, b) => +a.next!.dueAt! - +b.next!.dueAt!)[0];
+  if (soon?.next?.dueAt) {
+    const goal = soon.plan.needPct ? ` — цель ${Math.ceil((soon.next.maxPoints * soon.plan.needPct) / 100)}+ из ${soon.next.maxPoints}` : ` — до ${soon.next.maxPoints} б.`;
+    out.push({ anchor: soon.d.name, lead: `${fmt.dayMonth(soon.next.dueAt)} — ${soon.next.title}`, text: `по предмету «${soon.d.short}»${goal}.` });
+    used.add(soon.d.name);
+  }
+  const easiest = cards.filter((c) => c.plan.tone === "goal" && c.plan.needPct !== null && !used.has(c.d.name)).sort((a, b) => a.plan.needPct! - b.plan.needPct!)[0];
+  if (easiest) out.push({ anchor: easiest.d.name, lead: `${easiest.d.short}:`, text: `автомат ближе всего — достаточно в среднем ${easiest.plan.needPct}% за оставшиеся работы.` });
+  return out;
 }

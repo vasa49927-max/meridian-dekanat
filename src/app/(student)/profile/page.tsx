@@ -10,11 +10,14 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
+import { TourButton } from "@/components/shell/onboarding";
 import { logoutAction } from "../../(auth)/login/actions";
 import { PasswordRow } from "@/components/profile/password-row";
 import { DEMO_LOGINS } from "@/server/auth/change-password";
 import { getSession } from "@/server/auth/session";
 import { deviceLabel } from "@/lib/device";
+import { ConfirmForm } from "@/components/ui/confirm";
+import { logoutOthersAction } from "./actions";
 
 export const metadata: Metadata = { title: "Профиль" };
 
@@ -66,8 +69,19 @@ export default async function ProfilePage() {
             <ul className="mb-3 space-y-1.5 text-xs text-muted">
               {sessions.map((x) => <li key={x.id}><span className="font-medium text-fg">{deviceLabel(x.userAgent)}</span>{x.id === current?.sessionId && <span className="ml-1.5 rounded bg-ok-bg px-1.5 py-0.5 font-semibold text-ok">это устройство</span>} · вход {fmt.dateTime(x.createdAt)}</li>)}
             </ul>
+            {sessions.length > 1 && (DEMO_LOGINS.has(p.login) ? (
+              <p className="mb-3 rounded-lg bg-surface-2 px-3 py-2 text-xs text-muted">Кнопка «Выйти на других устройствах» в демо-аккаунтах отключена: под этим логином работают и другие проверяющие.</p>
+            ) : (
+              <div className="mb-3">
+                <ConfirmForm action={logoutOthersAction} hidden={{}} trigger="Выйти на других устройствах"
+                  triggerClassName="h-10 rounded-lg border border-line px-3 text-sm font-semibold hover:bg-surface-2"
+                  title="Выйти на других устройствах?" description="Все остальные браузеры и телефоны, где открыт ваш кабинет, разлогинятся. Это устройство останется в системе."
+                  confirmLabel="Да, выйти на остальных" />
+              </div>
+            ))}
             <div className="flex flex-wrap gap-2">
               <ThemeToggle withLabel />
+              <TourButton className="inline-flex h-11 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-medium hover:bg-surface-2" />
               <form action={logoutAction}><Button variant="secondary"><LogOut className="h-4 w-4" aria-hidden />Выйти</Button></form>
             </div>
           </Card>

@@ -3,7 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireStudent } from "@/server/auth/guards";
-import { createMyRequest, replyToMyRequest, withdrawMyRequest } from "@/server/dal/requests";
+import { createMyRequest, feedbackSchema, rateMyRequest, replyToMyRequest, withdrawMyRequest } from "@/server/dal/requests";
 import { AttachmentLimitError, readUploads } from "@/server/attachments";
 
 export type FormState = { error?: string; fieldErrors?: Record<string, string>; values?: Record<string, string> };
@@ -46,4 +46,18 @@ export async function withdrawAction(form: FormData) {
   const r = await withdrawMyRequest(v, id.data);
   if ("notFound" in r && r.notFound) notFound();
   revalidatePath(`/requests/${id.data}`);
+}
+
+export type RateState = { ok?: boolean; error?: string };
+
+/** Оценка работы деканата по закрытой заявке. */
+export async function rateRequestAction(_: RateState, form: FormData): Promise<RateState> {
+  const v = await requireStudent();
+  const id = String(form.get("id") ?? "");
+  const p = feedbackSchema.safeParse({ rating: form.get("rating") ?? undefined, comment: String(form.get("comment") ?? "").trim() || undefined });
+  if (!p.success) return { error: p.error.issues[0].message };
+  const r = await rateMyRequest(v, id, p.data);
+  if (!r.ok) { if ("notFound" in r) notFound(); return { error: r.error }; }
+  revalidatePath(`/requests/${id}`);
+  return { ok: true };
 }

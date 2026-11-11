@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { BellOff, CheckCheck, X } from "lucide-react";
 import { requireStudent } from "@/server/auth/guards";
 import { countMyUnread, getAnnouncementForMe, listMyNotifications, type NotifFilter } from "@/server/dal/student";
-import { fmt, now, relativeDay } from "@/lib/time";
+import { dayKey, fmt, nearDay, now, relativeDay } from "@/lib/time";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -46,12 +46,38 @@ export default async function NotificationsPage({ searchParams }: { searchParams
       </nav>
       {items.length ? (
         <>
-          <ul className="grid gap-2">
-            {items.map((n) => <NotificationItem key={n.id} n={{ id: n.id, kind: n.kind, title: n.title, body: n.body, link: n.link, important: n.important, read: !!n.readAt }} when={`${relativeDay(n.createdAt, at)}, ${fmt.time(n.createdAt)}`} />)}
-          </ul>
+          {/* Раунд 3: лента разбита по дням — «Сегодня», «Вчера», «11 ноября» */}
+          <div className="space-y-5">
+            {groupByDay(items, at).map((g) => (
+              <section key={g.key} aria-labelledby={`day-${g.key}`}>
+                <h2 id={`day-${g.key}`} className="mb-2 flex items-baseline gap-2 text-sm font-semibold">
+                  <span className="first-letter:uppercase">{g.title}</span>{g.sub && <span className="font-normal text-muted">{g.sub}</span>}
+                </h2>
+                <ul className="grid gap-2">
+                  {g.items.map((n) => <NotificationItem key={n.id} n={{ id: n.id, kind: n.kind, title: n.title, body: n.body, link: n.link, important: n.important, read: !!n.readAt }} when={fmt.time(n.createdAt)} />)}
+                </ul>
+              </section>
+            ))}
+          </div>
           {next && <div className="mt-4 text-center"><Link href={`${q(filter)}${filter === "all" ? "?" : "&"}before=${+next.createdAt}_${next.id}`} className="inline-flex h-11 items-center rounded-xl border border-line bg-surface px-4 font-semibold hover:bg-surface-2">Показать ещё</Link></div>}
         </>
       ) : <EmptyState icon={<BellOff />} title={filter === "unread" ? "Непрочитанных нет" : "Здесь пока пусто"}>Изменения расписания, статусы заявок и объявления деканата появятся здесь автоматически.</EmptyState>}
     </div>
   );
+}
+
+/** Группы по календарным дням (по Москве), в порядке ленты. */
+function groupByDay<T extends { createdAt: Date }>(items: T[], at: Date) {
+  const groups: { key: string; title: string; sub: string | null; items: T[] }[] = [];
+  for (const n of items) {
+    const key = dayKey(n.createdAt);
+    let g = groups.at(-1);
+    if (!g || g.key !== key) {
+      const rel = relativeDay(n.createdAt, at);
+      g = { key, title: rel, sub: nearDay(n.createdAt, at) || rel === "вчера" ? fmt.dayMonth(n.createdAt) : fmt.weekday(n.createdAt), items: [] };
+      groups.push(g);
+    }
+    g.items.push(n);
+  }
+  return groups;
 }

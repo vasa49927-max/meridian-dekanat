@@ -91,3 +91,36 @@ describe("Смена пароля (обычный, не демо-аккаунт)
     expect(left.map((x) => x.id)).toEqual([s1.id]);
   });
 });
+
+import { endOtherSessions } from "@/server/auth/change-password";
+describe("Выйти на других устройствах", () => {
+  it("удаляет только чужие сессии этого пользователя; у демо-аккаунта ничего не трогает", async () => {
+    const [u] = await db.insert(t.users).values({ login: "outtest", passwordHash: await hashPassword("Old-pass-123"), role: "STUDENT" }).returning();
+    const [other] = await db.insert(t.users).values({ login: "outtest2", passwordHash: await hashPassword("Old-pass-123"), role: "STUDENT" }).returning();
+    const mk = (userId: string, n: string) => db.insert(t.sessions).values({ tokenHash: `o-${n}-${Date.now()}`, userId, expiresAt: new Date(Date.now() + 1e7) }).returning().then((r) => r[0]);
+    const keep = await mk(u.id, "a"); await mk(u.id, "b"); const foreign = await mk(other.id, "c");
+    expect(await endOtherSessions(u.id, keep.id, "outtest")).toBe(true);
+    expect((await db.select().from(t.sessions).where(eq(t.sessions.userId, u.id))).map((x) => x.id)).toEqual([keep.id]);
+    expect((await db.select().from(t.sessions).where(eq(t.sessions.userId, other.id))).map((x) => x.id)).toEqual([foreign.id]);
+    const anna = (await db.select().from(t.users).where(eq(t.users.login, "sokolova")))[0];
+    const a1 = await mk(anna.id, "d"); await mk(anna.id, "e");
+    expect(await endOtherSessions(anna.id, a1.id, "sokolova")).toBe(false);
+    expect((await db.select().from(t.sessions).where(eq(t.sessions.userId, anna.id))).length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+import { rateMyRequest } from "@/server/dal/requests";
+describe("Оценка работы деканата", () => {
+  it("чужую заявку оценить нельзя (notFound), открытую — нельзя, свою закрытую — один раз", async () => {
+    const annaReqs = await db.select().from(t.requests).where(eq(t.requests.studentId, anna.studentId));
+    const issued = annaReqs.find((r) => r.status === "ISSUED")!;
+    const open = annaReqs.find((r) => r.status === "IN_PROGRESS")!;
+    expect(await rateMyRequest(timur, issued.id, { rating: 1 })).toMatchObject({ ok: false, notFound: true });
+    expect(await rateMyRequest(anna, open.id, { rating: 5 })).toMatchObject({ ok: false });
+    expect(await rateMyRequest(anna, issued.id, { rating: 4, comment: "ок" })).toMatchObject({ ok: true });
+    expect(await rateMyRequest(anna, issued.id, { rating: 1 })).toMatchObject({ ok: false, error: "Вы уже оценили эту заявку" });
+    const rows = await db.select().from(t.requestFeedback).where(eq(t.requestFeedback.requestId, issued.id));
+    expect(rows).toHaveLength(1);
+    expect(rows[0].rating).toBe(4);
+  });
+});

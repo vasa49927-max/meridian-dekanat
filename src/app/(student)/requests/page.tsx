@@ -49,7 +49,7 @@ export default async function RequestsPage({ searchParams }: { searchParams: Pro
                   <RequestIcon name={r.icon} />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2"><h3 className="font-semibold leading-snug">{r.title}</h3>{r.documentId && <span className="inline-flex items-center gap-1 text-xs text-ok"><QrCode className="h-3.5 w-3.5" aria-hidden />электронный документ</span>}</div>
-                    <p className="text-[13px] text-muted">{r.number} · подана {fmt.dayMonthShort(r.createdAt)}{["SUBMITTED", "IN_PROGRESS"].includes(r.status) ? ` · срок до ${fmt.dayMonthShort(r.dueAt)}` : ""}</p>
+                    <p className="text-[13px] text-muted">{r.number} · подана {fmt.dayMonth(r.createdAt)}{["SUBMITTED", "IN_PROGRESS"].includes(r.status) ? ` · срок до ${fmt.dayMonth(r.dueAt)}` : ""}</p>
                     {r.staffComment && ["NEEDS_INFO", "REJECTED"].includes(r.status) && <p className="mt-1 line-clamp-2 text-[13px] text-warn">{r.staffComment}</p>}
                   </div>
                   <StatusBadge status={r.status} className="ml-[52px] sm:ml-0" />

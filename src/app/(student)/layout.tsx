@@ -9,6 +9,7 @@ import { TabBar } from "@/components/shell/tab-bar";
 import { TopBar } from "@/components/shell/top-bar";
 import { Disclaimer } from "@/components/shell/disclaimer";
 import { OfflineBanner } from "@/components/shell/offline-banner";
+import { Onboarding } from "@/components/shell/onboarding";
 import { STATUS_LABEL } from "@/components/requests/status";
 import { logoutAction } from "../(auth)/login/actions";
 
@@ -46,6 +47,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         <footer className="mx-auto max-w-[1240px] px-4 pb-28 pt-4 lg:px-9 lg:pb-8"><Disclaimer /></footer>
       </div>
       <TabBar unread={unread} />
+      <Onboarding firstName={v.firstName} />
     </div>
   );
 }

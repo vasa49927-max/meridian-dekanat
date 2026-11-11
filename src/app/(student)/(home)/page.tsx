@@ -112,99 +112,108 @@ export default async function TodayPage() {
         {/* Обзор раунда 2: изменения — боль №1 по опросу (11 из 11), на телефоне показываем их сразу после карточки пары */}
         <div className="lg:col-span-3"><ChangeBanner changes={changes} /></div>
 
-        <Card aria-labelledby="day-h" className="max-lg:order-2 lg:row-span-2">
-          <CardTitle id="day-h" action={<Link href="/schedule" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Неделя</Link>}>
-            {dayTitle} · {(() => { const n = dayList.filter((l) => l.status !== "CANCELLED").length; return n ? `${n} ${n === 1 ? "пара" : n < 5 ? "пары" : "пар"}` : "без пар"; })()}
-          </CardTitle>
-          {showNextDay && <p className="-mt-1 mb-1 text-[13px] text-muted">Сегодня пар нет — вот ближайший учебный день.</p>}
-          {dayList.length ? (
-            <ol className="divide-y divide-dashed divide-line">
-              {dayList.map((l) => {
-                const done = l.endsAt < at;
-                const live = l.startsAt <= at && l.endsAt > at;
-                const kind = changeKind(l);
-                return (
-                  <li key={l.id} className={cn("flex gap-3 py-2.5", done && !kind && "text-muted [&_p]:text-muted", kind === "cancel" && "-mx-2 rounded-xl bg-danger-bg/70 px-2")}>
-                    <time className={cn("w-12 shrink-0 font-semibold tabular", live && "text-primary dark:text-accent-text", kind === "cancel" && "text-danger")} dateTime={l.startsAt.toISOString()}>{fmt.time(l.startsAt)}</time>
-                    <div className="min-w-0">
-                      <p className={cn("font-semibold leading-snug", live && "text-primary dark:text-accent-text")}>{l.title}</p>
-                      {kind && <ChangeChip kind={kind} className="mt-1" />}
-                      <p className="mt-0.5 text-[13px] text-muted">
-                        {kind === "cancel" ? (l.changeNote ?? "Пары не будет") : kind === "room" ? `Теперь ауд. ${l.room} (вместо ${l.prevRoom})` : kind === "move" ? `Перенесена сюда · ауд. ${l.room}` : `${LESSON_TYPE[l.type]} · ауд. ${l.room}, корп. ${l.buildingCode}`}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          ) : <EmptyState icon={<CalendarCheck2 />} title="Сегодня пар нет" className="py-6">{next ? `Ближайшая — ${relativeDay(next.startsAt, at)} в ${fmt.time(next.startsAt)}.` : null}</EmptyState>}
-        </Card>
+        {/* Раунд 3: нижняя часть — три колонки-стопки без растягивания карточек (на телефоне колонки «растворяются» — порядок задают order-классы) */}
+        <div className="max-lg:contents lg:col-span-3 lg:grid lg:grid-cols-3 lg:items-start lg:gap-4">
+          <div className="max-lg:contents lg:flex lg:flex-col lg:gap-4">
+            <Card aria-labelledby="day-h" className="max-lg:order-2">
+              <CardTitle id="day-h" action={<Link href="/schedule" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Неделя</Link>}>
+                {dayTitle} · {(() => { const n = dayList.filter((l) => l.status !== "CANCELLED").length; return n ? `${n} ${n === 1 ? "пара" : n < 5 ? "пары" : "пар"}` : "без пар"; })()}
+              </CardTitle>
+              {showNextDay && <p className="-mt-1 mb-1 text-[13px] text-muted">Сегодня пар нет — вот ближайший учебный день.</p>}
+              {dayList.length ? (
+                <ol className="divide-y divide-dashed divide-line">
+                  {dayList.map((l) => {
+                    const done = l.endsAt < at;
+                    const live = l.startsAt <= at && l.endsAt > at;
+                    const kind = changeKind(l);
+                    return (
+                      <li key={l.id} className={cn("flex gap-3 py-2.5", done && !kind && "text-muted [&_p]:text-muted", kind === "cancel" && "-mx-2 rounded-xl bg-danger-bg/70 px-2")}>
+                        <time className={cn("w-12 shrink-0 font-semibold tabular", live && "text-primary dark:text-accent-text", kind === "cancel" && "text-danger")} dateTime={l.startsAt.toISOString()}>{fmt.time(l.startsAt)}</time>
+                        <div className="min-w-0">
+                          <p className={cn("font-semibold leading-snug", live && "text-primary dark:text-accent-text")}>{l.title}</p>
+                          {kind && <ChangeChip kind={kind} className="mt-1" />}
+                          <p className="mt-0.5 text-[13px] text-muted">
+                            {kind === "cancel" ? (l.changeNote ?? "Пары не будет") : kind === "room" ? `Теперь ауд. ${l.room} (вместо ${l.prevRoom})` : kind === "move" ? `Перенесена сюда · ауд. ${l.room}` : `${LESSON_TYPE[l.type]} · ауд. ${l.room}, корп. ${l.buildingCode}`}
+                          </p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              ) : <EmptyState icon={<CalendarCheck2 />} title="Сегодня пар нет" className="py-6">{next ? `Ближайшая — ${relativeDay(next.startsAt, at)} в ${fmt.time(next.startsAt)}.` : null}</EmptyState>}
+            </Card>
 
-        <Card aria-labelledby="dl-h" className="max-lg:order-2">
-          <CardTitle id="dl-h">Ближайшие сроки</CardTitle>
-          {deadlines.length ? (
-            <ul className="divide-y divide-line">
-              {deadlines.map((d) => {
-                const hot = +d.dueAt - +at < 36 * 3600 * 1000;
-                const inner = (
-                  <div className="flex gap-3 py-2.5">
-                    <Badge tone={hot ? "danger" : "neutral"} className="mt-0.5 min-w-[70px] justify-center">{relativeDay(d.dueAt, at) === "сегодня" ? "сегодня" : relativeDay(d.dueAt, at) === "завтра" ? "завтра" : fmt.dayMonthShort(d.dueAt)}</Badge>
-                    <div className="min-w-0"><p className="text-sm font-semibold leading-snug">{d.title}</p>{d.description && <p className="text-[13px] text-muted">{d.description}</p>}</div>
-                  </div>
-                );
-                return <li key={d.id}>{d.link ? <Link href={d.link} className="block rounded-lg hover:bg-surface-2/60">{inner}</Link> : inner}</li>;
-              })}
-            </ul>
-          ) : <EmptyState title="Сроков на горизонте нет" className="py-6" />}
-        </Card>
+            <Card aria-labelledby="ai-h" className="max-lg:order-2 lg:col-span-1">
+              <CardTitle id="ai-h">Помощник деканата</CardTitle>
+              <p className="text-sm text-muted">Отвечает по Положению и вашим данным, умеет заполнить заявку.</p>
+              <form action="/assistant" className="mt-3 flex gap-2">
+                <label htmlFor="ai-q" className="sr-only">Вопрос помощнику</label>
+                <input id="ai-q" name="q" placeholder="Ваш вопрос деканату" className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-bg px-3.5 text-[15px] placeholder:text-muted/80 focus:border-primary focus:outline-none" />
+                <button className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-fg" aria-label="Спросить"><Sparkles className="h-5 w-5" aria-hidden /></button>
+              </form>
+            </Card>
 
-        <Card aria-labelledby="rq-h" className="max-lg:order-2">
-          <CardTitle id="rq-h" action={<Link href="/requests" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все</Link>}>Мои заявки</CardTitle>
-          {activeReqs.length ? (
-            <ul className="divide-y divide-line">
-              {activeReqs.map((r) => (
-                <li key={r.id}>
-                  {/* Правка капитана №2d: статус — под названием, а не отдельной широкой колонкой. */}
-                  <Link href={`/requests/${r.id}`} className="block rounded-lg py-2.5 hover:bg-surface-2/60">
-                    <p className="text-sm font-semibold leading-snug">{r.title}</p>
-                    <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted">
-                      <StatusBadge status={r.status} />
-                      <span>{r.status === "NEEDS_INFO" ? "ответьте деканату" : r.status === "READY" ? "откройте документ" : `до ${fmt.dayMonthShort(r.dueAt)}`}</span>
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : <p className="text-sm text-muted">Активных заявок нет.</p>}
-          <Link href="/requests/new" className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline dark:text-accent-text"><FileText className="h-4 w-4" aria-hidden />Заказать справку</Link>
-        </Card>
+          </div>
+          <div className="max-lg:contents lg:flex lg:flex-col lg:gap-4">
+            <Card aria-labelledby="dl-h" className="max-lg:order-2">
+              <CardTitle id="dl-h">Ближайшие сроки</CardTitle>
+              {deadlines.length ? (
+                <ul className="divide-y divide-line">
+                  {deadlines.map((d) => {
+                    const hot = +d.dueAt - +at < 36 * 3600 * 1000;
+                    const inner = (
+                      <div className="flex gap-3 py-2.5">
+                        <Badge tone={hot ? "danger" : "neutral"} className="mt-0.5 min-w-[70px] justify-center">{relativeDay(d.dueAt, at) === "сегодня" ? "сегодня" : relativeDay(d.dueAt, at) === "завтра" ? "завтра" : fmt.dayMonth(d.dueAt)}</Badge>
+                        <div className="min-w-0"><p className="text-sm font-semibold leading-snug">{d.title}</p>{d.description && <p className="text-[13px] text-muted">{d.description}</p>}</div>
+                      </div>
+                    );
+                    return <li key={d.id}>{d.link ? <Link href={d.link} className="block rounded-lg hover:bg-surface-2/60">{inner}</Link> : inner}</li>;
+                  })}
+                </ul>
+              ) : <EmptyState title="Сроков на горизонте нет" className="py-6" />}
+            </Card>
 
-        <Card aria-labelledby="ai-h" className="max-lg:order-2 lg:col-span-1">
-          <CardTitle id="ai-h">Помощник деканата</CardTitle>
-          <p className="text-sm text-muted">Отвечает по Положению и вашим данным, умеет заполнить заявку.</p>
-          <form action="/assistant" className="mt-3 flex gap-2">
-            <label htmlFor="ai-q" className="sr-only">Вопрос помощнику</label>
-            <input id="ai-q" name="q" placeholder="Ваш вопрос деканату" className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-bg px-3.5 text-[15px] placeholder:text-muted/80 focus:border-primary focus:outline-none" />
-            <button className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-fg" aria-label="Спросить"><Sparkles className="h-5 w-5" aria-hidden /></button>
-          </form>
-        </Card>
+          </div>
+          <div className="max-lg:contents lg:flex lg:flex-col lg:gap-4">
+            <Card aria-labelledby="rq-h" className="max-lg:order-2">
+              <CardTitle id="rq-h" action={<Link href="/requests" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все</Link>}>Мои заявки</CardTitle>
+              {activeReqs.length ? (
+                <ul className="divide-y divide-line">
+                  {activeReqs.map((r) => (
+                    <li key={r.id}>
+                      {/* Правка капитана №2d: статус — под названием, а не отдельной широкой колонкой. */}
+                      <Link href={`/requests/${r.id}`} className="block rounded-lg py-2.5 hover:bg-surface-2/60">
+                        <p className="text-sm font-semibold leading-snug">{r.title}</p>
+                        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-muted">
+                          <StatusBadge status={r.status} />
+                          <span>{r.status === "NEEDS_INFO" ? "ответьте деканату" : r.status === "READY" ? "откройте документ" : `до ${fmt.dayMonth(r.dueAt)}`}</span>
+                        </p>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="text-sm text-muted">Активных заявок нет.</p>}
+              <Link href="/requests/new" className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline dark:text-accent-text"><FileText className="h-4 w-4" aria-hidden />Заказать справку</Link>
+            </Card>
 
-        <Card aria-labelledby="news-h" className="max-lg:order-2 lg:col-span-1">
-          <CardTitle id="news-h" action={<Link href="/notifications?f=ANNOUNCEMENT" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все</Link>}>Объявления</CardTitle>
-          {news.items.length ? (
-            <ul className="divide-y divide-line">
-              {news.items.map((n) => (
-                <li key={n.id}>
-                  <Link href={n.link ?? "/notifications"} className="flex items-start gap-3 rounded-lg py-2.5 hover:bg-surface-2/60">
-                    <Megaphone className={cn("mt-0.5 h-4 w-4 shrink-0", n.important ? "text-danger" : "text-muted")} aria-hidden />
-                    <div className="min-w-0"><p className={cn("text-sm leading-snug", !n.readAt && "font-semibold")}>{n.title}</p><p className="text-[13px] text-muted">{fmt.dayMonthShort(n.createdAt)}{n.important ? " · важное" : ""}</p></div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : <p className="text-sm text-muted">Новых объявлений нет.</p>}
-          <Link href="/notifications" className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все уведомления <ArrowRight className="h-4 w-4" aria-hidden /></Link>
-        </Card>
+            <Card aria-labelledby="news-h" className="max-lg:order-2 lg:col-span-1">
+              <CardTitle id="news-h" action={<Link href="/notifications?f=ANNOUNCEMENT" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все</Link>}>Объявления</CardTitle>
+              {news.items.length ? (
+                <ul className="divide-y divide-line">
+                  {news.items.map((n) => (
+                    <li key={n.id}>
+                      <Link href={n.link ?? "/notifications"} className="flex items-start gap-3 rounded-lg py-2.5 hover:bg-surface-2/60">
+                        <Megaphone className={cn("mt-0.5 h-4 w-4 shrink-0", n.important ? "text-danger" : "text-muted")} aria-hidden />
+                        <div className="min-w-0"><p className={cn("text-sm leading-snug", !n.readAt && "font-semibold")}>{n.title}</p><p className="text-[13px] text-muted">{fmt.dayMonth(n.createdAt)}{n.important ? " · важное" : ""}</p></div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="text-sm text-muted">Новых объявлений нет.</p>}
+              <Link href="/notifications" className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline dark:text-accent-text">Все уведомления <ArrowRight className="h-4 w-4" aria-hidden /></Link>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

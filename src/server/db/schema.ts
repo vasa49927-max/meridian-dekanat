@@ -4,7 +4,7 @@
  */
 import { relations, sql } from "drizzle-orm";
 import {
-  boolean, customType, index, integer, jsonb, pgEnum, pgTable, real, smallint, text, timestamp, uniqueIndex, uuid,
+  boolean, check, customType, index, integer, jsonb, pgEnum, pgTable, real, smallint, text, timestamp, uniqueIndex, uuid,
 } from "drizzle-orm/pg-core";
 
 const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => "bytea" });
@@ -289,6 +289,19 @@ export const attachments = pgTable("attachments", {
   createdAt: createdAt(),
 }, (t) => [index("attachments_request_idx").on(t.requestId)]);
 
+/**
+ * Оценка работы деканата по закрытой заявке (раунд 3): 1–5 и необязательный комментарий.
+ * Одна оценка на заявку; ставит только автор заявки (проверка в DAL по studentId из сессии).
+ */
+export const requestFeedback = pgTable("request_feedback", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  requestId: uuid("request_id").notNull().unique().references(() => requests.id, { onDelete: "cascade" }),
+  studentId: uuid("student_id").notNull().references(() => students.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(),
+  comment: text("comment"),
+  createdAt: createdAt(),
+}, (t) => [check("request_feedback_rating_chk", sql`${t.rating} between 1 and 5`)]);
+
 // ───────────── Уведомления и объявления ─────────────
 export const notificationKindEnum = pgEnum("notification_kind", ["SCHEDULE", "REQUEST", "ANNOUNCEMENT", "DEADLINE", "APPOINTMENT", "GRADE"]);
 export const audienceEnum = pgEnum("audience", ["ALL", "FACULTY", "COURSE", "GROUP"]);
@@ -380,6 +393,8 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
   student: one(students, { fields: [requests.studentId], references: [students.id] }),
   events: many(requestEvents),
   document: one(documents, { fields: [requests.id], references: [documents.requestId] }),
+  assignee: one(staff, { fields: [requests.assigneeStaffId], references: [staff.id] }),
+  feedback: one(requestFeedback, { fields: [requests.id], references: [requestFeedback.requestId] }),
 }));
 export const requestEventsRelations = relations(requestEvents, ({ one }) => ({
   request: one(requests, { fields: [requestEvents.requestId], references: [requests.id] }),

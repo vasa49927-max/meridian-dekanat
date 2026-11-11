@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { takeRequestAction } from "@/app/(staff)/staff/actions";
+import { RatingStars } from "@/components/requests/rate-form";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { requireStaff } from "@/server/auth/guards";
@@ -26,7 +28,12 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
     <div className="pt-2 lg:pt-0">
       <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/staff" className="tap text-muted hover:text-fg">← Очередь</Link></nav>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div><h1 className="font-serif text-[26px] leading-tight">{r.type.title}</h1><p className="mt-1 text-sm text-muted">{r.number} · подана {fmt.dateTime(r.createdAt)} · срок до {fmt.dayMonth(r.dueAt)}</p></div>
+        <div><h1 className="font-serif text-[26px] leading-tight">{r.type.title}</h1><p className="mt-1 text-sm text-muted">{r.number} · подана {fmt.dateTime(r.createdAt)} · срок до {fmt.dayMonth(r.dueAt)}</p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-muted">Ведёт:</span>
+            <b>{r.assignee ? (r.assignee.id === v.staffId ? "вы" : `${r.assignee.lastName} ${r.assignee.firstName[0]}. ${r.assignee.middleName ? r.assignee.middleName[0] + "." : ""}`) : "никто — заявка свободна"}</b>
+            {r.assignee?.id !== v.staffId && next.length > 0 && <form action={takeRequestAction}><input type="hidden" name="id" value={r.id} /><button className="rounded-lg border border-line px-2.5 py-1 text-xs font-semibold hover:bg-surface-2">Взять себе</button></form>}
+          </div></div>
         <StatusBadge status={r.status} className="text-sm" />
       </div>
       <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr] [&>*]:min-w-0">
@@ -37,6 +44,12 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
             <p className="text-sm text-muted">{st.group.faculty.code} · {st.group.course} курс · гр. {st.group.name} · {st.group.program.code} «{st.group.program.name}»</p>
             <p className="text-sm text-muted">Зачётка {st.recordBook} · {st.basis}{st.militaryTraining ? " · ВУЦ" : ""}</p>
           </Card>
+          {r.feedback && (
+            <Card>
+              <CardTitle>Оценка студента</CardTitle>
+              <p className="flex flex-wrap items-center gap-2 text-sm"><RatingStars rating={r.feedback.rating} />{r.feedback.comment ? <span>«{r.feedback.comment}»</span> : <span className="text-muted">без комментария</span>}</p>
+            </Card>
+          )}
           <Card>
             <CardTitle>Данные заявки</CardTitle>
             <dl className="space-y-2 text-sm">

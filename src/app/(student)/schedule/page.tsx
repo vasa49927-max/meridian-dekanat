@@ -131,7 +131,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
             return (
               <section key={i} aria-label={fmt.longDay(d)} className={cn("min-w-0", isSameDay(d, at) && "rounded-2xl xl:bg-primary-soft/40 xl:p-1.5")}>
                 <h2 className={cn("mb-2 flex items-baseline gap-2 px-1 text-lg font-bold", isSameDay(d, at) && "text-primary dark:text-accent-text")}>
-                  <span>{fmt.weekday(d).replace(/^./, (c) => c.toUpperCase())}, {fmt.dayMonthShort(d)}</span>{isSameDay(d, at) && <span className="text-xs font-semibold uppercase">сегодня</span>}
+                  <span>{fmt.weekday(d).replace(/^./, (c) => c.toUpperCase())}, {fmt.dayMonth(d)}</span>{isSameDay(d, at) && <span className="text-xs font-semibold uppercase">сегодня</span>}
                 </h2>
                 {list.length ? <div className="grid grid-cols-[minmax(0,1fr)] gap-2">{list.map((l) => <LessonCard key={l.id} l={l} at={at} compact />)}</div> : <p className="rounded-2xl border border-dashed border-line px-3 py-4 text-center text-sm text-muted">Нет пар</p>}
               </section>
