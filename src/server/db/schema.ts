@@ -302,6 +302,44 @@ export const requestFeedback = pgTable("request_feedback", {
   createdAt: createdAt(),
 }, (t) => [check("request_feedback_rating_chk", sql`${t.rating} between 1 and 5`)]);
 
+/**
+ * Подписка на календарь (раунд 3): секретная ссылка webcal для Google/Apple/Яндекс Календаря.
+ * В БД — только SHA-256 токена; новая ссылка заменяет старую (старая перестаёт работать).
+ */
+export const calendarFeeds = pgTable("calendar_feeds", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  createdAt: createdAt(),
+  lastFetchedAt: timestamp("last_fetched_at", { withTimezone: true }),
+});
+
+/** Web Push: подписки браузеров/телефонов пользователя (endpoint + ключи шифрования из браузера). */
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull().unique(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  userAgent: text("user_agent"),
+  createdAt: createdAt(),
+}, (t) => [index("push_subscriptions_user_idx").on(t.userId)]);
+
+/** Что присылать на телефон. Нет строки — значения по умолчанию (всё, кроме утренней сводки). */
+export const notifyPrefs = pgTable("notify_prefs", {
+  userId: uuid("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  schedule: boolean("schedule").notNull().default(true),
+  requests: boolean("requests").notNull().default(true),
+  announcements: boolean("announcements").notNull().default(true),
+  morning: boolean("morning").notNull().default(false),
+});
+
+/** Служебные настройки приложения (ключи VAPID, дата последней утренней рассылки). */
+export const appSettings = pgTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+});
+
 // ───────────── Уведомления и объявления ─────────────
 export const notificationKindEnum = pgEnum("notification_kind", ["SCHEDULE", "REQUEST", "ANNOUNCEMENT", "DEADLINE", "APPOINTMENT", "GRADE"]);
 export const audienceEnum = pgEnum("audience", ["ALL", "FACULTY", "COURSE", "GROUP"]);

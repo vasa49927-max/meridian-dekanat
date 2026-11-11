@@ -3,6 +3,7 @@ import { getSession } from "@/server/auth/session";
 import { requireStudent } from "@/server/auth/guards";
 import { changePassword, endOtherSessions } from "@/server/auth/change-password";
 import { revalidatePath } from "next/cache";
+import { savePrefs } from "@/server/push";
 
 export type PwState = { ok?: boolean; error?: string; field?: "current" | "next" | "repeat" };
 
@@ -24,4 +25,12 @@ export async function logoutOthersAction(): Promise<void> {
   if (!s || s.userId !== v.userId) return;
   await endOtherSessions(v.userId, s.sessionId, s.login);
   revalidatePath("/profile");
+}
+
+/** Что присылать на телефон: переносы, заявки, объявления, утренняя сводка. */
+export async function savePushPrefsAction(_: { ok?: boolean }, form: FormData): Promise<{ ok?: boolean }> {
+  const v = await requireStudent();
+  await savePrefs(v.userId, { schedule: form.get("schedule") === "on", requests: form.get("requests") === "on", announcements: form.get("announcements") === "on", morning: form.get("morning") === "on" });
+  revalidatePath("/profile");
+  return { ok: true };
 }

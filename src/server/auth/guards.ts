@@ -21,19 +21,27 @@ export type Viewer = StudentViewer | StaffViewer;
 export const getViewer = cache(async (): Promise<Viewer | null> => {
   const s = await getSession();
   if (!s) return null;
-  if (s.role === "STUDENT") {
+  if (s.role === "STUDENT") return studentViewerByUserId(s.userId);
+  const [r] = await db.select({ staffId: schema.staff.id, firstName: schema.staff.firstName, lastName: schema.staff.lastName, middleName: schema.staff.middleName, position: schema.staff.position })
+    .from(schema.staff).where(eq(schema.staff.userId, s.userId)).limit(1);
+  return r ? { role: "STAFF", userId: s.userId, ...r } : null;
+});
+
+/**
+ * «Зритель»-студент по userId. Для сессии — из getViewer; для секретной ссылки календаря и бота —
+ * userId берётся из проверенного токена/привязки, никогда из параметров запроса.
+ */
+export async function studentViewerByUserId(userId: string): Promise<StudentViewer | null> {
+  {
     const [r] = await db.select({
       studentId: schema.students.id, groupId: schema.students.groupId, subgroup: schema.students.subgroup, militaryTraining: schema.students.militaryTraining, avatarHue: schema.students.avatarHue,
       firstName: schema.students.firstName, lastName: schema.students.lastName, middleName: schema.students.middleName,
       facultyId: schema.groups.facultyId, course: schema.groups.course,
     }).from(schema.students).innerJoin(schema.groups, eq(schema.groups.id, schema.students.groupId))
-      .where(eq(schema.students.userId, s.userId)).limit(1);
-    return r ? { role: "STUDENT", userId: s.userId, ...r } : null;
+      .where(eq(schema.students.userId, userId)).limit(1);
+    return r ? { role: "STUDENT", userId, ...r } : null;
   }
-  const [r] = await db.select({ staffId: schema.staff.id, firstName: schema.staff.firstName, lastName: schema.staff.lastName, middleName: schema.staff.middleName, position: schema.staff.position })
-    .from(schema.staff).where(eq(schema.staff.userId, s.userId)).limit(1);
-  return r ? { role: "STAFF", userId: s.userId, ...r } : null;
-});
+}
 
 /** Для страниц и Server Actions студента. Сотрудника отправляет в его кабинет. */
 export async function requireStudent(): Promise<StudentViewer> {

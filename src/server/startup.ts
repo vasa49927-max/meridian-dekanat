@@ -5,6 +5,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { db, schema } from "@/server/db";
 import { seedDemo } from "@/server/seed/seed";
 import { loadExtraCaCertificates } from "@/server/certs";
+import { startMorningDigest } from "@/server/morning";
 
 /** Старт сервера: применяем миграции; если база пустая (первый деплой) — заполняем демо-данными. */
 export async function runStartup() {
@@ -15,5 +16,6 @@ export async function runStartup() {
     console.log("[startup] пустая база — создаём демо-данные");
     await seedDemo(db, { log: (m) => console.log("[seed]", m) });
   }
+  startMorningDigest();
   console.log("[startup] готово");
 }

@@ -5,6 +5,7 @@ import { db, schema as t } from "@/server/db";
 import type { StaffViewer } from "@/server/auth/guards";
 import { buildDocument, newVerifyCode } from "@/server/documents";
 import { fmt, now } from "@/lib/time";
+import { pushToUsers } from "@/server/push";
 
 /**
  * DAL сотрудника деканата. Каждая функция требует StaffViewer —
@@ -119,7 +120,8 @@ export async function staffChangeStatus(v: StaffViewer, input: z.infer<typeof st
     }
     const body = input.comment || (input.status === "READY" ? (r.type.producesDocument ? "Документ готов — откройте заявку: там электронная справка с QR-кодом." : "Заявление рассмотрено.") : input.status === "IN_PROGRESS" ? "Заявку взяли в работу." : "Статус обновлён.");
     await tx.insert(t.notifications).values({ userId: r.student.userId, kind: "REQUEST", title: `${r.type.title}: ${STATUS_TITLE[input.status]}`, body, link: `/requests/${r.id}`, important: input.status === "READY" || input.status === "NEEDS_INFO" || input.status === "REJECTED" });
-  });
+    return body;
+  }).then((body) => { void pushToUsers([r.student.userId], "requests", { title: `${r.type.title}: ${STATUS_TITLE[input.status]}`, body, url: `/requests/${r.id}`, tag: `request-${r.id}` }); });
   return { ok: true as const };
 }
 
@@ -147,7 +149,7 @@ export const announcementSchema = z.object({
 
 /** Публикация + веерная рассылка уведомлений адресатам одним INSERT … SELECT (масштабируется на тысячи студентов). */
 export async function staffPublishAnnouncement(v: StaffViewer, d: z.infer<typeof announcementSchema>) {
-  return db.transaction(async (tx) => {
+  const r = await db.transaction(async (tx) => {
     let facultyId = d.facultyId ?? null;
     if (d.audience === "GROUP" && d.groupId) {
       const [g] = await tx.select().from(t.groups).where(eq(t.groups.id, d.groupId));
@@ -164,9 +166,13 @@ export async function staffPublishAnnouncement(v: StaffViewer, d: z.infer<typeof
       : sql`g.id = ${a.groupId}`;
     const res = await tx.execute(sql`insert into notifications (user_id, kind, title, body, link, important)
       select s.user_id, 'ANNOUNCEMENT', ${a.title}, ${a.body}, ${"/notifications?a=" + a.id}, ${a.important}
-      from students s join groups g on g.id = s.group_id where ${where}`);
-    return { ok: true as const, recipients: res.rowCount ?? 0 };
+      from students s join groups g on g.id = s.group_id where ${where} returning user_id`);
+    const userIds = (res.rows as { user_id: string }[]).map((x) => x.user_id);
+    return { ok: true as const, recipients: userIds.length, userIds, msg: { title: a.important ? `Важно: ${a.title}` : a.title, body: a.body.slice(0, 180), url: `/notifications?a=${a.id}` } };
   });
+  if (!r.ok) return r;
+  void pushToUsers(r.userIds, "announcements", r.msg); // на телефоны — после фиксации транзакции, не задерживая ответ
+  return { ok: true as const, recipients: r.recipients };
 }
 
 export async function staffListAnnouncements() {
@@ -192,7 +198,7 @@ export const moveSchema = z.object({
 
 /** Перенос/отмена пары + уведомление всем затронутым студентам (группа, подгруппа, ВУЦ). */
 export async function staffChangeLesson(_v: StaffViewer, d: z.infer<typeof moveSchema>, mskToDate: (date: string, time: string) => Date) {
-  return db.transaction(async (tx) => {
+  const r = await db.transaction(async (tx) => {
     const [l] = await tx.select().from(t.lessons).where(eq(t.lessons.id, d.lessonId)).limit(1);
     if (!l) return { ok: false as const, error: "Занятие не найдено" };
     const prevStartsAt = l.prevStartsAt ?? l.startsAt;
@@ -214,9 +220,13 @@ export async function staffChangeLesson(_v: StaffViewer, d: z.infer<typeof moveS
     const sub = l.subgroup === null ? sql`true` : l.subgroup === 9 ? sql`s.military_training` : sql`s.subgroup = ${l.subgroup}`;
     const key = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Moscow" }).format(l.startsAt);
     const res = await tx.execute(sql`insert into notifications (user_id, kind, title, body, link, important)
-      select s.user_id, 'SCHEDULE', ${title}, ${body}, ${"/schedule?d=" + key}, true from students s where s.group_id = ${l.groupId} and ${sub}`);
-    return { ok: true as const, recipients: res.rowCount ?? 0 };
+      select s.user_id, 'SCHEDULE', ${title}, ${body}, ${"/schedule?d=" + key}, true from students s where s.group_id = ${l.groupId} and ${sub} returning user_id`);
+    const userIds = (res.rows as { user_id: string }[]).map((x) => x.user_id);
+    return { ok: true as const, recipients: userIds.length, userIds, msg: { title, body, url: `/schedule?d=${key}`, tag: `lesson-${l.id}` } };
   });
+  if (!r.ok) return r;
+  void pushToUsers(r.userIds, "schedule", r.msg);
+  return { ok: true as const, recipients: r.recipients };
 }
 
 // ───────── Приём методиста

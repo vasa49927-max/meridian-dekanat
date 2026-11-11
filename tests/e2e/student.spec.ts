@@ -100,10 +100,10 @@ test.describe("Расписание", () => {
   });
 
   test(".ics скачивается и содержит VEVENT", async ({ page }) => {
-    await page.goto("/schedule");
+    await page.goto("/schedule/calendar");
     const [download] = await Promise.all([
       page.waitForEvent("download"),
-      page.getByRole("link", { name: "В календарь (.ics)" }).click(),
+      page.getByRole("link", { name: /Скачать файл \.ics один раз/ }).click(),
     ]);
     expect(download.suggestedFilename()).toBe("meridian-schedule.ics");
     const body = readFileSync((await download.path())!, "utf8");

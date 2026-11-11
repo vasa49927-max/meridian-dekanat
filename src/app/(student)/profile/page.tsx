@@ -16,6 +16,8 @@ import { PasswordRow } from "@/components/profile/password-row";
 import { DEMO_LOGINS } from "@/server/auth/change-password";
 import { getSession } from "@/server/auth/session";
 import { deviceLabel } from "@/lib/device";
+import { getPrefs } from "@/server/push";
+import { PushSettings } from "@/components/profile/push-settings";
 import { ConfirmForm } from "@/components/ui/confirm";
 import { logoutOthersAction } from "./actions";
 
@@ -24,6 +26,7 @@ export const metadata: Metadata = { title: "Профиль" };
 export default async function ProfilePage() {
   const v = await requireStudent();
   const current = await getSession();
+  const pushPrefs = await getPrefs(v.userId);
   const p = await getMyProfile(v);
   const s = p.student;
   const sessions = await db.select({ id: t.sessions.id, createdAt: t.sessions.createdAt, lastSeenAt: t.sessions.lastSeenAt, userAgent: t.sessions.userAgent })
@@ -62,6 +65,10 @@ export default async function ProfilePage() {
             <ul className="space-y-2">
               {s.languages.map((l) => <li key={l.lang} className="flex items-center justify-between text-sm"><span className="flex items-center gap-2"><Languages className="h-4 w-4 text-accent-text" aria-hidden />{l.lang}</span><Badge>{l.level}</Badge></li>)}
             </ul>
+          </Card>
+          <Card id="push">
+            <CardTitle>Уведомления на телефон</CardTitle>
+            <PushSettings prefs={pushPrefs} />
           </Card>
           <Card>
             <CardTitle>Безопасность</CardTitle>

@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/empty";
 import { Badge } from "@/components/ui/badge";
 import { LESSON_TYPE, teacherShort } from "@/components/schedule/lesson-meta";
 import { ChangeChip, ChangeLines, changeKind } from "@/components/schedule/change-banner";
+import { SessionView } from "@/components/schedule/session-view";
 import { cn } from "@/lib/cn";
 
 export const metadata: Metadata = { title: "Расписание" };
@@ -60,7 +61,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
   const v = await requireStudent();
   const sp = await searchParams;
   const at = now();
-  const view = sp.view === "week" ? "week" : "day";
+  const view = sp.view === "week" ? "week" : sp.view === "session" ? "session" : "day";
   const selected = parseDayKey(sp.d) ?? startOfDay(at);
   const week = startOfWeek(selected);
   const lessons = await listMyLessons(v, week, addDays(week, 7));
@@ -70,29 +71,30 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
   // Ближайший следующий день с занятиями (для пустого состояния): в пределах недели или понедельник следующей.
   const nextStudyDay = days.find((d) => d > selected && byDay(d).length) ?? addDays(week, 7);
   const sundayLessons = byDay(addDays(week, 6));
-  const q = (d: Date, vv = view) => `/schedule?d=${dayKey(d)}${vv === "week" ? "&view=week" : ""}`;
+  const q = (d: Date, vv: typeof view = view === "session" ? "day" : view) => (vv === "session" ? "/schedule?view=session" : `/schedule?d=${dayKey(d)}${vv === "week" ? "&view=week" : ""}`);
   const p = mskParts(week);
   const weekNo = Math.floor((+week - +startOfWeek(new Date(Date.UTC(2026, 8, 1)))) / (7 * 86400000)) + 1;
 
   return (
     <div className="pt-2 lg:pt-0">
       {/* Правка капитана №3a: даты недели — крупно, номер недели — подписью. */}
-      <PageHeader title="Расписание" subtitle={<><span className="block font-serif text-xl font-bold text-fg lg:text-2xl">{mskParts(week).d} — {fmt.dayMonth(addDays(week, 5))} {p.y}</span>{weekNo > 0 && weekNo < 30 ? <span className="text-sm">{weekNo}-я учебная неделя</span> : null}</>}
-        action={<LinkButton href="/api/schedule.ics" variant="secondary" size="sm" prefetch={false}><CalendarArrowDown className="h-4 w-4" aria-hidden />В календарь (.ics)</LinkButton>} />
+      <PageHeader title="Расписание" subtitle={view === "session" ? <span className="block font-serif text-xl font-bold text-fg lg:text-2xl">Зимняя сессия {p.y}/{String(p.y + 1).slice(2)}</span> : <><span className="block font-serif text-xl font-bold text-fg lg:text-2xl">{mskParts(week).d} — {fmt.dayMonth(addDays(week, 5))} {p.y}</span>{weekNo > 0 && weekNo < 30 ? <span className="text-sm">{weekNo}-я учебная неделя</span> : null}</>}
+        action={<LinkButton href="/schedule/calendar" variant="secondary" size="sm"><CalendarArrowDown className="h-4 w-4" aria-hidden />В календарь телефона</LinkButton>} />
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <nav aria-label="Вид расписания" className="inline-flex rounded-xl border border-line bg-surface p-1">
-          {(["day", "week"] as const).map((vv) => (
-            <Link key={vv} aria-current={view === vv ? "page" : undefined} href={q(selected, vv)} className={cn("rounded-lg px-3.5 py-1.5 text-sm font-semibold", view === vv ? "bg-primary text-primary-fg" : "text-muted hover:text-fg")}>{vv === "day" ? "День" : "Неделя"}</Link>
+          {(["day", "week", "session"] as const).map((vv) => (
+            <Link key={vv} aria-current={view === vv ? "page" : undefined} href={q(selected, vv)} className={cn("rounded-lg px-3.5 py-1.5 text-sm font-semibold", view === vv ? "bg-primary text-primary-fg" : "text-muted hover:text-fg")}>{vv === "day" ? "День" : vv === "week" ? "Неделя" : "Сессия"}</Link>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-1">
+        {view !== "session" && <div className="ml-auto flex items-center gap-1">
           <Link href={q(addDays(view === "week" ? week : selected, view === "week" ? -7 : -1))} className="grid h-10 w-9 place-items-center rounded-xl border border-line bg-surface hover:bg-surface-2" aria-label={view === "week" ? "Предыдущая неделя" : "Предыдущий день"}><ChevronLeft className="h-5 w-5" aria-hidden /></Link>
           <Link href={q(startOfDay(at))} className="h-10 rounded-xl border border-line bg-surface px-2.5 text-sm font-semibold leading-10 hover:bg-surface-2">Сегодня</Link>
           <Link href={q(addDays(view === "week" ? week : selected, view === "week" ? 7 : 1))} className="grid h-10 w-9 place-items-center rounded-xl border border-line bg-surface hover:bg-surface-2" aria-label={view === "week" ? "Следующая неделя" : "Следующий день"}><ChevronRight className="h-5 w-5" aria-hidden /></Link>
-        </div>
+        </div>}
       </div>
 
+      {view === "session" ? <SessionView v={v} at={at} /> : <>
       {changesCount > 0 && (
         <p className="mb-4 flex items-center gap-2 rounded-xl border border-warn-line bg-warn-bg px-3.5 py-2.5 text-sm font-medium text-warn"><ArrowLeftRight className="h-4 w-4 shrink-0" aria-hidden />На этой неделе изменений в расписании: {changesCount}. Они выделены цветом — и продублированы в уведомлениях.</p>
       )}
@@ -140,6 +142,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
           {sundayLessons.length > 0 && <p className="text-sm text-muted">В воскресенье: {sundayLessons.length} зан.</p>}
         </div>
       )}
+      </>}
     </div>
   );
 }

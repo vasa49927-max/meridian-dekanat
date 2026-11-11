@@ -34,7 +34,7 @@ const visibleLessons = (v: StudentViewer) => and(
 const lessonSelect = {
   id: t.lessons.id, title: t.lessons.title, type: t.lessons.type, startsAt: t.lessons.startsAt, endsAt: t.lessons.endsAt,
   room: t.lessons.room, status: t.lessons.status, prevStartsAt: t.lessons.prevStartsAt, prevRoom: t.lessons.prevRoom,
-  changeNote: t.lessons.changeNote, subgroup: t.lessons.subgroup,
+  changeNote: t.lessons.changeNote, changedAt: t.lessons.changedAt, subgroup: t.lessons.subgroup,
   teacherLast: t.teachers.lastName, teacherFirst: t.teachers.firstName, teacherMiddle: t.teachers.middleName, teacherTitle: t.teachers.title,
   buildingCode: t.buildings.code, buildingName: t.buildings.name, buildingAddress: t.buildings.address, buildingHint: t.buildings.hint, campus: t.buildings.campus,
 };

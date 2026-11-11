@@ -134,3 +134,81 @@ test("профиль: в демо-аккаунте «Выйти на други�
   await expect(page.getByText("это устройство")).toBeVisible();
   await second.close();
 });
+
+test.describe("Часть 2: календарь, сессия, уведомления на телефон", () => {
+  test("подписка на календарь: ссылка работает без входа, новая ссылка отключает старую, «Отключить» — всё", async ({ page, playwright }) => {
+    await login(page, "anna");
+    await page.goto("/schedule");
+    await page.getByRole("link", { name: "В календарь телефона" }).click();
+    await page.waitForURL(/\/schedule\/calendar$/);
+    await page.getByRole("button", { name: "Получить ссылку для подписки" }).click();
+    const url1 = await page.getByLabel("Ссылка на календарь").inputValue();
+    expect(url1).toMatch(/\/api\/calendar\/[A-Za-z0-9_-]{32}\.ics$/);
+    await expect(page.getByRole("link", { name: "Google Календарь (Android)" })).toHaveAttribute("href", /calendar\.google\.com.*webcal/);
+
+    const anon = await playwright.request.newContext(); // календарь телефона приходит без cookie
+    const r1 = await anon.get(new URL(url1).pathname);
+    expect(r1.status()).toBe(200);
+    expect(r1.headers()["content-type"]).toContain("text/calendar");
+    const ics = await r1.text();
+    expect(ics).toContain("BEGIN:VCALENDAR");
+    expect(ics).toContain("Международные финансовые рынки");
+    expect(ics).toContain("[ОТМЕНА] Макроэкономика");
+    expect(ics).toContain("Экзамен"); // сессия тоже в календаре
+
+    await page.reload();
+    await expect(page.getByText(/календарь обновлялся/)).toBeVisible();
+    await page.getByRole("button", { name: "Получить новую ссылку" }).click();
+    const url2 = await page.getByLabel("Ссылка на календарь").inputValue();
+    expect(url2).not.toBe(url1);
+    expect((await anon.get(new URL(url1).pathname)).status()).toBe(404);
+    expect((await anon.get(new URL(url2).pathname)).status()).toBe(200);
+    expect((await anon.get("/api/calendar/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.ics")).status()).toBe(404);
+
+    await page.reload();
+    await page.getByRole("button", { name: "Отключить подписку" }).click();
+    await page.getByRole("button", { name: "Да, отключить" }).click();
+    await expect(page.getByRole("button", { name: "Получить ссылку для подписки" })).toBeVisible();
+    expect((await anon.get(new URL(url2).pathname)).status()).toBe(404);
+    await anon.dispose();
+  });
+
+  test("вкладка «Сессия»: зачёты и экзамены, консультации, автомат", async ({ page }) => {
+    await login(page, "anna");
+    await page.goto("/schedule");
+    await page.getByRole("link", { name: "Сессия" }).click();
+    await expect(page.getByRole("heading", { name: "Зачётная неделя" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Экзамены" })).toBeVisible();
+    const hist = page.getByRole("listitem").filter({ hasText: "История международных отношений" });
+    await expect(hist).toContainText("автомат — можно не сдавать");
+    const stat = page.getByRole("listitem").filter({ hasText: "Статистика" });
+    await expect(stat).toContainText("Консультация: 29 декабря (вт)");
+    await expect(stat.getByRole("link", { name: /Нужно подтянуть баллы/ })).toHaveAttribute("href", /\/grades#/);
+  });
+
+  test("уведомления на телефон: API принимает только свои подписки на известные push-сервисы; настройки сохраняются", async ({ page, playwright }) => {
+    await login(page, "anna");
+    await page.goto("/profile");
+    await expect(page.getByRole("heading", { name: "Уведомления на телефон" })).toBeVisible();
+    const key = await (await page.request.get("/api/push/subscribe")).json();
+    expect(key.publicKey).toMatch(/^[A-Za-z0-9_-]{87}$/);
+    const p256dh = "B" + "A".repeat(86), auth = "A".repeat(22);
+    const ok = await page.request.post("/api/push/subscribe", { headers: { Origin: "http://localhost:3000" }, data: { endpoint: "https://fcm.googleapis.com/fcm/send/e2e-test", keys: { p256dh, auth } } });
+    expect(ok.status()).toBe(200);
+    const evil = await page.request.post("/api/push/subscribe", { headers: { Origin: "http://localhost:3000" }, data: { endpoint: "https://169.254.169.254/x", keys: { p256dh, auth } } });
+    expect(evil.status()).toBe(400);
+    const foreign = await page.request.post("/api/push/subscribe", { headers: { Origin: "https://evil.example" }, data: { endpoint: "https://fcm.googleapis.com/fcm/send/x", keys: { p256dh, auth } } });
+    expect(foreign.status()).toBe(403);
+    const anon = await playwright.request.newContext({ baseURL: "http://localhost:3000" });
+    expect((await anon.post("/api/push/subscribe", { headers: { Origin: "http://localhost:3000" }, data: {} })).status()).toBe(401);
+    await anon.dispose();
+
+    const morning = page.getByLabel(/Утренняя сводка/);
+    await expect(morning).not.toBeChecked();
+    await morning.check();
+    await page.getByRole("button", { name: "Сохранить" }).click();
+    await expect(page.getByText("Сохранено")).toBeVisible();
+    await page.reload();
+    await expect(page.getByLabel(/Утренняя сводка/)).toBeChecked();
+  });
+});
