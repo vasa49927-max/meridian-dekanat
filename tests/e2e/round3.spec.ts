@@ -311,3 +311,24 @@ test.describe("Раунд 4: правки капитана", () => {
     await expect(page.getByText("Electives sign-up (spring)")).toBeVisible();
   });
 });
+
+test("Раунд 5: в тёмной теме у ВСЕХ выпадающих списков свой непрозрачный фон (иначе Windows рисует список белым)", async ({ browser }) => {
+  const ctx = await browser.newContext({ colorScheme: "dark" });
+  const p = await ctx.newPage();
+  const check = async (path: string) => {
+    await p.goto(path);
+    await p.waitForLoadState("networkidle");
+    const bad = await p.evaluate(() => [...document.querySelectorAll("select")].filter((s) => {
+      const bg = getComputedStyle(s).backgroundColor, ob = s.options[0] ? getComputedStyle(s.options[0]).backgroundColor : bg;
+      return bg === "rgba(0, 0, 0, 0)" || bg === "transparent" || ob === "rgba(0, 0, 0, 0)";
+    }).map((s) => s.name || s.id || "select"));
+    expect(bad, `${path}: прозрачный фон у ${bad.join(", ")}`).toEqual([]);
+  };
+  await check("/login");
+  await login(p, "anna");
+  for (const path of ["/requests/new/TUITION_PAYMENT", "/appointments", "/profile"]) await check(path);
+  await p.context().clearCookies();
+  await login(p, "staff");
+  for (const path of ["/staff", "/staff/announcements", "/staff/schedule"]) await check(path);
+  await ctx.close();
+});
