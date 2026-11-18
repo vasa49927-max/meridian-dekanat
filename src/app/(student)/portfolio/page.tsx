@@ -48,7 +48,7 @@ export default async function PortfolioPage() {
                       <form action={deletePortfolioAction} className="shrink-0">
                         <input type="hidden" name="id" value={it.id} />
                         <ConfirmSubmit className={buttonVariants({ variant: "ghost", size: "icon", className: "h-9 w-9 text-muted hover:text-danger" })} title={t("portfolio.removeConfirm.title")} description={t("portfolio.removeConfirm.body")} confirmLabel={t("portfolio.removeConfirm.ok")}>
-                          <Trash2 className="h-4 w-4" aria-hidden /><span className="sr-only">{t("portfolio.removeAria", { title: it.title })}</span>
+                          <Trash2 className="h-4 w-4" aria-hidden /><span className="sr-only">{t("portfolio.removeAria", { title: tc(it.title) })}</span>
                         </ConfirmSubmit>
                       </form>
                     )}

@@ -53,6 +53,7 @@ const electives = {
     "notFound": "Курс не найден",
     "notChosen": "Вы не записаны на этот курс"
   },
+  "building": "корп. {b}",
   "slot": "{day}, {time} · ауд. {room}",
   "fromCourse": "с {n} курса"
 };

@@ -53,6 +53,7 @@ const electives: Shape<typeof ru> = {
     "notFound": "Cours introuvable",
     "notChosen": "Vous n’êtes pas inscrit à ce cours"
   },
+  "building": "bât. {b}",
   "slot": "{day}, {time} · salle {room}",
   "fromCourse": "à partir de la {n}e année"
 };

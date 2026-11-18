@@ -29,7 +29,7 @@ export function makeContentTr(locale: Locale, lex: Lex | null, ctx: { tr: (g: st
     .replace(new RegExp(`(\\d{1,2}) (${MONTHS.join("|")})( \\((?:пн|вт|ср|чт|пт|сб|вс)\\))?`, "g"), (_, d, m, w) => date(d, m, !!w))
     .replace(/ауд\. ([0-9A-Za-zА-Яа-я][\w-]*)/g, (_, r) => W.room.replace("{r}", r))
     .replace(/^Было: /, `${W.was}: `).replace(/\. Стало: /, `. ${W.now}: `).replace(/ — занятие отменено\./, ` — ${W.cancelled}.`)
-    .replace(/(\d+) (?:рабочий день|рабочих дня|рабочих дней)/, (_, n) => W.workdays.replace("{n}", n))
+    .replace(/(\d+) (?:рабочий день|рабочих дня|рабочих дней)/, (_, n) => (n === "1" ? W.workday : W.workdays).replace("{n}", n))
     .replace(/ · /g, " · ");
   return (s: string | null | undefined): string => {
     if (!s) return "";
@@ -44,7 +44,7 @@ export function makeContentTr(locale: Locale, lex: Lex | null, ctx: { tr: (g: st
     if ((m = s.match(/^Приглашение на консультацию: (.+)$/))) return `${W.invite}: ${ctx.tr("subjects", m[1])}`;
     if ((m = s.match(/^Через 2 дня: (.+) — (.+)$/))) return `${W.in2days}: ${ctx.tr("assessments", m[1])} — ${ctx.tr("short", m[2])}`;
     if ((m = s.match(/^(.+)\. Максимум (\d+) баллов\. Срок — (\d{1,2}) ([а-я]+)\.$/))) return W.deadlineBody.replace("{name}", ctx.tr("subjects", m[1])).replace("{max}", m[2]).replace("{date}", date(m[3], m[4], false));
-    if ((m = s.match(/^Заявка (\S+) принята\. Срок — (.+)\. Статус будет обновляться здесь\.$/))) return W.accepted.replace("{num}", m[1]).replace("{sla}", generic(m[2]));
+    if ((m = s.match(/^Заявка (\S+) принята\. Срок — (.+)\. Статус будет обновляться здесь\.$/))) return W.accepted.replace("{num}", m[1].replace(/^З-/, "Z-")).replace("{sla}", generic(m[2]));
     if ((m = s.match(/^(.+?), (\d{2}:\d{2}) · (.+)\. Тема: (.+)\.$/))) return `${generic(m[1])}, ${m[2]} · ${ctx.tr("offices", m[3])}. ${W.topic}: ${lex.exact[m[4]] ?? m[4]}.`;
     if ((m = s.match(/^С (\d{2}\.\d{2}\.\d{4}) по (\d{2}\.\d{2}\.\d{4})$/))) return `${m[1]} – ${m[2]}`;
     if ((m = s.match(/^(.+): ауд\. (\S+) → ауд\. (\S+)$/))) return `${generic(m[1])}: ${W.room.replace("{r}", m[2])} → ${W.room.replace("{r}", m[3])}`;
@@ -58,7 +58,7 @@ export type StatusKey = keyof typeof REV;
 export const CONTENT: Record<"en" | "zh" | "fr", Lex> = {
   en: {
     // раунд 6: приглашение на консультацию
-    words: { electiveSeat: "Elective: a seat has freed up", invite: "Consultation invitation", room: "room {r}", was: "Was", now: "Now", cancelled: "class cancelled", move: "Rescheduled", cancel: "Cancelled", roomChange: "New room", in2days: "In 2 days", deadlineBody: "{name}. Up to {max} points. Due {date}.", accepted: "Request {num} received. Processing time — {sla}. Status updates will appear here.", workdays: "{n} working days", topic: "Topic" },
+    words: { electiveSeat: "Elective: a seat has freed up", invite: "Consultation invitation", room: "room {r}", was: "Was", now: "Now", cancelled: "class cancelled", move: "Rescheduled", cancel: "Cancelled", roomChange: "New room", in2days: "In 2 days", deadlineBody: "{name}. Up to {max} points. Due {date}.", accepted: "Request {num} received. Processing time — {sla}. Status updates will appear here.", workday: "{n} working day", workdays: "{n} working days", topic: "Topic" },
     exact: {
       "Вы зачислены на курс из листа ожидания. Если передумали — откажитесь до конца записи, место перейдёт следующему.": "You have been enrolled from the waiting list. If you change your mind, drop the course before enrolment closes and the seat will go to the next person.",
       // раунд 6: демо-портфолио
@@ -132,7 +132,7 @@ export const CONTENT: Record<"en" | "zh" | "fr", Lex> = {
   },
   zh: {
     // раунд 6: приглашение на консультацию
-    words: { electiveSeat: "选修课：有空位了", invite: "咨询邀请", room: "{r} 教室", was: "原定", now: "现改为", cancelled: "课程取消", move: "调课", cancel: "停课", roomChange: "更换教室", in2days: "2天后截止", deadlineBody: "{name}。满分 {max} 分。截止日期：{date}。", accepted: "申请 {num} 已受理。办理时限：{sla}。状态将在此处更新。", workdays: "{n} 个工作日", topic: "事由" },
+    words: { electiveSeat: "选修课：有空位了", invite: "咨询邀请", room: "{r} 教室", was: "原定", now: "现改为", cancelled: "课程取消", move: "调课", cancel: "停课", roomChange: "更换教室", in2days: "2天后截止", deadlineBody: "{name}。满分 {max} 分。截止日期：{date}。", accepted: "申请 {num} 已受理。办理时限：{sla}。状态将在此处更新。", workday: "{n} 个工作日", workdays: "{n} 个工作日", topic: "事由" },
     exact: {
       "Вы зачислены на курс из листа ожидания. Если передумали — откажитесь до конца записи, место перейдёт следующему.": "你已从候补名单中被选上。如果改变主意，请在选课结束前退选，名额将转给下一位。",
       // раунд 6: демо-портфолио
@@ -148,7 +148,7 @@ export const CONTENT: Record<"en" | "zh" | "fr", Lex> = {
       "Договорная работа, подготовка правовых заключений.": "合同工作，撰写法律意见。",
       "Волонтёр международного форума": "国际论坛志愿者",
       "Студенческий совет": "学生会",
-      "ТРКИ-1 (русский как иностранный)": "俄语等级考试 ТРКИ-1（对外俄语）",
+      "ТРКИ-1 (русский как иностранный)": "俄语等级考试 TORFL-1（对外俄语）",
       "Тестовый центр (вымышленный)": "考试中心（虚构）",
       "В деканате видят, что по этой дисциплине есть риск не набрать нужные баллы. Запишитесь на консультацию в студенческий офис — вместе составим план.": "教务处注意到你在这门课程上有分数不足的风险。请预约学生办公室的咨询，我们一起制定计划。",
       "Запись на курсы по выбору на весенний семестр": "春季学期选修课报名", "Запись открыта в разделе «Успеваемость → Курсы по выбору» до 15 ноября включительно. После этой даты поменять выбор можно только заявлением.": "报名在“成绩 → 选修课”开放至11月15日（含）。此后只能通过申请更改。",
@@ -182,7 +182,7 @@ export const CONTENT: Record<"en" | "zh" | "fr", Lex> = {
   },
   fr: {
     // раунд 6: приглашение на консультацию
-    words: { electiveSeat: "Cours à option : une place s’est libérée", invite: "Invitation à une consultation", room: "salle {r}", was: "Avant", now: "Désormais", cancelled: "cours annulé", move: "Cours déplacé", cancel: "Cours annulé", roomChange: "Nouvelle salle", in2days: "Dans 2 jours", deadlineBody: "{name}. Jusqu’à {max} points. Échéance : {date}.", accepted: "Demande {num} reçue. Délai : {sla}. Le statut sera mis à jour ici.", workdays: "{n} jours ouvrés", topic: "Objet" },
+    words: { electiveSeat: "Cours à option : une place s’est libérée", invite: "Invitation à une consultation", room: "salle {r}", was: "Avant", now: "Désormais", cancelled: "cours annulé", move: "Cours déplacé", cancel: "Cours annulé", roomChange: "Nouvelle salle", in2days: "Dans 2 jours", deadlineBody: "{name}. Jusqu’à {max} points. Échéance : {date}.", accepted: "Demande {num} reçue. Délai : {sla}. Le statut sera mis à jour ici.", workday: "{n} jour ouvré", workdays: "{n} jours ouvrés", topic: "Objet" },
     exact: {
       "Вы зачислены на курс из листа ожидания. Если передумали — откажитесь до конца записи, место перейдёт следующему.": "Vous avez été inscrit depuis la liste d’attente. Si vous changez d’avis, désistez-vous avant la clôture : la place ira au suivant.",
       // раунд 6: демо-портфолио

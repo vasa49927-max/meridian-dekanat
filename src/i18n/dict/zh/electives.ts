@@ -52,6 +52,7 @@ const electives: Shape<typeof ru> = {
     "notFound": "未找到课程",
     "notChosen": "你未选这门课"
   },
+  "building": "{b} 楼",
   "slot": "{day} {time} · {room} 教室",
   "fromCourse": "{n} 年级起"
 };

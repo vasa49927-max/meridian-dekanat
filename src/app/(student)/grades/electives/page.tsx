@@ -25,7 +25,7 @@ export default async function ElectivesPage() {
   const { t, tn, tr, name, f } = await getI18n();
   const { items, window, mine } = await listMyElectives(v);
   const at = now();
-  const slot = (s: string) => { const m = s.match(/^(Пн|Вт|Ср|Чт|Пт|Сб), (\d{1,2}:\d{2}) · ауд\. (.+)$/); return m ? t("electives.slot", { day: t(`schedule.days.${DAY[m[1]]}`), time: m[2], room: m[3] }) : s; };
+  const slot = (s: string) => { const m = s.match(/^(Пн|Вт|Ср|Чт|Пт|Сб), (\d{1,2}:\d{2}) · ауд\. (.+)$/); return m ? t("electives.slot", { day: t(`schedule.days.${DAY[m[1]]}`), time: m[2], room: m[3].replace(/, корп\. (\S+)$/, (_, b: string) => `, ${t("electives.building", { b: name(b) })}`) }) : s; };
   const teacher = (s: string) => { const m = s.match(TITLE); return m ? `${tr("titles", m[1])} ${name(m[2])}` : name(s); };
   const sorted = [...items].sort((a, b) => Number(!!b.myStatus) - Number(!!a.myStatus));
   return (
