@@ -12,6 +12,7 @@ import { OfflineBanner } from "@/components/shell/offline-banner";
 import { Onboarding } from "@/components/shell/onboarding";
 import { logoutAction } from "../(auth)/login/actions";
 import { getI18n } from "@/i18n/server";
+import { cookies } from "next/headers";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const v = await requireStudent();
@@ -24,6 +25,9 @@ export default async function StudentLayout({ children }: { children: React.Reac
     requestTypes: types.filter((x) => x.popular).map((x) => ({ code: x.code, title: tr("rt", x.title) })),
   };
   const name = nm(`${v.firstName} ${v.lastName}`);
+  // Раунд 10 (Lighthouse): подсказки уже пройдены — сервер видит cookie и не отдаёт клиенту задачу их показать.
+  // Иначе на каждой странице окно подсказок появлялось после загрузки и считалось «крупнейшим элементом» (LCP ≈ 4 с).
+  const tourDone = (await cookies()).get("meridian-tour-v1")?.value === "done";
   return (
     <div className="lg:grid lg:grid-cols-[272px_minmax(0,1fr)] lg:bg-[linear-gradient(to_right,var(--side)_272px,transparent_272px)]">
       <a href="#main" className="sr-only z-50 rounded-lg bg-primary px-4 py-2 text-primary-fg focus:not-sr-only focus:fixed focus:left-3 focus:top-3">{t("common.nav.skip")}</a>
@@ -48,7 +52,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         <footer className="mx-auto max-w-[1240px] px-4 pb-28 pt-4 lg:px-9 lg:pb-8"><Disclaimer /></footer>
       </div>
       <TabBar unread={unread} />
-      <Onboarding firstName={v.firstName} />
+      <Onboarding firstName={v.firstName} autoShow={!tourDone} />
     </div>
   );
 }

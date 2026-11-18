@@ -4,6 +4,16 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
+ * Раунд 10 (Lighthouse): пока грузятся Golos Text и PT Serif, текст рисуется системным шрифтом,
+ * подогнанным по ширине и высоте строки (size-adjust, ascent/descent-override). Без этого при замене
+ * шрифта блоки меняли высоту и страница входа «прыгала» (CLS 0,13). Метрики посчитаны fontTools
+ * по реальным файлам шрифтов на смешанной строке (кириллица + латиница + цифры).
+ */
+@font-face { font-family: "Golos Fallback"; font-weight: 100 500; src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("Helvetica"); size-adjust: 105.42%; ascent-override: 92.96%; descent-override: 20.87%; line-gap-override: 0%; }
+@font-face { font-family: "Golos Fallback"; font-weight: 600 900; src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("Helvetica Bold"); size-adjust: 100.63%; ascent-override: 97.39%; descent-override: 21.86%; line-gap-override: 0%; }
+@font-face { font-family: "PT Serif Fallback"; font-weight: 700; src: local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Liberation Serif Bold"); size-adjust: 111.73%; ascent-override: 92.99%; descent-override: 25.6%; line-gap-override: 0%; }
+
+/*
  * Дизайн-токены «Меридиан» — направление A «Посольство» (выбрано капитаном на КТ (а)).
  * Описание и проверка контраста — docs/DESIGN.md. В компонентах — только эти переменные.
  */
@@ -132,8 +142,8 @@
   --color-ok-bg: var(--ok-bg);
   --color-info: var(--info);
   --color-info-bg: var(--info-bg);
-  --font-sans: "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-serif: "PT Serif", Georgia, serif;
+  --font-sans: "Golos Text Variable", "Golos Text", "Golos Fallback", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: "PT Serif", "PT Serif Fallback", Georgia, serif;
   --radius-card: 18px;
   --shadow-card: var(--shadow);
 }

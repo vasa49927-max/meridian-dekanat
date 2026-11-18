@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { cookies, headers } from "next/headers";
-import "@fontsource/golos-text/400.css";
-import "@fontsource/golos-text/500.css";
-import "@fontsource/golos-text/600.css";
-import "@fontsource/golos-text/700.css";
+// Раунд 10: вариативный Golos — 2 файла (кириллица и латиница) вместо 8 (4 начертания × 2)
+import "@fontsource-variable/golos-text/wght.css";
 import "@fontsource/pt-serif/700.css";
 import "./globals.css";
 import { ThemeScript } from "@/components/theme-script";

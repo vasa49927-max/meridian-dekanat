@@ -20,7 +20,7 @@
 | class-variance-authority | 0.7.1 | Apache-2.0 | варианты компонентов |
 | clsx, tailwind-merge | 2.1.1, 3.7.0 | MIT | классы |
 | server-only | 0.0.1 | MIT | защита серверных модулей |
-| @fontsource/golos-text | 5.3.0 | **OFL-1.1** | шрифт Golos Text (Paratype) |
+| @fontsource-variable/golos-text | 5.3.0 | **OFL-1.1** | шрифт Golos Text, вариативный (Paratype) |
 | @fontsource/pt-serif | 5.3.0 | **OFL-1.1** | шрифт PT Serif (Paratype) |
 
 ## Инструменты разработки

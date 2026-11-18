@@ -17,5 +17,5 @@ test-results/
 next-env.d.ts
 .vercel
 /design/node_modules/
-docs/lighthouse/lh-*.json
+docs/lighthouse/**/lh-*.json
 .audit/

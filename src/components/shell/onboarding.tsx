@@ -17,15 +17,18 @@ const STEPS = [
   { icon: ArrowLeftRight, n: 1 as const }, { icon: Target, n: 2 as const }, { icon: FileText, n: 3 as const }, { icon: Search, n: 4 as const },
 ];
 
-export function Onboarding({ firstName }: { firstName: string }) {
+/** autoShow=false, когда сервер уже видит cookie «подсказки пройдены» — тогда клиент даже не планирует показ. */
+export function Onboarding({ firstName, autoShow = true }: { firstName: string; autoShow?: boolean }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
   const { t } = useI18n();
   useEffect(() => {
-    let seen = true;
-    try { seen = localStorage.getItem(TOUR_KEY) === "done"; } catch { /* приватный режим — подсказки просто не показываем автоматически */ }
-    // Раунд 8: дублируем флаг в cookie (не секрет, только «видел подсказки») — работает и там, где localStorage очищается
-    if (document.cookie.split("; ").includes(`${TOUR_KEY}=done`)) seen = true;
+    let seen = !autoShow;
+    if (!seen) {
+      try { seen = localStorage.getItem(TOUR_KEY) === "done"; } catch { seen = true; /* приватный режим — подсказки просто не показываем автоматически */ }
+      // Раунд 8: дублируем флаг в cookie (не секрет, только «видел подсказки») — работает и там, где localStorage очищается
+      if (document.cookie.split("; ").includes(`${TOUR_KEY}=done`)) seen = true;
+    }
     // Раунд 8 (скорость): подсказки — когда страница уже загружена и браузер свободен, а не через 400 мс после гидратации.
     // Иначе окно спорит за поток с первой отрисовкой и становится «крупнейшим элементом» (LCP) вместо самого кабинета.
     let t: ReturnType<typeof setTimeout> | undefined;
@@ -34,7 +37,7 @@ export function Onboarding({ firstName }: { firstName: string }) {
     const reopen = () => { setStep(0); setOpen(true); };
     window.addEventListener("meridian:tour", reopen);
     return () => { if (t) clearTimeout(t); window.removeEventListener("load", show); window.removeEventListener("meridian:tour", reopen); };
-  }, []);
+  }, [autoShow]);
   const close = (o: boolean) => {
     setOpen(o);
     if (!o) { try { localStorage.setItem(TOUR_KEY, "done"); } catch { /* не критично */ } document.cookie = `${TOUR_KEY}=done; path=/; max-age=31536000; samesite=lax`; }
