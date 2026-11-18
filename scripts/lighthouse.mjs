@@ -15,9 +15,11 @@ await Promise.all([p.waitForURL((u) => !u.pathname.startsWith("/login")), p.clic
 const cookie = (await p.context().cookies()).map((c) => `${c.name}=${c.value}`).join("; ");
 await b.close();
 const rows = [];
-for (const route of ["/login", "/", "/schedule", "/grades", "/requests"]) {
-  const file = `${out}/lh${route === "/" ? "-today" : route.replace(/\//g, "-")}.json`;
-  execFileSync(process.env.LH_BIN ?? "lighthouse", [base + route, "--quiet", "--output=json", `--output-path=${file}`, "--only-categories=performance,accessibility,best-practices", `--chrome-path=${chromium.executablePath()}`, "--chrome-flags=--headless=new --no-sandbox", `--extra-headers=${JSON.stringify(route === "/login" ? {} : { Cookie: cookie })}`], { stdio: "inherit" });
+// Повторный визит (подсказки уже видел) — обычный случай; первый визит с подсказками меряем отдельно строкой «/ (первый вход)»
+const returning = `${cookie}; meridian-tour-v1=done`;
+for (const route of ["/login", "/?first", "/", "/schedule", "/grades", "/grades/electives", "/requests", "/portfolio", "/map"]) {
+  const file = `${out}/lh${route === "/" ? "-today" : route === "/?first" ? "-today-first-visit" : route.replace(/\//g, "-")}.json`;
+  execFileSync(process.env.LH_BIN ?? "lighthouse", [base + route, "--quiet", "--output=json", `--output-path=${file}`, "--only-categories=performance,accessibility,best-practices", `--chrome-path=${chromium.executablePath()}`, "--chrome-flags=--headless=new --no-sandbox", `--extra-headers=${JSON.stringify(route === "/login" ? {} : { Cookie: route === "/?first" ? cookie : returning })}`], { stdio: "inherit" });
   const j = JSON.parse(fs.readFileSync(file, "utf8"));
   const s = (k) => Math.round(j.categories[k].score * 100);
   rows.push({ route, performance: s("performance"), accessibility: s("accessibility"), bestPractices: s("best-practices"), lcp: j.audits["largest-contentful-paint"].displayValue, cls: j.audits["cumulative-layout-shift"].displayValue, tbt: j.audits["total-blocking-time"].displayValue });

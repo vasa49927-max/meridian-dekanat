@@ -167,8 +167,8 @@ export async function staffPublishAnnouncement(v: StaffViewer, d: z.infer<typeof
       : d.audience === "FACULTY" ? sql`g.faculty_id = ${a.facultyId}`
       : d.audience === "COURSE" ? sql`g.faculty_id = ${a.facultyId} and g.course = ${a.course}`
       : sql`g.id = ${a.groupId}`;
-    const res = await tx.execute(sql`insert into notifications (user_id, kind, title, body, link, important)
-      select s.user_id, 'ANNOUNCEMENT', ${a.title}, ${a.body}, ${"/notifications?a=" + a.id}, ${a.important}
+    const res = await tx.execute(sql`insert into notifications (user_id, kind, title, body, link, important, created_at)
+      select s.user_id, 'ANNOUNCEMENT', ${a.title}, ${a.body}, ${"/notifications?a=" + a.id}, ${a.important}, ${now()}
       from students s join groups g on g.id = s.group_id where ${where} returning user_id`);
     const userIds = (res.rows as { user_id: string }[]).map((x) => x.user_id);
     return { ok: true as const, recipients: userIds.length, userIds, msg: { title: a.important ? `Важно: ${a.title}` : a.title, body: a.body.slice(0, 180), url: `/notifications?a=${a.id}` } };
@@ -222,8 +222,8 @@ export async function staffChangeLesson(_v: StaffViewer, d: z.infer<typeof moveS
     }
     const sub = l.subgroup === null ? sql`true` : l.subgroup === 9 ? sql`s.military_training` : sql`s.subgroup = ${l.subgroup}`;
     const key = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Moscow" }).format(l.startsAt);
-    const res = await tx.execute(sql`insert into notifications (user_id, kind, title, body, link, important)
-      select s.user_id, 'SCHEDULE', ${title}, ${body}, ${"/schedule?d=" + key}, true from students s where s.group_id = ${l.groupId} and ${sub} returning user_id`);
+    const res = await tx.execute(sql`insert into notifications (user_id, kind, title, body, link, important, created_at)
+      select s.user_id, 'SCHEDULE', ${title}, ${body}, ${"/schedule?d=" + key}, true, ${now()} from students s where s.group_id = ${l.groupId} and ${sub} returning user_id`);
     const userIds = (res.rows as { user_id: string }[]).map((x) => x.user_id);
     return { ok: true as const, recipients: userIds.length, userIds, msg: { title, body, url: `/schedule?d=${key}`, tag: `lesson-${l.id}` } };
   });

@@ -145,3 +145,42 @@ export function planFor(control: Control, s: DisciplineSummary): Plan {
   if (n3.feasible) parts.push(["partSat", n3.need]);
   return { ...base, tone: watch ? "risk" : "exam", head: watch ? "watch" : "exam", detail: parts.length ? "examNeed" : "examImpossible", vars: { pace: s.pacePct }, parts: parts.slice(0, 2) };
 }
+
+/**
+ * Прогноз академической стипендии (раунд 8; вымышленное Положение, п. 10.1): назначается студентам бюджетной основы
+ * по итогам сессии без оценок «удовлетворительно» и задолженностей.
+ * Прогноз итога по дисциплине = прогноз текущего контроля при нынешнем темпе + экзамен/зачёт в том же темпе.
+ * Это ориентир, а не обещание: в интерфейсе так и подписано.
+ */
+export type StipendItem = { name: string; short: string; control: Control; summary: DisciplineSummary };
+/** kind: exam — хватит нужного балла на экзамене; pace — нужно поднять темп в семестре (need из rem) и сдать экзамен на максимум; impossible — уже недостижимо. */
+export type StipendRisk = { name: string; short: string; control: Control; predicted: number; need: number; rem: number; kind: "exam" | "pace" | "impossible"; feasible: boolean };
+export type StipendForecast = { applicable: boolean; status: "keep" | "risk" | "none"; risks: StipendRisk[]; predictedMin: number | null };
+
+export function predictTotal(s: DisciplineSummary) {
+  if (s.total !== null) return s.total;
+  const pace = s.gradedMax ? s.earned / s.gradedMax : 0.7; // нет оценок — считаем «средним» темпом 70%
+  return round1(Math.min(100, s.projectedCurrent + pace * BRS.finalMax));
+}
+
+export function stipendForecast(basis: string, items: StipendItem[]): StipendForecast {
+  if (basis !== "бюджет") return { applicable: false, status: "none", risks: [], predictedMin: null };
+  const risks: StipendRisk[] = [];
+  let predictedMin: number | null = null;
+  for (const it of items) {
+    const s = it.summary;
+    const credit = it.control === "CREDIT";
+    // Зачёт автоматом или «отлично» автоматом — дисциплина не угрожает стипендии
+    if (s.auto?.achieved) continue;
+    const predicted = predictTotal(s);
+    const threshold = credit ? BRS.passTotal : 75;
+    if (!credit) predictedMin = predictedMin === null ? predicted : Math.min(predictedMin, predicted);
+    if (predicted < threshold) {
+      const n = neededOnFinal(s.projectedCurrent, threshold);
+      const needCurrent = Math.max(0, round1(threshold - BRS.finalMax - s.earned)); // сколько добрать в семестре, если экзамен — на максимум
+      const kind = n.feasible ? "exam" as const : needCurrent <= s.remainingMax ? "pace" as const : "impossible" as const;
+      risks.push({ name: it.name, short: it.short, control: it.control, predicted, need: kind === "exam" ? n.need : needCurrent, rem: s.remainingMax, kind, feasible: kind !== "impossible" });
+    }
+  }
+  return { applicable: true, status: risks.length ? "risk" : "keep", risks, predictedMin };
+}

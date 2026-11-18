@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BRS, markFor, neededOnFinal, summarize, whatIf } from "@/lib/brs";
+import { BRS, markFor, neededOnFinal, stipendForecast, summarize, whatIf, type Control } from "@/lib/brs";
 
 const a = (maxPoints: number, points: number | null, kind = "CONTROL") => ({ id: String(Math.random()), title: "t", maxPoints, points, kind });
 
@@ -83,5 +83,31 @@ describe("«Что мне делать» по дисциплине", () => {
   });
   it("высокий риск", () => {
     expect(planFor("EXAM", summarize("EXAM", [a(30, 5), a(30, 10)])).tone).toBe("risk");
+  });
+});
+
+describe("прогноз стипендии (раунд 8)", () => {
+  const mk = (control: Control, pts: (number | null)[]) => summarize(control, pts.map((p, i) => ({ id: String(i), title: `w${i}`, maxPoints: 15, points: p, kind: "CONTROL" })));
+  it("договор — стипендия не назначается", () => {
+    expect(stipendForecast("договор", [])).toMatchObject({ applicable: false, status: "none" });
+  });
+  it("все прогнозы ≥ 75 — сохранится; «удовл.» по экзамену — под угрозой с нужным баллом за экзамен", () => {
+    const good = mk("EXAM", [14, 13, null, null]);
+    const weak = mk("EXAM", [9, 10, null, null]); // 19 из 30 — «хорошо» ещё достижимо
+    expect(stipendForecast("бюджет", [{ name: "A", short: "A", control: "EXAM", summary: good }]).status).toBe("keep");
+    const f = stipendForecast("бюджет", [{ name: "A", short: "A", control: "EXAM", summary: good }, { name: "B", short: "B", control: "EXAM", summary: weak }]);
+    expect(f.status).toBe("risk");
+    expect(f.risks[0]).toMatchObject({ name: "B", feasible: true, kind: "exam" });
+    expect(f.risks[0].predicted).toBeLessThan(75);
+    expect(f.risks[0].need).toBeGreaterThan(0);
+  });
+  it("слабый темп: «хорошо» достижимо только если поднять темп в семестре", () => {
+    const slow = mk("EXAM", [6, 7, null, null]); // 13 из 30, впереди ещё 30
+    const r = stipendForecast("бюджет", [{ name: "S", short: "S", control: "EXAM", summary: slow }]).risks[0];
+    expect(r).toMatchObject({ kind: "pace", need: 22, rem: 30 }); // 75 − 40 − 13
+  });
+  it("зачёт автоматом не создаёт риска", () => {
+    const auto = mk("CREDIT", [15, 15, 14, null]);
+    expect(stipendForecast("бюджет", [{ name: "C", short: "C", control: "CREDIT", summary: auto }]).status).toBe("keep");
   });
 });

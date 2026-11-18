@@ -82,5 +82,6 @@ const grades: Shape<typeof ru> = {
     autoExcellent: "excellent (automatique)", totalMark: "{total} — {mark}",
   },
   invite: { text: "Le décanat vous invite à une consultation ({date}) pour voir comment remonter vos points.", cta: "Prendre rendez-vous" },
+  stipend: {"title": "Prévision de bourse", "keep": "Vous garderez votre bourse", "keepDetail": "À votre rythme actuel, tous les examens sont au moins « bien » et les cours validés (Règlement, art. 10.1).", "risk": "Votre bourse est menacée", "riskItem": "{name} : prévision {pred} pts — il faut {need} pts à l’examen pour « bien »", "riskItemCredit": "{name} : prévision {pred} pts — il faut {need} pts pour valider", "riskPace": "{name} : prévision {pred} pts — pour « bien », accélérez : encore {need} pts sur les {rem} restants et un bon examen", "riskImpossible": "{name} : prévision {pred} pts — « bien » n’est plus atteignable, parlez à un conseiller", "contract": "Les étudiants payants ne reçoivent pas la bourse académique.", "increased": "La bourse renforcée récompense les réussites. Ajoutez-les au portfolio", "note": "Prévision fondée sur votre rythme actuel — un repère, pas une promesse.", "homeKeep": "Bourse : en bonne voie", "homeRisk": "Bourse : menacée ({names})"},
 };
 export default grades;

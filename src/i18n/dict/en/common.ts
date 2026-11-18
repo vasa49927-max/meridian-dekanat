@@ -11,7 +11,7 @@ const common: Shape<typeof ru> = {
     sections: "Sections", mainSections: "Main sections", today: "Today", schedule: "Timetable", grades: "Grades", requests: "Requests & certificates",
     requestsShort: "Requests", notifications: "Notifications", assistant: "Assistant", appointments: "Book a coordinator", profile: "Profile", more: "More",
     unreadCount: { one: "{n} unread", other: "{n} unread" },
-    groups: {"study": "Studies", "office": "Dean’s office", "me": "My space", "work": "Work", "analytics": "Analytics", "service": "Service"}, staffAnalytics: "Management dashboard", staffRisks: "Students at risk", survey: "Course feedback", map: "How to get there", portfolio: "Portfolio", staffSurveys: "Course surveys", staffQueue: "Request queue", staffAnnouncements: "Announcements", staffLessons: "Class changes", staffReception: "Student reception", staffDemo: "Demo data",
+    groups: {"study": "Studies", "office": "Dean’s office", "me": "My space", "work": "Work", "analytics": "Analytics", "service": "Service"}, staffAnalytics: "Management dashboard", staffRisks: "Students at risk", survey: "Course feedback", map: "How to get there", portfolio: "Portfolio", staffElectives: "Elective courses", staffSurveys: "Course surveys", staffQueue: "Request queue", staffAnnouncements: "Announcements", staffLessons: "Class changes", staffReception: "Student reception", staffDemo: "Demo data",
     hasUnread: "You have unread notifications", skip: "Skip to content", logout: "Log out", studentRole: "Year {course} · student",
   },
   top: { search: "Search and actions", searchAria: "Search and actions (Ctrl+K)", notifications: "Notifications", notificationsUnread: "Notifications: {n} unread" },

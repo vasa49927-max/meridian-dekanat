@@ -2,7 +2,7 @@
  * Раунд 6: маршруты «Как пройти», изоляция портфолио, анонимность опроса, риски, панель руководителя, ИИ-черновик.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db, schema as t } from "@/server/db";
 import { seedDemo } from "@/server/seed/seed";
 import type { StaffViewer, StudentViewer } from "@/server/auth/guards";
@@ -144,5 +144,75 @@ describe("Раунд 7: совпадение номера заявки", () => {
     try { await db.insert(t.requests).values({ ...r, id: undefined as unknown as string }); } catch (e) { err = e; }
     const pg = err as { code?: string; cause?: { code?: string } };
     expect(pg.code === "23505" || pg.cause?.code === "23505").toBe(true);
+  });
+});
+
+describe("Раунд 8: курсы по выбору", () => {
+  it("последнее место — одному, дальше лист ожидания; не больше двух курсов", async () => {
+    const { chooseElective, listMyElectives } = await import("@/server/dal/electives");
+    const [nego] = await db.select().from(t.electives).where(eq(t.electives.code, "NEGOEN"));
+    const before = (await listMyElectives(anna)).items.find((e) => e.id === nego.id)!;
+    expect(before.free).toBe(1);
+    expect(await chooseElective(anna, nego.id)).toEqual({ ok: true, status: "ENROLLED" });
+    expect(await chooseElective(anna, nego.id)).toEqual({ ok: false, error: "exists" });
+    expect(await chooseElective(mei, nego.id)).toEqual({ ok: true, status: "WAITLIST" }); // мест больше нет
+    const [media] = await db.select().from(t.electives).where(eq(t.electives.code, "MEDIA"));
+    const [esg] = await db.select().from(t.electives).where(eq(t.electives.code, "ESG"));
+    expect(await chooseElective(anna, media.id)).toEqual({ ok: true, status: "ENROLLED" });
+    expect(await chooseElective(anna, esg.id)).toEqual({ ok: false, error: "limit" });
+  });
+  it("отказ освобождает место — первый в листе ожидания зачисляется и получает уведомление", async () => {
+    const { dropElective, listMyElectives } = await import("@/server/dal/electives");
+    const [nego] = await db.select().from(t.electives).where(eq(t.electives.code, "NEGOEN"));
+    expect(await dropElective(anna, nego.id)).toEqual({ ok: true });
+    const meiView = (await listMyElectives(mei)).items.find((e) => e.id === nego.id)!;
+    expect(meiView.myStatus).toBe("ENROLLED");
+    const [n] = await db.select().from(t.notifications).where(and(eq(t.notifications.userId, mei.userId), eq(t.notifications.link, "/grades/electives")));
+    expect(n.title).toContain("Переговоры на английском");
+    expect(await dropElective(timur, nego.id)).toEqual({ ok: false, error: "notChosen" }); // чужую запись не отменить
+  });
+  it("курс для старших — не для первокурсника; закрытое окно — запись невозможна", async () => {
+    const { chooseElective } = await import("@/server/dal/electives");
+    const [eaeu] = await db.select().from(t.electives).where(eq(t.electives.code, "EAEULAW")); // с 3 курса
+    expect(await chooseElective(mei, eaeu.id)).toEqual({ ok: false, error: "course" });
+    await db.update(t.electives).set({ closesAt: new Date("2026-11-01T00:00:00Z") }).where(eq(t.electives.code, "SPORTM"));
+    const [sport] = await db.select().from(t.electives).where(eq(t.electives.code, "SPORTM"));
+    expect(await chooseElective(timur, sport.id)).toEqual({ ok: false, error: "closed" });
+  });
+  it("одновременная запись на последнее место: зачислен ровно один", async () => {
+    const { chooseElective } = await import("@/server/dal/electives");
+    const [esg] = await db.select().from(t.electives).where(eq(t.electives.code, "ESG"));
+    const [{ n }] = await db.select({ n: sql<number>`count(*)`.mapWith(Number) }).from(t.electiveChoices).where(and(eq(t.electiveChoices.electiveId, esg.id), eq(t.electiveChoices.status, "ENROLLED")));
+    await db.update(t.electives).set({ capacity: esg.reserved + n + 1 }).where(eq(t.electives.id, esg.id)); // ровно одно место
+    // У Анны и Мэй по одному свободному «слоту» — пробуют занять одно место одновременно
+    const res = await Promise.all([chooseElective(anna, esg.id), chooseElective(mei, esg.id)]);
+    const statuses = res.filter((r) => r.ok).map((r) => (r as { status: string }).status);
+    expect(statuses).toHaveLength(2);
+    expect(statuses.filter((x) => x === "ENROLLED")).toHaveLength(1);
+    expect(statuses.filter((x) => x === "WAITLIST")).toHaveLength(1);
+  });
+});
+
+describe("Раунд 8: чек-лист первокурсника", () => {
+  it("отметки — только свои и только из списка", async () => {
+    const { listMyChecklist, toggleMyChecklist } = await import("@/server/dal/checklist");
+    expect(await toggleMyChecklist(mei, "drop table", true)).toBe(false);
+    expect(await toggleMyChecklist(mei, "library", true)).toBe(true);
+    expect((await listMyChecklist(mei)).has("library")).toBe(true);
+    expect((await listMyChecklist(anna)).has("library")).toBe(false);
+    expect(await toggleMyChecklist(mei, "library", false)).toBe(true);
+    expect((await listMyChecklist(mei)).has("library")).toBe(false);
+  });
+});
+
+describe("Раунд 8: место в листе ожидания", () => {
+  it("второй в очереди видит «2», а не «1» (точность времени записи)", async () => {
+    const { listMyElectives, chooseElective, dropElective } = await import("@/server/dal/electives");
+    const anna = await student("sokolova");
+    for (const e of (await listMyElectives(anna)).items.filter((x) => x.myStatus)) await dropElective(anna, e.id); // предыдущие тесты могли записать Анну
+    const full = (await listMyElectives(anna)).items.find((e) => e.free === 0 && e.waiting > 0)!;
+    expect(await chooseElective(anna, full.id)).toMatchObject({ ok: true, status: "WAITLIST" });
+    const mine = (await listMyElectives(anna)).items.find((e) => e.id === full.id)!;
+    expect(mine.myPosition).toBe(full.waiting + 1);
   });
 });

@@ -82,5 +82,6 @@ const grades: Shape<typeof ru> = {
     autoExcellent: "excellent (automatic)", totalMark: "{total} — {mark}",
   },
   invite: { text: "The dean's office invites you to a consultation ({date}) to plan how to raise your points.", cta: "Book a slot" },
+  stipend: {"title": "Scholarship forecast", "keep": "You will keep your scholarship", "keepDetail": "At your current pace every exam is “good” or better and all pass/fail courses are passed (Regulations, cl. 10.1).", "risk": "Your scholarship is at risk", "riskItem": "{name}: forecast {pred} pts — you need {need} pts in the exam for “good”", "riskItemCredit": "{name}: forecast {pred} pts — you need {need} pts to pass", "riskPace": "{name}: forecast {pred} pts — to reach “good”, raise your pace: {need} more of the remaining {rem} pts and a strong exam", "riskImpossible": "{name}: forecast {pred} pts — “good” is no longer reachable, talk to a coordinator", "contract": "Fee-paying students do not receive the academic scholarship.", "increased": "The enhanced scholarship is awarded for achievements. Add yours to the portfolio", "note": "The forecast is based on your current pace — a guide, not a promise.", "homeKeep": "Scholarship: on track", "homeRisk": "Scholarship: at risk ({names})"},
 };
 export default grades;

@@ -213,3 +213,15 @@ export const ANNOUNCEMENTS: { title: string; body: string; source: string; impor
   { title: "Читальный зал в сессию работает до 22:00", body: "С 14 декабря по 24 января читальный зал главного корпуса открыт ежедневно с 9:00 до 22:00.", source: "Библиотека", important: false, audience: "ALL", daysAgo: 10 },
   { title: "Адаптационная встреча для первокурсников", body: "Расскажем про БРС, Положение о деканате и как пользоваться «Меридианом». Аудитория 101, кампус Одинцово.", source: "Деканат ФЛМК", important: false, audience: "COURSE", faculty: "ФЛМК", course: 1, daysAgo: 12 },
 ];
+
+/** Курсы по выбору на весну 2027 (раунд 8). Всё вымышлено: названия, преподаватели, аудитории. */
+export const ELECTIVES: { code: string; title: string; description: string; teacher: string; slot: string; credits: number; capacity: number; minCourse: number; taken: number }[] = [
+  { code: "DIGDIP", title: "Цифровая дипломатия", description: "Как государства и организации ведут диалог в соцсетях; кейсы кризисных коммуникаций.", teacher: "доц. Мельникова Т. А.", slot: "Вт, 17:40 · ауд. 3015", credits: 3, capacity: 25, minCourse: 2, taken: 25 },
+  { code: "CHNECO", title: "Экономика Китая", description: "Модель роста, реформы, внешняя торговля и инвестиции КНР.", teacher: "проф. Ли Вэй", slot: "Ср, 15:55 · ауд. 2110", credits: 3, capacity: 30, minCourse: 2, taken: 22 },
+  { code: "NEGOEN", title: "Переговоры на английском", description: "Подготовка позиции, торг, протокол и культура переговоров; ролевые игры.", teacher: "ст. преп. Браун А. Г.", slot: "Чт, 17:40 · ауд. 518, корп. Б", credits: 2, capacity: 18, minCourse: 1, taken: 17 },
+  { code: "PYDATA", title: "Python для аналитики в международных отношениях", description: "Сбор и анализ открытых данных: торговля, санкции, голосования в ООН. С нуля.", teacher: "доц. Садыкова Э. М.", slot: "Пн, 17:40 · ауд. 1018", credits: 4, capacity: 24, minCourse: 1, taken: 11 },
+  { code: "SPORTM", title: "Международный спортивный менеджмент", description: "Как устроены клубы, лиги и международные турниры; спонсорство и медиаправа.", teacher: "доц. Гуров Д. О.", slot: "Пт, 15:55 · ауд. 3040", credits: 2, capacity: 30, minCourse: 1, taken: 14 },
+  { code: "EAEULAW", title: "Право ЕАЭС", description: "Таможенный союз, единый рынок услуг, суд ЕАЭС — на практических кейсах.", teacher: "доц. Зимина О. П.", slot: "Вт, 15:55 · ауд. 3021", credits: 3, capacity: 20, minCourse: 3, taken: 9 },
+  { code: "ESG", title: "Устойчивое развитие и ESG", description: "Климатическая повестка, ESG-рейтинги и зелёные финансы; разбор отчётов компаний.", teacher: "доц. Ковалёва М. Р.", slot: "Ср, 17:40 · ауд. 2001", credits: 2, capacity: 35, minCourse: 1, taken: 19 },
+  { code: "MEDIA", title: "Медиаграмотность и проверка фактов", description: "Как проверять источники, фото и цифры; практикум по фактчекингу.", teacher: "ст. преп. Чэнь Ю.", slot: "Чт, 15:55 · ауд. 412, корп. Б", credits: 2, capacity: 22, minCourse: 1, taken: 6 },
+];

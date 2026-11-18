@@ -41,5 +41,6 @@ const today: Shape<typeof ru> = {
     appointmentsHint: "sans file d’attente", profileHint: "données, langues, sessions",
   },
   quick: {"aria": "Actions rapides", "cert": "Demander une attestation", "week": "Emploi du temps de la semaine", "appointment": "Prendre rendez-vous", "map": "Itinéraire vers le cours", "request": "Demande"},
+  checklist: {"title": "Premiers pas à l’université", "left": {"one": "encore {n} étape", "other": "encore {n} étapes"}, "allDone": "Tout est prêt — bienvenue !", "go": "Aller à : {item}", "items": {"card": "Retirer sa carte d’étudiant au bureau des étudiants", "mail": "Se connecter à la messagerie et au LMS", "calendar": "Abonner le calendrier du téléphone à l’emploi du temps", "push": "Activer les notifications de changements de cours", "map": "Repérer le chemin vers les salles", "library": "S’inscrire à la bibliothèque et retirer les manuels", "electives": "Choisir les cours à option du printemps", "clubs": "Trouver un club étudiant"}},
 };
 export default today;

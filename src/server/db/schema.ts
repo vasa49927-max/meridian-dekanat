@@ -3,8 +3,10 @@
  * Правило: у каждой таблицы с личными данными есть владелец (studentId/userId) и индекс по нему.
  */
 import { relations, sql } from "drizzle-orm";
+import { now } from "@/lib/time";
 import {
   boolean, check, customType, index, integer, jsonb, pgEnum, pgTable, real, smallint, text, timestamp, uniqueIndex, uuid,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 
 const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => "bytea" });
@@ -397,6 +399,42 @@ export const portfolioItems = pgTable("portfolio_items", {
   createdAt: createdAt(),
 }, (t) => [index("portfolio_student_idx").on(t.studentId)]);
 
+/**
+ * Курсы по выбору (раунд 8). Межфакультетские элективы на весенний семестр: ограниченное число мест,
+ * не больше двух курсов на студента; когда мест нет — лист ожидания (место освобождается → первый в очереди зачисляется).
+ */
+export const electives = pgTable("electives", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: text("code").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  teacher: text("teacher").notNull(),
+  slot: text("slot").notNull(), // «Вт, 17:40 · ауд. 3015»
+  credits: smallint("credits").notNull(),
+  capacity: smallint("capacity").notNull(),
+  /** Места, занятые студентами вне демо-данных (других факультетов и групп) — чтобы заполненность выглядела правдоподобно. */
+  reserved: smallint("reserved").notNull().default(0),
+  minCourse: smallint("min_course").notNull().default(1),
+  semester: text("semester").notNull(), // 2027-весна
+  opensAt: ts("opens_at").notNull(),
+  closesAt: ts("closes_at").notNull(),
+});
+
+export const electiveChoices = pgTable("elective_choices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id").notNull().references(() => students.id, { onDelete: "cascade" }),
+  electiveId: uuid("elective_id").notNull().references(() => electives.id, { onDelete: "cascade" }),
+  status: text("status").$type<"ENROLLED" | "WAITLIST">().notNull(),
+  createdAt: createdAt(),
+}, (t) => [uniqueIndex("elective_choice_uq").on(t.studentId, t.electiveId), index("elective_choices_elective_idx").on(t.electiveId, t.status, t.createdAt)]);
+
+/** Чек-лист первокурсника (раунд 8): отметки «сделано» — только свои. */
+export const checklistDone = pgTable("checklist_done", {
+  studentId: uuid("student_id").notNull().references(() => students.id, { onDelete: "cascade" }),
+  item: text("item").notNull(),
+  doneAt: createdAt(),
+}, (t) => [primaryKey({ columns: [t.studentId, t.item] })]);
+
 // ───────────── Уведомления и объявления ─────────────
 export const notificationKindEnum = pgEnum("notification_kind", ["SCHEDULE", "REQUEST", "ANNOUNCEMENT", "DEADLINE", "APPOINTMENT", "GRADE"]);
 export const audienceEnum = pgEnum("audience", ["ALL", "FACULTY", "COURSE", "GROUP"]);
@@ -424,7 +462,9 @@ export const notifications = pgTable("notifications", {
   link: text("link"),
   important: boolean("important").notNull().default(false),
   readAt: ts("read_at"),
-  createdAt: createdAt(),
+  // Время — по часам приложения (now() из lib/time), а не по часам БД: в демо-режиме часы «заморожены»,
+  // и уведомление, созданное «сейчас» по БД, оказывалось «в будущем» и пряталось из списка (раунд 8).
+  createdAt: createdAt().$defaultFn(() => now()),
 }, (t) => [
   index("notifications_user_idx").on(t.userId, t.createdAt),
   index("notifications_unread_idx").on(t.userId).where(sql`read_at is null`),

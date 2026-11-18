@@ -13,5 +13,6 @@ import assistant from "./assistant";
 import campus from "./campus";
 import survey from "./survey";
 import portfolio from "./portfolio";
+import electives from "./electives";
 
-export const en: Shape<Dict> = { common, auth, today, schedule, grades, requests, notifications, profile, appointments, assistant, campus, survey, portfolio };
+export const en: Shape<Dict> = { common, auth, today, schedule, grades, requests, notifications, profile, appointments, assistant, campus, survey, portfolio, electives };

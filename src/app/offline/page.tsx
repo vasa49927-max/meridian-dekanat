@@ -1,6 +1,7 @@
 import { WifiOff } from "lucide-react";
 import type { Metadata } from "next";
 import { Logo } from "@/components/logo";
+import { Scene } from "@/components/ui/scene";
 import { getI18n } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -14,7 +15,7 @@ export default async function OfflinePage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
       <Logo className="text-primary dark:text-fg" />
-      <WifiOff className="h-10 w-10 text-warn" aria-hidden />
+      <Scene tone="warn" icon={<WifiOff />} />
       <h1 className="font-serif text-2xl">{t("auth.pages.offline.heading")}</h1>
       <p className="text-muted">{t("auth.pages.offline.text")}</p>
     </main>

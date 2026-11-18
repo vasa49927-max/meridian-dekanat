@@ -11,7 +11,7 @@ const common: Shape<typeof ru> = {
     sections: "Rubriques", mainSections: "Rubriques principales", today: "Aujourd’hui", schedule: "Planning", grades: "Résultats", requests: "Demandes et attestations",
     requestsShort: "Demandes", notifications: "Notifications", assistant: "Assistant", appointments: "Rendez-vous", profile: "Profil", more: "Plus",
     unreadCount: { one: "{n} non lue", other: "{n} non lues" },
-    groups: {"study": "Études", "office": "Décanat", "me": "Mon espace", "work": "Travail", "analytics": "Analyse", "service": "Service"}, staffAnalytics: "Tableau de bord", staffRisks: "Étudiants à risque", survey: "Évaluation des cours", map: "Comment y aller", portfolio: "Portfolio", staffSurveys: "Enquêtes de cours", staffQueue: "File des demandes", staffAnnouncements: "Annonces", staffLessons: "Changements de cours", staffReception: "Accueil des étudiants", staffDemo: "Données de démo",
+    groups: {"study": "Études", "office": "Décanat", "me": "Mon espace", "work": "Travail", "analytics": "Analyse", "service": "Service"}, staffAnalytics: "Tableau de bord", staffRisks: "Étudiants à risque", survey: "Évaluation des cours", map: "Comment y aller", portfolio: "Portfolio", staffElectives: "Cours à option", staffSurveys: "Enquêtes de cours", staffQueue: "File des demandes", staffAnnouncements: "Annonces", staffLessons: "Changements de cours", staffReception: "Accueil des étudiants", staffDemo: "Données de démo",
     hasUnread: "Vous avez des notifications non lues", skip: "Aller au contenu", logout: "Se déconnecter", studentRole: "{course}e année · étudiant",
   },
   top: { search: "Recherche et actions", searchAria: "Recherche et actions (Ctrl+K)", notifications: "Notifications", notificationsUnread: "Notifications : {n} non lues" },

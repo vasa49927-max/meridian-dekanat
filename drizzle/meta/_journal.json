@@ -43,6 +43,13 @@
       "when": 1794408046600,
       "tag": "0005_round6",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794482449961,
+      "tag": "0006_round8",
+      "breakpoints": true
     }
   ]
 }

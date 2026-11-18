@@ -1,4 +1,4 @@
-import { Award, MapPinned, BarChart3, ShieldAlert, MessageSquareHeart, Bell, CalendarDays, FileText, GraduationCap, Sparkles, Sun, UserRound, CalendarClock, Inbox, Megaphone, CalendarCog, RotateCcw } from "lucide-react";
+import { ListChecks, Award, MapPinned, BarChart3, ShieldAlert, MessageSquareHeart, Bell, CalendarDays, FileText, GraduationCap, Sparkles, Sun, UserRound, CalendarClock, Inbox, Megaphone, CalendarCog, RotateCcw } from "lucide-react";
 
 /**
  * Раунд 7 (аудит удобства): 11 пунктов одним списком читались медленно — разбили на три смысловые группы
@@ -34,5 +34,6 @@ export const STAFF_NAV = [
   { href: "/staff/analytics", label: "Панель руководителя", key: "staffAnalytics", icon: BarChart3, group: "analytics" },
   { href: "/staff/risks", label: "Риски студентов", key: "staffRisks", icon: ShieldAlert, group: "analytics" },
   { href: "/staff/surveys", label: "Опросы о курсах", key: "staffSurveys", icon: MessageSquareHeart, group: "analytics" },
+  { href: "/staff/electives", label: "Курсы по выбору", key: "staffElectives", icon: ListChecks, group: "analytics" },
   { href: "/staff/demo", label: "Демо-данные", key: "staffDemo", icon: RotateCcw, group: "service" },
 ] as const;

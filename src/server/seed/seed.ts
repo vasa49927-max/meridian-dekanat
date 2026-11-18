@@ -7,7 +7,7 @@ import { hashPassword } from "@/server/auth/password";
 import { buildDocument, newRequestNumber, newVerifyCode, type StudentForDoc } from "@/server/documents";
 import { addDays, fmt, msk, mskParts, now as nowFn, startOfDay, startOfWeek } from "@/lib/time";
 import {
-  ANNOUNCEMENTS, BUILDINGS, CURRICULA, DEMO_STAFF, DEMO_STUDENTS, EXTRA_STUDENTS, FACULTIES, PROGRAMS, REQUEST_TYPES, SEMESTER, SLOTS, TEACHERS,
+  ANNOUNCEMENTS, BUILDINGS, ELECTIVES, CURRICULA, DEMO_STAFF, DEMO_STUDENTS, EXTRA_STUDENTS, FACULTIES, PROGRAMS, REQUEST_TYPES, SEMESTER, SLOTS, TEACHERS,
 } from "./data";
 
 /** Детерминированный генератор случайных чисел — одинаковые демо-данные при каждом сбросе. */
@@ -30,7 +30,7 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
   const rand = rng(20261106);
 
   await db.transaction(async (tx) => {
-    await tx.execute(sql`TRUNCATE TABLE risk_invites, survey_responses, survey_votes, portfolio_items, bot_link_codes, messenger_links, request_feedback, attachments, calendar_feeds, push_subscriptions, notify_prefs, appointments, slots, notifications, announcements, documents, request_events, requests, request_types,
+    await tx.execute(sql`TRUNCATE TABLE elective_choices, electives, checklist_done, risk_invites, survey_responses, survey_votes, portfolio_items, bot_link_codes, messenger_links, request_feedback, attachments, calendar_feeds, push_subscriptions, notify_prefs, appointments, slots, notifications, announcements, documents, request_events, requests, request_types,
       deadlines, final_grades, scores, assessments, lessons, course_offerings, disciplines, teachers, staff, students, groups, buildings,
       programs, faculties, rate_events, sessions, users RESTART IDENTITY CASCADE`);
 
@@ -210,8 +210,12 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
 
     // ── Сроки (часть — относительно «сейчас», чтобы демо было свежим в любой день проверки)
     const day = (n: number, hh = 23, mm = 59) => { const p = mskParts(addDays(NOW, n)); return msk(p.y, p.m, p.d, hh, mm); };
+    // Раунд 8: окно записи на курсы по выбору — не раньше 15 ноября и не короче двух недель от сброса демо-данных,
+    // чтобы у жюри (проверка до 28.11, реальное время на сервере) запись была открыта.
+    const electivesClose = new Date(Math.max(+msk(2026, 11, 15, 23, 59), +day(14)));
+    const electivesOpen = new Date(Math.min(+msk(2026, 11, 2, 10, 0), +day(-10, 10, 0)));
     await tx.insert(s.deadlines).values([
-      { title: "Запись на курсы по выбору (весна)", description: "Учебный офис · после срока — только заявлением", dueAt: msk(2026, 11, 15, 23, 59) },
+      { title: "Запись на курсы по выбору (весна)", description: "Учебный офис · после срока — только заявлением", dueAt: electivesClose, link: "/grades/electives" },
       { title: "Заявки на зимние стажировки", description: "Нужна выписка из зачётки — закажите заранее", dueAt: msk(2026, 11, 20, 23, 59), facultyId: fac["МЭО"].id, link: "/requests/new/RECORD_EXTRACT" },
       { title: "Справка для военкомата (ежегодно)", description: "Для студентов ВУЦ и состоящих на учёте", dueAt: msk(2026, 11, 30, 18, 0), facultyId: fac["МП"].id, link: "/requests/new/MILITARY_CERT" },
       { title: "Регистрация на модель ООН", description: "Студсовет", dueAt: msk(2026, 12, 1, 23, 59) },
@@ -397,6 +401,21 @@ export async function seedDemo(db: DB, opts: { now?: Date; log?: (m: string) => 
       { studentId: timur.id, kind: "VOLUNTEER", title: "Волонтёр международного форума", org: "Студенческий совет", date: "2025-10" },
       { studentId: mei.id, kind: "CERTIFICATE", title: "ТРКИ-1 (русский как иностранный)", org: "Тестовый центр (вымышленный)", date: "2026-08", verified: true },
     ]);
+    // ── Раунд 8: курсы по выбору. Часть мест заняли вымышленные студенты из демо (extras), остальное — «другие группы» (reserved).
+    const elRows = await tx.insert(s.electives).values(ELECTIVES.map((e) => ({ code: e.code, title: e.title, description: e.description, teacher: e.teacher, slot: e.slot, credits: e.credits, capacity: e.capacity, reserved: Math.max(0, e.taken - Math.min(e.taken, 2)), minCourse: e.minCourse, semester: "2027-весна", opensAt: electivesOpen, closesAt: electivesClose }))).returning();
+    for (const [i, e] of ELECTIVES.entries()) {
+      // по 2 записи на курс: каждый вымышленный студент получает ровно 2 курса — как требует лимит
+      for (let k = 0; k < Math.min(e.taken, 2); k++) {
+        await tx.insert(s.electiveChoices).values({ studentId: extras[(i * 2 + k) % extras.length].id, electiveId: elRows[i].id, status: "ENROLLED", createdAt: addDays(NOW, -8 + k) }).onConflictDoNothing();
+      }
+    }
+    // Мэй (1 курс) уже прошла три шага чек-листа первокурсника
+    await tx.insert(s.checklistDone).values(["card", "mail", "map"].map((item) => ({ studentId: mei.id, item })));
+    // Тимур уже записан на «Право ЕАЭС»; на заполненную «Цифровую дипломатию» — в листе ожидания
+    await tx.insert(s.electiveChoices).values([
+      { studentId: timur.id, electiveId: elRows[ELECTIVES.findIndex((e) => e.code === "EAEULAW")].id, status: "ENROLLED", createdAt: addDays(NOW, -3) },
+      { studentId: timur.id, electiveId: elRows[ELECTIVES.findIndex((e) => e.code === "DIGDIP")].id, status: "WAITLIST", createdAt: addDays(NOW, -2) },
+    ]).onConflictDoNothing();
     // ── Раунд 6: ответы анонимного опроса о курсах (от «однокурсников» Анны; сама Анна ещё не голосовала)
     let srnd = 7;
     const srand = () => ((srnd = (srnd * 1103515245 + 12345) % 2147483648) / 2147483648);

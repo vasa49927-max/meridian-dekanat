@@ -14,7 +14,7 @@ export function PageSkeleton({ cards = 3 }: { cards?: number }) {
       <Skeleton className="h-8 w-56" />
       <Skeleton className="h-4 w-40" />
       {Array.from({ length: cards }).map((_, i) => (
-        <div key={i} className="space-y-3 rounded-[var(--radius-card)] border border-line bg-surface p-4">
+        <div key={i} className="card space-y-3 rounded-[var(--radius-card)] border border-line bg-surface p-4">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-5 w-3/4" />
           <Skeleton className="h-4 w-1/2" />

@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { AlertTriangle, BookOpen, CalendarClock, CalendarHeart, MessageSquareHeart, CheckCircle2, CircleDot, Flag, Target } from "lucide-react";
 import { requireStudent } from "@/server/auth/guards";
-import { getMyGrades } from "@/server/dal/student";
+import { getMyGrades, getMyProfile } from "@/server/dal/student";
+import { StipendCard } from "@/components/grades/stipend-card";
+import { GradesTabs } from "@/components/grades/grades-tabs";
 import { listMyRiskInvites } from "@/server/dal/risks";
 import { listMySurveyCourses } from "@/server/dal/survey";
-import { BRS, averagePoints, markFor, planFor } from "@/lib/brs";
+import { BRS, averagePoints, markFor, planFor, stipendForecast, type Control } from "@/lib/brs";
 import { now } from "@/lib/time";
 import { getI18n } from "@/i18n/server";
 import { INTL_LOCALE } from "@/i18n/config";
@@ -48,7 +50,8 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
   const i18n = await getI18n();
   const { t, tn, tr, name, f, locale } = i18n;
   const num = (n: number) => n.toLocaleString(INTL_LOCALE[locale]);
-  const [{ current, past }, invites, survey] = await Promise.all([getMyGrades(v), listMyRiskInvites(v), listMySurveyCourses(v)]);
+  const [{ current, past }, invites, survey, prof] = await Promise.all([getMyGrades(v), listMyRiskInvites(v), listMySurveyCourses(v), getMyProfile(v)]);
+  const stipend = stipendForecast(prof.student.basis, current.map((d) => ({ name: d.name, short: d.short, control: d.control as Control, summary: d.summary })));
   const surveyLeft = survey.filter((c) => !c.voted).length;
   const cards = current.map((d) => {
     const plan = planFor(d.control, d.summary);
@@ -91,10 +94,8 @@ export default async function GradesPage({ searchParams }: { searchParams: Promi
         </Card>
       </div>
 
-      <nav aria-label={t("grades.tabs.aria")} className="mb-4 seg inline-flex rounded-xl border border-line p-1">
-        <Link aria-current={!isPast ? "page" : undefined} href="/grades" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", !isPast ? "bg-primary text-primary-fg" : "text-muted")}>{t("grades.tabs.current")}</Link>
-        <Link aria-current={isPast ? "page" : undefined} href="/grades?tab=record" className={cn("rounded-lg px-4 py-1.5 text-sm font-semibold", isPast ? "bg-primary text-primary-fg" : "text-muted")}>{t("grades.tabs.record")}</Link>
-      </nav>
+      {!isPast && <div className="mb-4"><StipendCard f={stipend} t={t as never} tr={tr} num={num} /></div>}
+      <GradesTabs active={isPast ? "record" : "current"} labels={{ aria: t("grades.tabs.aria"), current: t("grades.tabs.current"), record: t("grades.tabs.record"), electives: t("electives.tab") }} />
 
       {!isPast ? (
         <>

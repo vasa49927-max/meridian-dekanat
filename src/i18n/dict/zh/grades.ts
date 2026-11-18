@@ -82,5 +82,6 @@ const grades: Shape<typeof ru> = {
     autoExcellent: "优秀（免考）", totalMark: "{total} — {mark}",
   },
   invite: { text: "教务处邀请你参加咨询（{date}），一起制定提高分数的计划。", cta: "预约" },
+  stipend: {"title": "奖学金预测", "keep": "可以保住奖学金", "keepDetail": "按目前进度，所有考试不低于“良好”，考查科目均通过（条例第 10.1 条）。", "risk": "奖学金有风险", "riskItem": "{name}：预测 {pred} 分——考试需得 {need} 分才能“良好”", "riskItemCredit": "{name}：预测 {pred} 分——需得 {need} 分才能通过", "riskPace": "{name}：预测 {pred} 分——要达到“良好”，需加快进度：剩余作业 {rem} 分中再拿 {need} 分，并考好考试", "riskImpossible": "{name}：预测 {pred} 分——已无法达到“良好”，请联系教务员", "contract": "自费生不享受学业奖学金。", "increased": "高额奖学金按成就评选，请把成就添加到个人档案", "note": "预测基于目前进度，仅供参考。", "homeKeep": "奖学金：保持中", "homeRisk": "奖学金：有风险（{names}）"},
 };
 export default grades;

@@ -11,7 +11,8 @@ import assistant from "./assistant";
 import campus from "./campus";
 import survey from "./survey";
 import portfolio from "./portfolio";
+import electives from "./electives";
 
 /** Русский словарь — источник истины: остальные языки обязаны повторять его форму (проверяет TypeScript). */
-export const ru = { common, auth, today, schedule, grades, requests, notifications, profile, appointments, assistant, campus, survey, portfolio };
+export const ru = { common, auth, today, schedule, grades, requests, notifications, profile, appointments, assistant, campus, survey, portfolio, electives };
 export type Dict = typeof ru;

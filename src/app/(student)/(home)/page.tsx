@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { ArrowRight, CalendarCheck2, CalendarClock, CalendarRange, Coffee, FilePlus2, FileText, MapPinned, Megaphone, Sparkles } from "lucide-react";
 import { mapHref } from "@/lib/campus";
+import { CHECKLIST } from "@/lib/checklist";
+import { listMyChecklist } from "@/server/dal/checklist";
+import { ChecklistCard } from "@/components/checklist/checklist-card";
 import { requireStudent } from "@/server/auth/guards";
-import { getMyGrades, getNextLesson, listMyDeadlines, listMyLessons, listMyNotifications, listMyUpcomingChanges } from "@/server/dal/student";
+import { getMyGrades, getMyProfile, getNextLesson, listMyDeadlines, listMyLessons, listMyNotifications, listMyUpcomingChanges } from "@/server/dal/student";
 import { listMyRequests } from "@/server/dal/requests";
 import { TZ, addDays, mskParts, now, startOfDay } from "@/lib/time";
-import { averagePoints } from "@/lib/brs";
+import { averagePoints, stipendForecast, type Control } from "@/lib/brs";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty";
@@ -36,9 +39,9 @@ export default async function TodayPage() {
   const { t, tn, tr, tc, name, f } = await getI18n();
   const at = now();
   const dayStart = startOfDay(at);
-  const [next, today, changes, deadlines, reqs, grades, news] = await Promise.all([
+  const [next, today, changes, deadlines, reqs, grades, news, profile, checklist] = await Promise.all([
     getNextLesson(v, at), listMyLessons(v, dayStart, addDays(dayStart, 1)), listMyUpcomingChanges(v, at), listMyDeadlines(v, at, 4),
-    listMyRequests(v, null, 10), getMyGrades(v), listMyNotifications(v, "ANNOUNCEMENT", null, 3),
+    listMyRequests(v, null, 10), getMyGrades(v), listMyNotifications(v, "ANNOUNCEMENT", null, 3), getMyProfile(v), v.course === 1 ? listMyChecklist(v) : Promise.resolve(null),
   ]);
   // Сегодня пар нет (вечер/выходной) — показываем день ближайшей пары, а не пустую карточку (UX-ревью №11).
   const todayActive = today.filter((l) => l.status !== "CANCELLED");
@@ -59,6 +62,7 @@ export default async function TodayPage() {
   const teacherFull = next?.teacherLast ? name([next.teacherLast, next.teacherFirst, next.teacherMiddle].filter(Boolean).join(" ")) : null;
   const activeReqs = reqs.items.filter((r) => r.status !== "ISSUED" && r.status !== "REJECTED").slice(0, 3);
   const pastAvg = averagePoints(grades.past.map((g) => g.points));
+  const stipend = stipendForecast(profile.student.basis, grades.current.map((d) => ({ name: d.name, short: d.short, control: d.control as Control, summary: d.summary })));
   const autoDone = grades.current.filter((d) => d.summary.auto?.achieved).length;
   const risky = grades.current.filter((d) => d.summary.risk !== "none");
   const gradedMax = grades.current.reduce((s, d) => s + d.summary.gradedMax, 0);
@@ -121,6 +125,7 @@ export default async function TodayPage() {
           )}
           <ul className="mt-3 space-y-1.5 text-sm">
             <li>{t("today.grades.autoDone")} <b>{t("today.grades.autoOf", { n: autoDone, total: grades.current.length })}</b></li>
+            {stipend.applicable && <li className={stipend.status === "risk" ? "text-warn" : "text-ok"}><Link href="/grades" className="font-semibold hover:underline">{stipend.status === "risk" ? t("grades.stipend.homeRisk", { names: stipend.risks.map((r) => tr("short", r.short)).join(", ") }) : t("grades.stipend.homeKeep")}</Link></li>}
             {pastAvg !== null && <li>{t("today.grades.avg")} <b className="tabular">{pastAvg.toLocaleString(INTL_LOCALE[f.locale])}</b></li>}
             {risky.length > 0 ? (
               <li className="text-danger"><b>{t("today.grades.riskLabel")}</b> {risky.slice(0, 2).map((r) => tr("short", r.short)).join(", ")} — {riskText(risky[0].summary, t)}</li>
@@ -154,6 +159,9 @@ export default async function TodayPage() {
             </Link>
           )}
         </nav>
+
+        {/* Раунд 8: первые шаги — только первокурсникам, пока не отмечено всё */}
+        {checklist && checklist.size < CHECKLIST.length && <div className="min-w-0 lg:col-span-3"><ChecklistCard done={[...checklist]} /></div>}
 
         {/* Обзор раунда 2: изменения — боль №1 по опросу (11 из 11), на телефоне показываем их сразу после карточки пары */}
         <div className="lg:col-span-3"><ChangeBanner changes={changes} /></div>

@@ -40,6 +40,7 @@ export function makeContentTr(locale: Locale, lex: Lex | null, ctx: { tr: (g: st
       return `${ctx.tr("rt", m[1])}: ${locale === "zh" ? st : st.charAt(0).toLowerCase() + st.slice(1)}`;
     }
     if ((m = s.match(/^(Перенос|Отмена|Новая аудитория): (.+)$/))) return `${W[{ Перенос: "move", Отмена: "cancel", "Новая аудитория": "roomChange" }[m[1]] as "move"]}: ${ctx.tr("subjects", m[2])}`;
+    if ((m = s.match(/^Курс по выбору: место освободилось — (.+)$/))) return `${W.electiveSeat}: ${ctx.tr("electives", m[1])}`;
     if ((m = s.match(/^Приглашение на консультацию: (.+)$/))) return `${W.invite}: ${ctx.tr("subjects", m[1])}`;
     if ((m = s.match(/^Через 2 дня: (.+) — (.+)$/))) return `${W.in2days}: ${ctx.tr("assessments", m[1])} — ${ctx.tr("short", m[2])}`;
     if ((m = s.match(/^(.+)\. Максимум (\d+) баллов\. Срок — (\d{1,2}) ([а-я]+)\.$/))) return W.deadlineBody.replace("{name}", ctx.tr("subjects", m[1])).replace("{max}", m[2]).replace("{date}", date(m[3], m[4], false));
@@ -57,8 +58,9 @@ export type StatusKey = keyof typeof REV;
 export const CONTENT: Record<"en" | "zh" | "fr", Lex> = {
   en: {
     // раунд 6: приглашение на консультацию
-    words: { invite: "Consultation invitation", room: "room {r}", was: "Was", now: "Now", cancelled: "class cancelled", move: "Rescheduled", cancel: "Cancelled", roomChange: "New room", in2days: "In 2 days", deadlineBody: "{name}. Up to {max} points. Due {date}.", accepted: "Request {num} received. Processing time — {sla}. Status updates will appear here.", workdays: "{n} working days", topic: "Topic" },
+    words: { electiveSeat: "Elective: a seat has freed up", invite: "Consultation invitation", room: "room {r}", was: "Was", now: "Now", cancelled: "class cancelled", move: "Rescheduled", cancel: "Cancelled", roomChange: "New room", in2days: "In 2 days", deadlineBody: "{name}. Up to {max} points. Due {date}.", accepted: "Request {num} received. Processing time — {sla}. Status updates will appear here.", workdays: "{n} working days", topic: "Topic" },
     exact: {
+      "Вы зачислены на курс из листа ожидания. Если передумали — откажитесь до конца записи, место перейдёт следующему.": "You have been enrolled from the waiting list. If you change your mind, drop the course before enrolment closes and the seat will go to the next person.",
       // раунд 6: демо-портфолио
       "Олимпиада по экономике «Меридиан-2026», призёр (2-е место)": "Meridian-2026 Economics Olympiad, prize winner (2nd place)",
       "Вымышленный экономический клуб": "Fictional economics club",
@@ -130,8 +132,9 @@ export const CONTENT: Record<"en" | "zh" | "fr", Lex> = {
   },
   zh: {
     // раунд 6: приглашение на консультацию
-    words: { invite: "咨询邀请", room: "{r} 教室", was: "原定", now: "现改为", cancelled: "课程取消", move: "调课", cancel: "停课", roomChange: "更换教室", in2days: "2天后截止", deadlineBody: "{name}。满分 {max} 分。截止日期：{date}。", accepted: "申请 {num} 已受理。办理时限：{sla}。状态将在此处更新。", workdays: "{n} 个工作日", topic: "事由" },
+    words: { electiveSeat: "选修课：有空位了", invite: "咨询邀请", room: "{r} 教室", was: "原定", now: "现改为", cancelled: "课程取消", move: "调课", cancel: "停课", roomChange: "更换教室", in2days: "2天后截止", deadlineBody: "{name}。满分 {max} 分。截止日期：{date}。", accepted: "申请 {num} 已受理。办理时限：{sla}。状态将在此处更新。", workdays: "{n} 个工作日", topic: "事由" },
     exact: {
+      "Вы зачислены на курс из листа ожидания. Если передумали — откажитесь до конца записи, место перейдёт следующему.": "你已从候补名单中被选上。如果改变主意，请在选课结束前退选，名额将转给下一位。",
       // раунд 6: демо-портфолио
       "Олимпиада по экономике «Меридиан-2026», призёр (2-е место)": "“子午线-2026”经济学竞赛获奖（第二名）",
       "Вымышленный экономический клуб": "虚构的经济学俱乐部",
@@ -179,8 +182,9 @@ export const CONTENT: Record<"en" | "zh" | "fr", Lex> = {
   },
   fr: {
     // раунд 6: приглашение на консультацию
-    words: { invite: "Invitation à une consultation", room: "salle {r}", was: "Avant", now: "Désormais", cancelled: "cours annulé", move: "Cours déplacé", cancel: "Cours annulé", roomChange: "Nouvelle salle", in2days: "Dans 2 jours", deadlineBody: "{name}. Jusqu’à {max} points. Échéance : {date}.", accepted: "Demande {num} reçue. Délai : {sla}. Le statut sera mis à jour ici.", workdays: "{n} jours ouvrés", topic: "Objet" },
+    words: { electiveSeat: "Cours à option : une place s’est libérée", invite: "Invitation à une consultation", room: "salle {r}", was: "Avant", now: "Désormais", cancelled: "cours annulé", move: "Cours déplacé", cancel: "Cours annulé", roomChange: "Nouvelle salle", in2days: "Dans 2 jours", deadlineBody: "{name}. Jusqu’à {max} points. Échéance : {date}.", accepted: "Demande {num} reçue. Délai : {sla}. Le statut sera mis à jour ici.", workdays: "{n} jours ouvrés", topic: "Objet" },
     exact: {
+      "Вы зачислены на курс из листа ожидания. Если передумали — откажитесь до конца записи, место перейдёт следующему.": "Vous avez été inscrit depuis la liste d’attente. Si vous changez d’avis, désistez-vous avant la clôture : la place ira au suivant.",
       // раунд 6: демо-портфолио
       "Олимпиада по экономике «Меридиан-2026», призёр (2-е место)": "Olympiade d’économie « Meridian-2026 », lauréate (2e place)",
       "Вымышленный экономический клуб": "Club d’économie fictif",

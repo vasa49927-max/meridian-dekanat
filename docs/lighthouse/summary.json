@@ -1,47 +1,83 @@
 [
   {
     "route": "/login",
-    "performance": 93,
+    "performance": 96,
+    "accessibility": 96,
+    "bestPractices": 96,
+    "lcp": "2.1 s",
+    "cls": "0",
+    "tbt": "210 ms"
+  },
+  {
+    "route": "/?first",
+    "performance": 91,
     "accessibility": 100,
     "bestPractices": 96,
-    "lcp": "2.9 s",
+    "lcp": "2.3 s",
     "cls": "0",
-    "tbt": "160 ms"
+    "tbt": "340 ms"
   },
   {
     "route": "/",
     "performance": 90,
     "accessibility": 100,
-    "bestPractices": 100,
-    "lcp": "3.3 s",
-    "cls": "0.006",
-    "tbt": "90 ms"
+    "bestPractices": 96,
+    "lcp": "2.9 s",
+    "cls": "0",
+    "tbt": "260 ms"
   },
   {
     "route": "/schedule",
-    "performance": 95,
-    "accessibility": 100,
-    "bestPractices": 100,
-    "lcp": "2.5 s",
+    "performance": 92,
+    "accessibility": 73,
+    "bestPractices": 89,
+    "lcp": "3.0 s",
     "cls": "0",
-    "tbt": "140 ms"
+    "tbt": "190 ms"
   },
   {
     "route": "/grades",
+    "performance": 95,
+    "accessibility": 100,
+    "bestPractices": 96,
+    "lcp": "1.2 s",
+    "cls": "0",
+    "tbt": "260 ms"
+  },
+  {
+    "route": "/grades/electives",
     "performance": 91,
     "accessibility": 100,
-    "bestPractices": 100,
-    "lcp": "3.3 s",
+    "bestPractices": 96,
+    "lcp": "2.2 s",
     "cls": "0",
-    "tbt": "60 ms"
+    "tbt": "320 ms"
   },
   {
     "route": "/requests",
-    "performance": 98,
-    "accessibility": 100,
-    "bestPractices": 100,
+    "performance": 93,
+    "accessibility": 96,
+    "bestPractices": 96,
     "lcp": "2.1 s",
     "cls": "0",
-    "tbt": "110 ms"
+    "tbt": "290 ms"
+  },
+  {
+    "route": "/portfolio",
+    "performance": 92,
+    "accessibility": 100,
+    "bestPractices": 96,
+    "lcp": "2.4 s",
+    "cls": "0",
+    "tbt": "270 ms"
+  },
+  {
+    "route": "/map",
+    "performance": 90,
+    "accessibility": 73,
+    "bestPractices": 89,
+    "lcp": "2.9 s",
+    "cls": "0.01",
+    "tbt": "270 ms"
   }
 ]

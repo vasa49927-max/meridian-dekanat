@@ -309,7 +309,8 @@ test.describe("Раунд 4: правки капитана", () => {
     await expect(page.getByText("Was: 18 November (Wed), 14:30, room 506. Now: 19 November (Thu), 17:40, room 1018.")).toBeVisible();
     await expect(page.getByText("Model UN: delegate registration is open").first()).toBeVisible();
     await page.goto("/");
-    await expect(page.getByText("Electives sign-up (spring)")).toBeVisible();
+    // Раунд 8: запись на курсы по выбору теперь открыта дольше (2 недели от сброса) и в «ближайшие 4 срока» не попадает
+    await expect(page.getByText("Winter internship applications")).toBeVisible();
   });
 });
 

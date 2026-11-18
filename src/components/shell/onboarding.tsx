@@ -24,14 +24,20 @@ export function Onboarding({ firstName }: { firstName: string }) {
   useEffect(() => {
     let seen = true;
     try { seen = localStorage.getItem(TOUR_KEY) === "done"; } catch { /* приватный режим — подсказки просто не показываем автоматически */ }
-    const t = seen ? undefined : setTimeout(() => setOpen(true), 400);
+    // Раунд 8: дублируем флаг в cookie (не секрет, только «видел подсказки») — работает и там, где localStorage очищается
+    if (document.cookie.split("; ").includes(`${TOUR_KEY}=done`)) seen = true;
+    // Раунд 8 (скорость): подсказки — когда страница уже загружена и браузер свободен, а не через 400 мс после гидратации.
+    // Иначе окно спорит за поток с первой отрисовкой и становится «крупнейшим элементом» (LCP) вместо самого кабинета.
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const show = () => { t = setTimeout(() => setOpen(true), 900); };
+    if (!seen) { if (document.readyState === "complete") show(); else window.addEventListener("load", show, { once: true }); }
     const reopen = () => { setStep(0); setOpen(true); };
     window.addEventListener("meridian:tour", reopen);
-    return () => { if (t) clearTimeout(t); window.removeEventListener("meridian:tour", reopen); };
+    return () => { if (t) clearTimeout(t); window.removeEventListener("load", show); window.removeEventListener("meridian:tour", reopen); };
   }, []);
   const close = (o: boolean) => {
     setOpen(o);
-    if (!o) try { localStorage.setItem(TOUR_KEY, "done"); } catch { /* не критично */ }
+    if (!o) { try { localStorage.setItem(TOUR_KEY, "done"); } catch { /* не критично */ } document.cookie = `${TOUR_KEY}=done; path=/; max-age=31536000; samesite=lax`; }
   };
   const S = STEPS[step];
   const last = step === STEPS.length - 1;

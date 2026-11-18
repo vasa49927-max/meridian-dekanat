@@ -41,5 +41,6 @@ const today: Shape<typeof ru> = {
     appointmentsHint: "no waiting in line", profileHint: "details, languages, sessions",
   },
   quick: {"aria": "Quick actions", "cert": "Order a certificate", "week": "This week’s timetable", "appointment": "Book a coordinator", "map": "Route to class", "request": "Request"},
+  checklist: {"title": "First steps at university", "left": {"one": "{n} step left", "other": "{n} steps left"}, "allDone": "All done — welcome aboard!", "go": "Go to: {item}", "items": {"card": "Collect your student ID at the student office", "mail": "Sign in to your university email and LMS", "calendar": "Subscribe your phone calendar to the timetable", "push": "Turn on notifications about class changes", "map": "See how to get to your classrooms", "library": "Register at the library and get your textbooks", "electives": "Choose your spring electives", "clubs": "Find a student club or society"}},
 };
 export default today;

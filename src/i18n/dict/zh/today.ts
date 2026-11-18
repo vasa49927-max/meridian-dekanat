@@ -41,5 +41,6 @@ const today: Shape<typeof ru> = {
     appointmentsHint: "无需排队", profileHint: "个人信息、语言、登录会话",
   },
   quick: {"aria": "快捷操作", "cert": "申请证明", "week": "本周课表", "appointment": "预约教务员", "map": "去教室的路线", "request": "申请"},
+  checklist: {"title": "入学第一步", "left": {"other": "还剩 {n} 步"}, "allDone": "全部完成——欢迎！", "go": "前往：{item}", "items": {"card": "在学生事务中心领取学生证", "mail": "登录学校邮箱和 LMS", "calendar": "将课表订阅到手机日历", "push": "开启调课通知", "map": "了解如何前往各教室", "library": "办理图书馆证并领取教材", "electives": "选择春季选修课", "clubs": "加入学生社团"}},
 };
 export default today;
