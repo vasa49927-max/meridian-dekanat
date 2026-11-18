@@ -113,7 +113,7 @@ test("деканат: колонка «Ведёт», фильтр «Мои», «
   await page.getByRole("row").filter({ hasText: number }).getByRole("link").first().click();
   await page.waitForURL(/\/staff\/requests\/[0-9a-f-]{36}$/);
   await expect(page.getByText("Ведёт:")).toBeVisible();
-  await expect(page.locator("b", { hasText: "вы" })).toBeVisible();
+  await expect(page.locator("b", { hasText: "Вы" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Взять себе" })).toHaveCount(0);
 
   // Студент видит, кто ведёт его заявку

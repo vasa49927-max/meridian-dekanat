@@ -7,6 +7,7 @@ import { db, schema } from "@/server/db";
 import { verifyPassword } from "@/server/auth/password";
 import { createSession, destroySession } from "@/server/auth/session";
 import { LIMITS, clear, clientIp, countRecent, record } from "@/server/auth/rate-limit";
+import { DEMO_LOGINS } from "@/server/auth/change-password";
 import { getI18n } from "@/i18n/server";
 
 const schemaLogin = (m: { login: string; password: string }) => z.object({
@@ -40,7 +41,10 @@ export async function loginAction(_: LoginState, form: FormData): Promise<LoginS
   const [byPair, byUser, byIp] = await Promise.all([
     countRecent(pairBucket, LIMITS.loginPerUserIp.windowMs), countRecent(userBucket, LIMITS.loginPerUser.windowMs), countRecent(ipBucket, LIMITS.loginPerIp.windowMs),
   ]);
-  if (byPair >= LIMITS.loginPerUserIp.max || byUser >= LIMITS.loginPerUser.max || byIp >= LIMITS.loginPerIp.max) {
+  // Раунд 9 (находка аудитора): у демо-аккаунтов пароль опубликован для жюри — перебирать нечего, а лимит «на логин
+  // со всех адресов» позволял с 4 IP заблокировать вход всему жюри. Для них оставляем только «логин+IP» и «IP».
+  const demo = DEMO_LOGINS.has(login);
+  if (byPair >= LIMITS.loginPerUserIp.max || (!demo && byUser >= LIMITS.loginPerUser.max) || byIp >= LIMITS.loginPerIp.max) {
     return { error: t("auth.errors.tooMany"), login };
   }
   const [user] = await db.select().from(schema.users).where(eq(schema.users.login, login)).limit(1);

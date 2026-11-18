@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, gt } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema as t } from "@/server/db";
 import type { StudentViewer } from "@/server/auth/guards";
@@ -25,9 +25,13 @@ export const bookSchema = z.object({
 
 /** Бронирование без гонок: слот помечается занятым условным UPDATE … WHERE is_booked = false. */
 export async function bookSlot(v: StudentViewer, input: z.infer<typeof bookSchema>, at: Date) {
-  const active = (await listMyAppointments(v)).filter((a) => a.status === "BOOKED" && a.startsAt > at);
-  if (active.length >= 2) return { ok: false as const, error: "Можно держать не больше двух активных записей — отмените одну из них" };
   return db.transaction(async (tx) => {
+    // Раунд 9 (аудит): лимит «2 активные записи» — внутри транзакции под блокировкой по студенту,
+    // иначе два параллельных запроса давали третью запись.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"appt:" + v.studentId}))`);
+    const [{ n }] = await tx.select({ n: count() }).from(t.appointments).innerJoin(t.slots, eq(t.slots.id, t.appointments.slotId))
+      .where(and(eq(t.appointments.studentId, v.studentId), eq(t.appointments.status, "BOOKED"), gt(t.slots.startsAt, at)));
+    if (n >= 2) return { ok: false as const, error: "Можно держать не больше двух активных записей — отмените одну из них" };
     const taken = await tx.update(t.slots).set({ isBooked: true })
       .where(and(eq(t.slots.id, input.slotId), eq(t.slots.isBooked, false), gt(t.slots.startsAt, at))).returning();
     if (!taken.length) return { ok: false as const, error: "Это время только что заняли. Выберите другое." };

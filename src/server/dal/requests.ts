@@ -1,13 +1,13 @@
 import "server-only";
 import { cache } from "react";
-import { and, asc, desc, eq, lt, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, lt, or } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema as t } from "@/server/db";
 import type { StudentViewer } from "@/server/auth/guards";
 import type { RequestField } from "@/server/db/schema";
 import { newRequestNumber } from "@/server/documents";
 import { saveAttachments, type ReadyFile } from "@/server/attachments";
-import { now } from "@/lib/time";
+import { now, plural } from "@/lib/time";
 
 export const listRequestTypes = cache(async () =>
   db.select().from(t.requestTypes).orderBy(desc(t.requestTypes.popular), asc(t.requestTypes.title)));
@@ -44,7 +44,7 @@ export async function getMyRequest(v: StudentViewer, id: string) {
  */
 export type RequestMsgs = {
   tooLong: (max: number) => string; chooseOption: string; required: (label: string) => string;
-  noType: string; checkFields: string; createFailed: string; replyNotAllowed: string; withdrawNotAllowed: string; rateNotAllowed: string; alreadyRated: string;
+  noType: string; checkFields: string; createFailed: string; replyNotAllowed: string; withdrawNotAllowed: string; rateNotAllowed: string; alreadyRated: string; dailyLimit?: string;
 };
 export const RU_REQUEST_MSGS: RequestMsgs = {
   tooLong: (max) => `Не длиннее ${max} символов`, chooseOption: "Выберите вариант из списка", required: (label) => `Заполните поле «${label}»`,
@@ -75,6 +75,9 @@ export async function createMyRequest(v: StudentViewer, code: string, raw: Recor
   }
   const payload = Object.fromEntries(Object.entries(parsed.data).filter(([, val]) => val !== ""));
   const created = now();
+  // Раунд 9 (аудит): не больше 20 заявок в сутки — иначе через вложения можно было забить базу
+  const [{ n }] = await db.select({ n: count() }).from(t.requests).where(and(eq(t.requests.studentId, v.studentId), gt(t.requests.createdAt, new Date(+created - 86400000))));
+  if (n >= 20) return { ok: false as const, error: m.dailyLimit ?? "Не больше 20 заявок в сутки — если нужно больше, запишитесь к методисту" };
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const id = await db.transaction(async (tx) => {
@@ -84,7 +87,7 @@ export async function createMyRequest(v: StudentViewer, code: string, raw: Recor
         }).returning({ id: t.requests.id, number: t.requests.number });
         await tx.insert(t.requestEvents).values({ requestId: r.id, status: "SUBMITTED", actor: "Студент", comment: [comment?.slice(0, 500), files.length ? `Приложено файлов: ${files.length}` : null].filter(Boolean).join(" · ") || null });
         await saveAttachments(tx, r.id, "STUDENT", files);
-        await tx.insert(t.notifications).values({ userId: v.userId, kind: "REQUEST", title: `${type.title}: подана`, body: `Заявка ${r.number} принята. Срок — ${type.slaDays} ${type.slaDays === 1 ? "рабочий день" : "рабочих дня"}. Статус будет обновляться здесь.`, link: `/requests/${r.id}`, readAt: new Date() });
+        await tx.insert(t.notifications).values({ userId: v.userId, kind: "REQUEST", title: `${type.title}: подана`, body: `Заявка ${r.number} принята. Срок — ${type.slaDays} ${plural(type.slaDays, "рабочий день", "рабочих дня", "рабочих дней")}. Статус будет обновляться здесь.`, link: `/requests/${r.id}`, readAt: new Date() });
         return r.id;
       });
       return { ok: true as const, id };

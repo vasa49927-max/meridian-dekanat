@@ -25,7 +25,10 @@ export default async function RisksPage({ searchParams }: { searchParams: Promis
   const groups = [...new Set(all.map((r) => `${r.faculty} · ${r.group}`))].sort();
   const level = sp.level === "high" || sp.level === "watch" ? sp.level : "all";
   const rows = all.filter((r) => (level === "all" || r.summary.risk === level) && (!sp.group || `${r.faculty} · ${r.group}` === sp.group));
-  const high = all.filter((r) => r.summary.risk === "high").length;
+  // Раунд 9 (аудит UX): все плитки считают СТУДЕНТОВ (раньше две — пары «студент–предмет», и 0 + 7 ≠ 6)
+  const highSet = new Set(all.filter((r) => r.summary.risk === "high").map((r) => r.studentId));
+  const high = highSet.size;
+  const watchOnly = new Set(all.filter((r) => !highSet.has(r.studentId)).map((r) => r.studentId)).size;
   const students = new Set(all.map((r) => r.studentId)).size;
   const q = (p: Record<string, string | undefined>) => { const u = new URLSearchParams(Object.entries({ level: level === "all" ? undefined : level, group: sp.group, ...p }).filter(([, x]) => x) as [string, string][]); const s = u.toString(); return `/staff/risks${s ? `?${s}` : ""}`; };
 
@@ -35,7 +38,7 @@ export default async function RisksPage({ searchParams }: { searchParams: Promis
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <Card className="p-4"><p className="text-xs font-semibold uppercase tracking-wider text-muted">Студентов с риском</p><p className="mt-1 font-serif text-3xl tabular">{students}</p></Card>
         <Card className={cn("p-4", high > 0 && "border-danger/40")}><p className="text-xs font-semibold uppercase tracking-wider text-muted">Высокий риск</p><p className={cn("mt-1 font-serif text-3xl tabular", high > 0 && "text-danger")}>{high}</p><p className="text-xs text-muted">не набрать {BRS.passTotal} даже с экзаменом</p></Card>
-        <Card className="p-4"><p className="text-xs font-semibold uppercase tracking-wider text-muted">Под наблюдением</p><p className="mt-1 font-serif text-3xl tabular">{all.length - high}</p><p className="text-xs text-muted">темп ниже 60% от возможного</p></Card>
+        <Card className="p-4"><p className="text-xs font-semibold uppercase tracking-wider text-muted">Под наблюдением</p><p className="mt-1 font-serif text-3xl tabular">{watchOnly}</p><p className="text-xs text-muted">темп ниже 60% хотя бы по одному предмету</p></Card>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">

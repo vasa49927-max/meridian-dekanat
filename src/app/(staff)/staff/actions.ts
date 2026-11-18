@@ -7,8 +7,9 @@ import { db } from "@/server/db";
 import { env } from "@/server/env";
 import { seedDemo } from "@/server/seed/seed";
 import { msk } from "@/lib/time";
-import { LIMITS, countRecent, record } from "@/server/auth/rate-limit";
+import { LIMITS, countRecent, record, hit } from "@/server/auth/rate-limit";
 import { staffInviteAtRisk } from "@/server/dal/risks";
+import { markSeeded } from "@/server/demo-reset";
 import { draftReply } from "@/server/ai/draft";
 import { z } from "zod";
 
@@ -66,6 +67,7 @@ export async function resetDemoAction(): Promise<StaffState> {
   // Не чаще раза в 30 минут: один член жюри не выбросит из кабинета других посреди проверки (находка M-2).
   if ((await countRecent("demo-reset", LIMITS.demoReset.windowMs)) >= LIMITS.demoReset.max) return { error: "Демо-данные уже сбрасывали в последние 30 минут. Попробуйте позже." };
   await seedDemo(db);
+  await markSeeded();
   await record("demo-reset");
   // Сид удаляет все сессии — в том числе текущую. Возвращаемся на вход.
   redirect("/login?reset=1");
@@ -88,8 +90,7 @@ export async function draftReplyAction(id: string, status: string): Promise<{ te
   const p = z.object({ id: z.string().uuid(), status: z.enum(["IN_PROGRESS", "NEEDS_INFO", "READY", "ISSUED", "REJECTED"]) }).safeParse({ id, status });
   if (!p.success) return { error: "Сначала выберите статус" };
   const bucket = `draft:${v.staffId}`;
-  if ((await countRecent(bucket, LIMITS.aiPerUser.windowMs)) >= LIMITS.aiPerUser.max) return { error: "Слишком много черновиков за час — попробуйте позже" };
-  await record(bucket);
+  if (!(await hit(bucket, LIMITS.aiPerUser.max, LIMITS.aiPerUser.windowMs))) return { error: "Слишком много черновиков за час — попробуйте позже" };
   const d = await draftReply(v, p.data.id, p.data.status);
   if (!d) return { error: "Заявка не найдена" };
   return d;

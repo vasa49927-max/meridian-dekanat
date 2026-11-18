@@ -16,7 +16,7 @@ const today: Shape<typeof ru> = {
     days: { one: "{n} jour", other: "{n} jours" },
   },
   grades: {
-    title: "Où en sont vos études", pace1: "des points possibles", pace2: "ce semestre",
+    title: "Où en sont vos études", pace1: "rythme : points sur le maximum", pace2: "des travaux déjà notés",
     dayPoints: "Points des matières de ce jour", todayPoints: "Points des matières du jour",
     auto: "validé", risk: "risque", toAuto: "encore {n} pour valider", toAutoHint: "points manquants pour une validation automatique",
     autoDone: "Validations automatiques :", autoOf: "{n} sur {total}", avg: "Moyenne du relevé :", riskLabel: "Risque :", noRisk: "Aucun risque — continuez ainsi",

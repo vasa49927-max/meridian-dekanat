@@ -16,7 +16,7 @@ const today: Shape<typeof ru> = {
     days: { one: "{n} day", other: "{n} days" },
   },
   grades: {
-    title: "How your studies are going", pace1: "of possible points", pace2: "this semester",
+    title: "How your studies are going", pace1: "pace: points out of the maximum", pace2: "for work already graded",
     dayPoints: "Points in this day’s courses", todayPoints: "Points in today’s courses",
     auto: "automatic", risk: "at risk", toAuto: "{n} to automatic", toAutoHint: "points still needed for an automatic grade",
     autoDone: "Automatic grades so far:", autoOf: "{n} of {total}", avg: "Grade point average:", riskLabel: "At risk:", noRisk: "No risks — keep it up",

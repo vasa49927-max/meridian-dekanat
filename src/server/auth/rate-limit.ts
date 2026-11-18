@@ -19,6 +19,15 @@ export async function record(bucket: string) {
   }
 }
 
+/**
+ * Атомарный лимит (раунд 9, находка аудитора): сначала записываем событие, потом считаем вместе с ним.
+ * Раньше «посчитать → записать» пропускало параллельные запросы сверх лимита (6 тестовых push вместо 5).
+ */
+export async function hit(bucket: string, max: number, windowMs: number) {
+  await record(bucket);
+  return (await countRecent(bucket, windowMs)) <= max;
+}
+
 export async function clear(bucket: string) {
   await db.delete(schema.rateEvents).where(eq(schema.rateEvents.bucket, bucket));
 }

@@ -22,7 +22,7 @@ const assistant: Shape<typeof ru> = {
   offlineAnswer: "答案摘自条例，未使用AI（俄语）",
   typing: "助手正在输入",
   inputLabel: "您的问题",
-  placeholder: "例如：兵役登记处需要哪种证明？",
+  placeholder: "例如：兵役登记处证明",
   send: "发送",
   disclaimer: "助手可能出错，请以条例为准。它不会自行提交申请：由您核对表单并发送。",
   errors: {

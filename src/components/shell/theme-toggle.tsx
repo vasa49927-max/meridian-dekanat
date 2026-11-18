@@ -17,6 +17,7 @@ export function useTheme() {
     const next = !document.documentElement.classList.contains("dark");
     document.documentElement.classList.toggle("dark", next);
     try { localStorage.setItem("theme", next ? "dark" : "light"); } catch {}
+    document.cookie = `theme-r=${next ? "dark" : "light"};path=/;max-age=31536000;samesite=lax`;
   };
   return { dark, toggle };
 }

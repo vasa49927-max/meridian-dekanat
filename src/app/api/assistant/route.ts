@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { apiViewer, assertSameOrigin } from "@/server/auth/guards";
-import { LIMITS, countRecent, record } from "@/server/auth/rate-limit";
+import { LIMITS, hit } from "@/server/auth/rate-limit";
 import { askAssistant } from "@/server/ai/assistant";
 import { getI18n } from "@/i18n/server";
 
@@ -19,10 +19,9 @@ export async function POST(req: Request) {
   const parsed = body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: t("assistant.errors.badRequest") }, { status: 400 });
   const bucket = `ai:${auth.viewer.userId}`;
-  if ((await countRecent(bucket, LIMITS.aiPerUser.windowMs)) >= LIMITS.aiPerUser.max) {
+  if (!(await hit(bucket, LIMITS.aiPerUser.max, LIMITS.aiPerUser.windowMs))) {
     return Response.json({ error: t("assistant.errors.tooMany") }, { status: 429 });
   }
-  await record(bucket);
   // История приходит от клиента — убираем служебную метку действия, чтобы её нельзя было подсунуть модели (находка L-3).
   const messages = parsed.data.messages.map((m) => ({ ...m, content: m.content.replace(/ДЕЙСТВИЕ\s*:/gi, "действие -") }));
   const reply = await askAssistant(auth.viewer, messages, locale);

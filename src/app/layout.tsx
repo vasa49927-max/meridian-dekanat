@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import "@fontsource/golos-text/400.css";
 import "@fontsource/golos-text/500.css";
 import "@fontsource/golos-text/600.css";
@@ -37,9 +37,10 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const dark = (await cookies()).get("theme-r")?.value === "dark";
   const i18n = await clientI18nProps();
   return (
-    <html lang={i18n.locale === "zh" ? "zh-CN" : i18n.locale} suppressHydrationWarning>
+    <html lang={i18n.locale === "zh" ? "zh-CN" : i18n.locale} className={dark ? "dark" : undefined} suppressHydrationWarning>
       <head>
         <ThemeScript nonce={nonce} />
       </head>

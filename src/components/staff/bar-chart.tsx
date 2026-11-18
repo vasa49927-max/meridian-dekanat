@@ -19,7 +19,7 @@ export function BarChart({ data, label, unit, height = 160 }: { data: { key: str
         {/* сетка */}
         {ticks.map((t) => (
           <div key={t} className="absolute inset-x-8 border-t border-line/70" style={{ bottom: `${(t / nice) * (height - 20) + 20}px` }}>
-            <span className="absolute -left-8 -top-2 w-7 text-right text-[10px] tabular text-muted">{t}</span>
+            <span className="absolute -left-8 -top-2 w-7 text-right text-[10px] tabular text-muted">{t.toLocaleString("ru-RU")}</span>
           </div>
         ))}
         <svg className="absolute inset-x-8 bottom-5 overflow-visible" style={{ height: height - 20, width: "calc(100% - 4rem)" }} viewBox={`0 0 100 ${height - 20}`} preserveAspectRatio="none" role="img" aria-label={label}>

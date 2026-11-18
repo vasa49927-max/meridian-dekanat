@@ -17,6 +17,9 @@ function sniff(buf: Buffer, name: string): string | null {
 
 /** Имя файла без путей и управляющих символов. */
 const cleanName = (n: string) => n.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").replace(/^\.+/, "").slice(-120) || "файл";
+/** Раунд 9 (аудит): расширение — по настоящему типу файла. Иначе «PDF» с HTML внутри, названный .html, сохранялся у сотрудника как .html. */
+const EXT: Record<string, string> = { "application/pdf": ".pdf", "image/png": ".png", "image/jpeg": ".jpg", "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx" };
+const withExt = (n: string, mime: string) => { const ext = EXT[mime]; if (!ext) return n; const base = n.replace(/\.[^.]{1,8}$/, ""); return `${base.slice(0, 120 - ext.length)}${ext}`; };
 
 export type ReadyFile = { fileName: string; mime: string; size: number; data: Buffer };
 
@@ -38,7 +41,7 @@ export async function readUploads(entries: FormDataEntryValue[], m: UploadMsgs =
     const data = Buffer.from(await f.arrayBuffer());
     const mime = sniff(data, f.name);
     if (!mime) return { ok: false, error: m.badType(cleanName(f.name)) };
-    out.push({ fileName: cleanName(f.name), mime, size: data.length, data });
+    out.push({ fileName: withExt(cleanName(f.name), mime), mime, size: data.length, data });
   }
   return { ok: true, files: out };
 }

@@ -10,6 +10,15 @@ type Msg = { role: "user" | "assistant"; content: string; sources?: { id: string
 const SUGGEST = ["s1", "s2", "s3", "s4", "s5", "s6"] as const;
 
 /** Чат с помощником. Ответы — со ссылками на пункты Положения; кнопка «Заполнить заявку» открывает предзаполненную форму. */
+/**
+ * Раунд 9 (аудит «жюри»): GigaChat отвечает с разметкой Markdown — звёздочки «**…**» показывались как есть.
+ * Разбираем только жирный текст и маркеры списков, без HTML: текст остаётся текстом (никакого dangerouslySetInnerHTML).
+ */
+function richText(s: string) {
+  const lines = s.replace(/^#{1,6}\s+/gm, "").replace(/^\s*[-*]\s+/gm, "• ").split(/(\*\*[^*]+\*\*)/g);
+  return lines.map((part, i) => (part.startsWith("**") && part.endsWith("**") && part.length > 4 ? <b key={i}>{part.slice(2, -2)}</b> : part.replace(/\*\*/g, "")));
+}
+
 export function Chat({ firstName, initialQuestion, llm }: { firstName: string; initialQuestion: string | null; llm: boolean }) {
   const { t, tr, name, locale } = useI18n();
   const [msgs, setMsgs] = useState<Msg[]>([]);
@@ -64,7 +73,7 @@ export function Chat({ firstName, initialQuestion, llm }: { firstName: string; i
             <div className={cn("max-w-[88%] rounded-2xl px-4 py-3 text-[15px]", m.role === "user" ? "rounded-br-md bg-primary text-primary-fg" : m.error ? "rounded-bl-md border border-danger/30 bg-danger-bg text-danger" : "rounded-bl-md border border-line bg-surface")}>
               {m.error && <TriangleAlert className="mb-1 h-4 w-4" aria-hidden />}
               {/* Офлайн-режим отвечает по-русски — помечаем язык фрагмента для экранных дикторов */}
-              <p className="whitespace-pre-line" lang={m.role === "assistant" && m.mode === "offline" && locale !== "ru" ? "ru" : undefined}>{m.content}</p>
+              <p className="whitespace-pre-line" lang={m.role === "assistant" && m.mode === "offline" && locale !== "ru" ? "ru" : undefined}>{m.role === "assistant" ? richText(m.content) : m.content}</p>
               {!!m.sources?.length && (
                 <p className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-muted"><BookOpenText className="h-3.5 w-3.5" aria-hidden />{t("assistant.sources")} {m.sources.map((s) => <span key={s.id} className="rounded-md bg-surface-2 px-1.5 py-0.5" title={s.section}>{t("assistant.point", { id: s.id })}</span>)}</p>
               )}

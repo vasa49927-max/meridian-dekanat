@@ -10,7 +10,7 @@ import { useI18n } from "@/i18n/client";
  * Доступный диалог (Radix AlertDialog): фокус внутри, Esc закрывает, по умолчанию фокус на «Нет».
  */
 export function ConfirmForm({
-  action, hidden, trigger, title, description, confirmLabel, cancelLabel, triggerClassName, danger = true,
+  action, hidden, trigger, title, description, confirmLabel, cancelLabel, triggerClassName, triggerLabel, danger = true,
 }: {
   action: (form: FormData) => void | Promise<void>;
   hidden: Record<string, string>;
@@ -20,6 +20,8 @@ export function ConfirmForm({
   confirmLabel?: string;
   cancelLabel?: string;
   triggerClassName?: string;
+  /** Подпись кнопки для экранной читалки, если на странице несколько одинаковых кнопок (раунд 9, аудит UX) */
+  triggerLabel?: string;
   danger?: boolean;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -30,7 +32,7 @@ export function ConfirmForm({
       {Object.entries(hidden).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
       <AlertDialog.Root open={open} onOpenChange={setOpen}>
         <AlertDialog.Trigger asChild>
-          <button type="button" className={triggerClassName}>{trigger}</button>
+          <button type="button" className={triggerClassName} aria-label={triggerLabel}>{trigger}</button>
         </AlertDialog.Trigger>
         <AlertDialog.Portal>
           <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/45 backdrop-blur-[2px]" />

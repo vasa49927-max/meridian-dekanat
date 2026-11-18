@@ -247,7 +247,7 @@ export const requests = pgTable("requests", {
   staffComment: text("staff_comment"),
   assigneeStaffId: uuid("assignee_staff_id").references(() => staff.id),
   dueAt: ts("due_at").notNull(),
-  createdAt: createdAt(),
+  createdAt: createdAt().$defaultFn(() => now()), // время приложения (DEMO_NOW в демо), см. ошибку ИИ №45
   updatedAt: ts("updated_at").notNull().defaultNow(),
 }, (t) => [
   index("requests_student_idx").on(t.studentId, t.createdAt),
@@ -260,7 +260,7 @@ export const requestEvents = pgTable("request_events", {
   status: requestStatusEnum("status").notNull(),
   comment: text("comment"),
   actor: text("actor").notNull(), // «Вы», «Деканат МЭО»
-  createdAt: createdAt(),
+  createdAt: createdAt().$defaultFn(() => now()), // время приложения (DEMO_NOW в демо), см. ошибку ИИ №45
 }, (t) => [index("request_events_req_idx").on(t.requestId, t.createdAt)]);
 
 export const documents = pgTable("documents", {

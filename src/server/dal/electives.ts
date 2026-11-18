@@ -54,6 +54,8 @@ export async function listMyElectives(v: StudentViewer) {
 export async function chooseElective(v: StudentViewer, electiveId: string): Promise<{ ok: true; status: "ENROLLED" | "WAITLIST" } | { ok: false; error: ElectiveError }> {
   if (!z.uuid().safeParse(electiveId).success) return { ok: false, error: "notFound" };
   return db.transaction(async (tx) => {
+    // Раунд 9 (аудит): лимит «2 курса» — под блокировкой по студенту (параллельные записи на разные курсы давали третий)
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${"elective:" + v.studentId}))`);
     const [e] = await tx.select().from(t.electives).where(eq(t.electives.id, electiveId)).for("update");
     if (!e) return { ok: false as const, error: "notFound" as const };
     const at = now();

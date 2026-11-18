@@ -9,6 +9,7 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".audit/**", // скрипты проверок и субагентов (не в репозитории)
     "out/**",
     "build/**",
     "next-env.d.ts",

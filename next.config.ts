@@ -19,7 +19,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   devIndicators: false,
   // Вложения к заявкам: до 3 файлов по 5 МБ за одну отправку формы.
-  experimental: { serverActions: { bodySizeLimit: "16mb" } },
+  // proxyClientMaxBodySize: proxy.ts буферизует тело запроса и по умолчанию обрезает его на 10 МБ — 3 файла по 4,9 МБ давали 500 (аудит, раунд 9).
+  experimental: { serverActions: { bodySizeLimit: "16mb" }, proxyClientMaxBodySize: "16mb" },
   serverExternalPackages: ["@node-rs/argon2"],
   turbopack: {
     rules: {

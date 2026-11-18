@@ -75,7 +75,7 @@ test.describe("Расписание", () => {
     await expect(movedCard.locator("s")).toHaveCount(0);
     // Смена аудитории — свой ярлык
     const roomCard = page.getByRole("region", { name: "Среда, 11 ноября" }).getByRole("article", { name: "10:40 Макроэкономика, другая аудитория" });
-    await expect(roomCard.getByText("Другая аудитория", { exact: true })).toBeVisible();
+    await expect(roomCard.getByText("Новая аудитория", { exact: true })).toBeVisible();
     await expect(roomCard).toContainText("вместо ауд. 3015");
     // Правка капитана №3b: отмена — красная полоса «Пара отменена»
     await page.goto("/schedule?d=2026-11-16&view=week");

@@ -291,3 +291,5 @@ input:-webkit-autofill:focus {
 .control[aria-invalid="true"] { border-color: var(--danger); }
 /* Счётчики в меню деканата дублируют очередь — на очень низких экранах уступают место пунктам меню */
 @media (max-height: 700px) { .side-stats { display: none; } }
+/* Раунд 9 (аудит UX, WCAG 2.4.11): на телефоне элемент в фокусе не должен прятаться под нижним меню */
+@media (max-width: 1023px) { html { scroll-padding-bottom: calc(84px + env(safe-area-inset-bottom)); } }

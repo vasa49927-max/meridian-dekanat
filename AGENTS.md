@@ -8,37 +8,37 @@
 **Не официальный сервис МГИМО.** Все данные вымышлены. Продуктовая логика — `docs/PRD.md`, архитектура — `docs/ARCHITECTURE.md`.
 \* рабочее название, окончательное — в `docs/DECISIONS.md`.
 
-Две роли: `STUDENT` (свой кабинет) и `STAFF` (сотрудник деканата: очередь заявок, объявления, переносы пар).
+Две роли: `STUDENT` (свой кабинет) и `STAFF` (сотрудник деканата: очередь заявок, аналитика, объявления, переносы пар).
 Сквозной сценарий, который всегда должен работать: студент подал заявку → деканат сменил статус → студент увидел статус и уведомление.
 
 ## 2. Стек (не менять без записи в DECISIONS.md)
 - Next.js (App Router, Server Components, Server Actions) + TypeScript `strict`
 - Tailwind CSS v4 + компоненты в стиле shadcn/ui (лежат в `src/components/ui`, правим как свой код) + lucide-react
-- Prisma ORM + PostgreSQL 16; валидация — zod
-- Пароли — argon2id (`@node-rs/argon2`); сессии — собственные, в таблице `Session`
+- Drizzle ORM + PostgreSQL 16 (Prisma заменён в первый день — движок не скачивался, D-014); валидация — zod
+- Пароли — argon2id (`@node-rs/argon2`); сессии — собственные, в таблице `sessions`
 - Тесты — Vitest (unit) + Playwright (e2e)
 - Шрифты — `@fontsource/*` (self-host). **Запрещены** в рантайме: внешние CDN, Google Fonts, внешние картинки, аналитика.
 
 ## 3. Структура
 ```
 src/app/(auth)/login         вход
-src/app/(student)/...        кабинет студента (today, schedule, grades, requests, notifications, profile, assistant, appointments)
-src/app/(staff)/staff/...    кабинет деканата
-src/app/api/...              route handlers (ics, assistant, health)
+src/app/(student)/...        кабинет студента (today, schedule, grades, electives, requests, notifications, profile, assistant, appointments, portfolio, survey, map)
+src/app/(staff)/staff/...    кабинет деканата (очередь, аналитика, риски, опросы, курсы по выбору, объявления, переносы, приём)
+src/app/api/...              route handlers (calendar, assistant, push, bot, attachments, health)
 src/app/verify/[code]        публичная проверка подлинности справки по QR
 src/server/auth/             сессии, пароли, rate limit, guards (requireStudent/requireStaff)
 src/server/dal/              Data Access Layer — ЕДИНСТВЕННОЕ место, где код ходит в БД за данными пользователя
 src/server/ai/               ИИ-помощник (GigaChat), промпты, инструменты
 src/lib/                     чистые утилиты без доступа к БД (форматирование дат, БРС-калькулятор)
 src/components/              UI; ui/ — базовые компоненты
-prisma/                      schema.prisma, migrations, seed.ts
+src/server/db/schema.ts      схема БД (Drizzle); drizzle/ — SQL-миграции; src/server/seed/ — демо-данные
 tests/unit, tests/e2e        тесты
 docs/                        вся документация (см. раздел 8)
 ```
 
 ## 4. Правила безопасности (нарушение = задача не выполнена)
 1. **Владелец данных берётся только из сессии.** Любая функция DAL принимает `viewer` (результат `requireStudent()`/`requireStaff()`) и фильтрует по `viewer.userId`. Никогда не принимай `userId`/`studentId` из URL, формы или тела запроса как «чей это объект».
-2. Объект по id из URL ищется как `where: { id, studentId: viewer.studentId }`. Не нашёлся → `notFound()` (404), а не 403: не подтверждаем существование чужого объекта.
+2. Объект по id из URL ищется как `and(eq(t.x.id, id), eq(t.x.studentId, viewer.studentId))`. Не нашёлся → `notFound()` (404), а не 403: не подтверждаем существование чужого объекта.
 3. Роль проверяется на сервере в каждом layout **и** в каждом Server Action / route handler (layout не защищает action).
 4. Пароли — только argon2id-хэш. Сессионный токен в cookie — случайные 32 байта; в БД хранится только его SHA-256.
 5. Cookie: `httpOnly`, `secure` (в production), `sameSite=lax`, `path=/`. Logout удаляет запись сессии.
@@ -63,9 +63,9 @@ docs/                        вся документация (см. раздел
 ## 6. Команды
 ```bash
 npm install
-npm run db:up          # локальный PostgreSQL (docker compose) — или свой PG, см. .env.example
-npm run db:migrate     # prisma migrate dev
-npm run db:seed        # демо-данные (осень 2026)
+npm run db:up          # локальный PostgreSQL (docker compose) — или scripts/pg-local.sh
+npm run db:migrate     # SQL-миграции из drizzle/ (новая миграция: npx drizzle-kit generate)
+npm run db:seed        # демо-данные (осень 2026); DEMO_NOW=… фиксирует «сейчас»
 npm run dev            # http://localhost:3000
 npm run lint && npm run typecheck
 npm run test           # vitest

@@ -19,7 +19,7 @@ const auth: Shape<typeof ru> = {
     signingIn: "Signing in…",
     signIn: "Sign in",
     demoTitle: "Demo access for the jury",
-    demoText: "Fictional accounts. Click to fill in the login and password.",
+    demoNightly: "Demo data resets every night at 4:00 Moscow time — feel free to click everything.", demoText: "Fictional accounts. Click to fill in the login and password.",
     demoStudent: "{name}, {faculty}, year {course}",
     demoWithExtra: "{base}, {extra}",
     demoMilitary: "military training",

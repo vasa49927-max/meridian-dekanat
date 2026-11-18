@@ -46,7 +46,7 @@ export function MoscowPlan({ target, codes, l }: { target: Target | null; codes:
       <rect x="306" y="208" width="28" height="8" rx="2" className="fill-primary dark:fill-accent" />
       <text x="342" y="236" className={small}>{l.entrance}</text>
       {r && <path d={r} fill="none" strokeWidth="3" strokeDasharray="6 5" strokeLinecap="round" strokeLinejoin="round" className="stroke-primary dark:stroke-accent" />}
-      {r && <circle cx={r.split(" ").slice(-2)[0].replace(/[ML]/, "")} cy={r.split(" ").slice(-1)[0]} r="7" className="fill-accent stroke-surface" strokeWidth="2.5"><title>{l.target}</title></circle>}
+      {r && <circle cx={r.split(" ").slice(-2)[0].replace(/[ML]/, "")} cy={r.split(" ").slice(-1)[0]} r="7" data-target className="fill-accent stroke-surface" strokeWidth="2.5"><title>{l.target}</title></circle>}
     </svg>
   );
 }
@@ -61,7 +61,7 @@ export function OdintsovoPlan({ active, codes, l }: { active: boolean; codes: Re
       <rect x="306" y="156" width="28" height="8" rx="2" className="fill-primary dark:fill-accent" />
       <rect x="60" y="168" width="56" height="16" rx="4" className="fill-muted" /><text x="88" y="160" textAnchor="middle" className={small}>{l.bus}</text>
       {active && <path d="M116 176 L320 176 L320 125" fill="none" strokeWidth="3" strokeDasharray="6 5" strokeLinecap="round" className="stroke-primary dark:stroke-accent" />}
-      {active && <circle cx="320" cy="125" r="7" className="fill-accent stroke-surface" strokeWidth="2.5" />}
+      {active && <circle cx="320" cy="125" r="7" data-target className="fill-accent stroke-surface" strokeWidth="2.5" />}
     </svg>
   );
 }

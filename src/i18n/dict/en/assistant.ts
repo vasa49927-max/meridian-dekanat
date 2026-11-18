@@ -22,7 +22,7 @@ const assistant: Shape<typeof ru> = {
   offlineAnswer: "Answer compiled from the Regulations without AI (in Russian)",
   typing: "Assistant is typing",
   inputLabel: "Your question",
-  placeholder: "e.g. which certificate do I need for the military office?",
+  placeholder: "e.g. certificate for the military office",
   send: "Send",
   disclaimer: "The assistant can make mistakes — check against the Regulations. It never submits requests itself: you review the form and send it.",
   errors: {

@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { loginAction, type LoginState } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,11 @@ export function LoginForm({ next }: { next?: string }) {
   const [show, setShow] = useState(false);
   const [login, setLogin] = useState(state.login ?? "");
   const [password, setPassword] = useState("");
+  // Раунд 9 (аудит UX): после ошибки фокус — на первое неверное поле (раньше оставался на body, читалка молчала)
+  useEffect(() => {
+    if (state.fields?.login) document.getElementById("login")?.focus();
+    else if (state.fields?.password || state.error) document.getElementById("password")?.focus();
+  }, [state]);
   return (
     <>
       <form action={action} className="space-y-4 lg:space-y-3" noValidate>
@@ -33,7 +38,7 @@ export function LoginForm({ next }: { next?: string }) {
           <Label htmlFor="login">{t("auth.login.login")}</Label>
           <Input id="login" name="login" autoComplete="username" autoCapitalize="none" spellCheck={false} required value={login} onChange={(e) => setLogin(e.target.value)}
             aria-invalid={!!state.fields?.login} aria-describedby={state.fields?.login ? "login-err" : undefined} />
-          {state.fields?.login && <FieldHint id="login-err" error>{state.fields.login}</FieldHint>}
+          {state.fields?.login && <div role="alert"><FieldHint id="login-err" error>{state.fields.login}</FieldHint></div>}
         </div>
         <div>
           <Label htmlFor="password">{t("auth.login.password")}</Label>
@@ -44,7 +49,7 @@ export function LoginForm({ next }: { next?: string }) {
               {show ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
             </button>
           </div>
-          {state.fields?.password && <FieldHint id="pw-err" error>{state.fields.password}</FieldHint>}
+          {state.fields?.password && <div role="alert"><FieldHint id="pw-err" error>{state.fields.password}</FieldHint></div>}
         </div>
         {state.error && <p role="alert" className="rounded-xl bg-danger-bg px-3.5 py-2.5 text-sm font-medium text-danger">{state.error}</p>}
         <Button type="submit" size="lg" className="w-full" disabled={pending}>
@@ -64,6 +69,7 @@ export function LoginForm({ next }: { next?: string }) {
             </li>
           ))}
         </ul>
+        <p className="mt-2.5 text-xs text-muted">{t("auth.login.demoNightly")}</p>
       </div>
     </>
   );

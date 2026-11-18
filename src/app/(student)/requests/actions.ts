@@ -15,7 +15,7 @@ function requestMsgs({ t, tr }: I18n): RequestMsgs {
   return {
     tooLong: (n) => t("requests.errors.tooLong", { n }), chooseOption: t("requests.errors.chooseOption"),
     required: (label) => t("requests.errors.required", { label: tr("rt", label) }),
-    noType: t("requests.errors.noType"), checkFields: t("requests.errors.checkFields"), createFailed: t("requests.errors.createFailed"),
+    noType: t("requests.errors.noType"), checkFields: t("requests.errors.checkFields"), createFailed: t("requests.errors.createFailed"), dailyLimit: t("requests.errors.dailyLimit"),
     replyNotAllowed: t("requests.errors.replyNotAllowed"), withdrawNotAllowed: t("requests.errors.withdrawNotAllowed"),
     rateNotAllowed: t("requests.errors.rateNotAllowed"), alreadyRated: t("requests.errors.alreadyRated"),
   };

@@ -22,7 +22,7 @@ const assistant: Shape<typeof ru> = {
   offlineAnswer: "Réponse tirée du Règlement sans IA (en russe)",
   typing: "L’assistant écrit",
   inputLabel: "Votre question",
-  placeholder: "Par exemple : quelle attestation pour le bureau militaire ?",
+  placeholder: "Ex. : attestation pour le bureau militaire",
   send: "Envoyer",
   disclaimer: "L’assistant peut se tromper — vérifiez dans le Règlement. Il n’envoie jamais de demande lui-même : vous vérifiez le formulaire et l’envoyez.",
   errors: {

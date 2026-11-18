@@ -6,8 +6,9 @@ import type { Metadata } from "next";
 import { requireStaff } from "@/server/auth/guards";
 import { STATUS_FLOW, staffGetRequest } from "@/server/dal/staff";
 import { qrSvg, verifyUrl } from "@/server/qr";
-import { fmt } from "@/lib/time";
+import { fmt, now } from "@/lib/time";
 import { Card, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { StatusBadge, STATUS_LABEL } from "@/components/requests/status";
 import { DocumentView } from "@/components/requests/document-view";
 import { AttachmentsList } from "@/components/requests/attachments-list";
@@ -28,10 +29,10 @@ export default async function StaffRequestPage({ params }: { params: Promise<{ i
     <div className="pt-2 lg:pt-0">
       <nav aria-label="Навигация" className="mb-2 text-sm"><Link href="/staff" className="tap text-muted hover:text-fg">← Очередь</Link></nav>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div><span aria-hidden className="mb-2.5 block h-[3px] w-9 rounded-full bg-gradient-to-r from-accent to-accent/30" /><h1 className="font-serif text-[26px] leading-tight lg:text-[34px]">{r.type.title}</h1><p className="mt-1 text-sm text-muted">{r.number} · подана {fmt.dateTime(r.createdAt)} · срок до {fmt.dayMonth(r.dueAt)}</p>
+        <div><span aria-hidden className="mb-2.5 block h-[3px] w-9 rounded-full bg-gradient-to-r from-accent to-accent/30" /><h1 className="font-serif text-[26px] leading-tight lg:text-[34px]">{r.type.title}</h1><p className="mt-1 text-sm text-muted">{r.number} · подана {fmt.dateTime(r.createdAt)} · срок до {fmt.dayMonth(r.dueAt)}{["SUBMITTED", "IN_PROGRESS"].includes(r.status) && r.dueAt < now() && <Badge tone="danger" className="ml-2 align-middle">просрочена</Badge>}</p>
           <div className="mt-1.5 flex flex-wrap items-center gap-2 text-sm">
             <span className="text-muted">Ведёт:</span>
-            <b>{r.assignee ? (r.assignee.id === v.staffId ? "вы" : `${r.assignee.lastName} ${r.assignee.firstName[0]}. ${r.assignee.middleName ? r.assignee.middleName[0] + "." : ""}`) : "никто — заявка свободна"}</b>
+            <b>{r.assignee ? (r.assignee.id === v.staffId ? "Вы" : `${r.assignee.lastName} ${r.assignee.firstName[0]}. ${r.assignee.middleName ? r.assignee.middleName[0] + "." : ""}`) : "Никто — заявка свободна"}</b>
             {r.assignee?.id !== v.staffId && next.length > 0 && <form action={takeRequestAction}><input type="hidden" name="id" value={r.id} /><button className="rounded-lg border border-line px-2.5 py-1 text-xs font-semibold hover:bg-surface-2">Взять себе</button></form>}
           </div></div>
         <StatusBadge status={r.status} className="text-sm" />

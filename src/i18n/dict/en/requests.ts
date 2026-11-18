@@ -133,6 +133,7 @@ const requests: Shape<typeof ru> = {
     chooseOption: "Choose an option from the list",
     required: "Fill in “{label}”",
     noType: "This request type does not exist",
+    dailyLimit: "At most 20 requests per day — if you need more, book a coordinator",
     checkFields: "Check the form fields",
     createFailed: "Could not create the request",
     replyNotAllowed: "You can reply only when the dean’s office asks for more information",

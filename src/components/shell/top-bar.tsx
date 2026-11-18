@@ -48,7 +48,7 @@ export function TopBar({ unread, index, home = "/" }: { unread: number; index: P
             {unread > 0 && <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full border-2 border-bg bg-danger-solid px-1 text-[11px] font-bold text-white">{unread > 99 ? "99+" : unread}</span>}
           </Link>
         )}
-        <LanguageSwitcher compact className="hidden sm:inline-flex" />
+        {index.role === "STUDENT" && <LanguageSwitcher compact className="hidden sm:inline-flex" />}
         <ThemeToggle className="hidden lg:inline-flex" />
       </div>
       {loaded && <CommandPalette index={index} open={open} setOpen={show} />}

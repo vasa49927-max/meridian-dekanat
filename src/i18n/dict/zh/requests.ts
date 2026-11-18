@@ -133,6 +133,7 @@ const requests: Shape<typeof ru> = {
     chooseOption: "请从列表中选择",
     required: "请填写“{label}”",
     noType: "不存在此类申请",
+    dailyLimit: "每天最多提交 20 份申请——如需更多，请预约教务员",
     checkFields: "请检查表格字段",
     createFailed: "无法创建申请",
     replyNotAllowed: "仅当教务办要求补充材料时才能回复",

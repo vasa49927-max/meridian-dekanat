@@ -16,7 +16,7 @@ const today: Shape<typeof ru> = {
     days: { other: "{n}天" },
   },
   grades: {
-    title: "学习情况", pace1: "已获得的分数比例", pace2: "本学期",
+    title: "学习情况", pace1: "进度：得分占满分比例", pace2: "（已评分的作业）",
     dayPoints: "当天课程的分数", todayPoints: "今天课程的分数",
     auto: "免考", risk: "有风险", toAuto: "距免考还差 {n}", toAutoHint: "距免考还差的分数",
     autoDone: "已获免考：", autoOf: "{n}/{total}", avg: "成绩册平均分：", riskLabel: "风险：", noRisk: "没有风险，继续保持",

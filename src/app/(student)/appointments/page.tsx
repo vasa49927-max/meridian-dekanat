@@ -62,7 +62,7 @@ export default async function AppointmentsPage() {
                   <p className="text-sm">{topicLabel(a.topic)}</p>
                   <p className="flex items-center gap-1 text-[13px] text-muted"><MapPin className="h-3.5 w-3.5" aria-hidden />{tr("offices", a.location)} · {staffShort(a)}</p>
                 </div>
-                <ConfirmForm action={cancelAppointmentAction} hidden={{ id: a.id }} trigger={t("appointments.cancel")} triggerClassName="h-10 rounded-lg px-3 text-sm font-medium text-danger hover:bg-danger-bg"
+                <ConfirmForm action={cancelAppointmentAction} hidden={{ id: a.id }} trigger={t("appointments.cancel")} triggerLabel={`${t("appointments.cancel")}: ${f.shortDay(a.startsAt)}, ${f.time(a.startsAt)}`} triggerClassName="h-10 rounded-lg px-3 text-sm font-medium text-danger hover:bg-danger-bg"
                   title={t("appointments.cancelTitle")} description={t("appointments.cancelText", { day: f.shortDay(a.startsAt), time: f.time(a.startsAt), topic: topicLabel(a.topic) })} confirmLabel={t("appointments.cancelConfirm")} />
               </li>
             ))}

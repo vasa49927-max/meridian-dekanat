@@ -31,7 +31,7 @@ const schedule = {
     odintsovo: " (Одинцово)",
   },
   change: {
-    kind: { cancel: "Отмена", move: "Перенос", room: "Другая аудитория" },
+    kind: { cancel: "Отмена", move: "Перенос", room: "Новая аудитория" },
     noClass: "пары не будет",
     roomNow: "{day} · {time} · теперь ауд. {room}",
     roomWas: "вместо ауд. {room}",

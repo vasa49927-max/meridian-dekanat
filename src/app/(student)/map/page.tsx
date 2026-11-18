@@ -8,6 +8,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/field";
 import { MoscowPlan, OdintsovoPlan } from "@/components/campus/campus-plan";
+import { ScrollToTarget } from "@/components/campus/scroll-to-target";
 
 export async function generateMetadata() {
   const { t: tt } = await getI18n();
@@ -47,7 +48,7 @@ export default async function MapPage({ searchParams }: { searchParams: Promise<
 
       <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr] [&>*]:min-w-0">
         <Card>
-          <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0" tabIndex={0} role="region" aria-label={tt("campus.plan.aria")}>{route?.campus === "ODINTSOVO" ? <OdintsovoPlan active={route.known} codes={codes} l={l} /> : <MoscowPlan target={route?.target ?? null} codes={codes} l={l} />}</div>
+          <ScrollToTarget className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0" label={tt("campus.plan.aria")}>{route?.campus === "ODINTSOVO" ? <OdintsovoPlan active={route.known} codes={codes} l={l} /> : <MoscowPlan target={route?.target ?? null} codes={codes} l={l} />}</ScrollToTarget>
           <ul className="mt-3 grid gap-1 text-sm sm:grid-cols-2" aria-label={tt("campus.buildings")}>
             {buildings.filter((x) => (route?.campus === "ODINTSOVO") === (x.campus === "ODINTSOVO")).map((x) => <li key={x.code}><b>{codes[x.code] ?? name(x.code)}</b> — {tr("buildings", x.name)}</li>)}
           </ul>

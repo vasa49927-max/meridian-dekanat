@@ -17,7 +17,7 @@ const auth = {
     signingIn: "Входим…",
     signIn: "Войти",
     demoTitle: "Демо-доступ для жюри",
-    demoText: "Вымышленные аккаунты. Нажмите, чтобы подставить логин и пароль.",
+    demoNightly: "Демо-данные обновляются каждую ночь в 4:00 МСК — можно смело нажимать всё.", demoText: "Вымышленные аккаунты. Нажмите, чтобы подставить логин и пароль.",
     demoStudent: "{name}, {faculty}, {course} курс",
     demoWithExtra: "{base}, {extra}",
     demoMilitary: "ВУЦ",

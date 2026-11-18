@@ -26,6 +26,8 @@ export const surveySchema = z.object({
 let secret: string | null = null;
 async function surveySecret() {
   if (secret) return secret;
+  // Лучше — секрет вне БД (переменная окружения): тогда по одной базе нельзя проверить даже факт голосования.
+  if (process.env.SURVEY_SECRET && process.env.SURVEY_SECRET.length >= 32) return (secret = process.env.SURVEY_SECRET);
   const [row] = await db.select().from(t.appSettings).where(eq(t.appSettings.key, "survey_secret"));
   if (row) return (secret = row.value);
   await db.insert(t.appSettings).values({ key: "survey_secret", value: randomBytes(32).toString("base64url") }).onConflictDoNothing();
@@ -47,13 +49,18 @@ export async function submitMySurvey(v: StudentViewer, input: z.infer<typeof sur
   const { current } = await getMyGrades(v);
   if (!current.some((d) => d.id === input.offeringId)) return { ok: false as const, error: "notFound" as const }; // только свои курсы
   const hash = await voterHash(v.studentId, input.offeringId);
+  // Раунд 9 (аудит): голос и ответ — в РАЗНЫХ транзакциях. В одной транзакции у обеих строк совпадал служебный номер
+  // транзакции PostgreSQL (xmin), и администратор БД мог связать хэш голосовавшего с его оценками.
   try {
-    await db.transaction(async (tx) => {
-      await tx.insert(t.surveyVotes).values({ voterHash: hash }); // PK: второй ответ упадёт здесь
-      await tx.insert(t.surveyResponses).values({ offeringId: input.offeringId, clarity: input.clarity, teacher: input.teacher, workload: input.workload, comment: input.comment || null, day: dayKey(now()) });
-    });
+    await db.insert(t.surveyVotes).values({ voterHash: hash }); // PK: второй ответ упадёт здесь
   } catch {
     return { ok: false as const, error: "already" as const };
+  }
+  try {
+    await db.insert(t.surveyResponses).values({ offeringId: input.offeringId, clarity: input.clarity, teacher: input.teacher, workload: input.workload, comment: input.comment || null, day: dayKey(now()) });
+  } catch (e) {
+    await db.delete(t.surveyVotes).where(eq(t.surveyVotes.voterHash, hash)); // ответ не сохранился — голос не «сгорает»
+    throw e;
   }
   return { ok: true as const };
 }

@@ -19,7 +19,7 @@ const auth: Shape<typeof ru> = {
     signingIn: "正在登录…",
     signIn: "登录",
     demoTitle: "评委演示账号",
-    demoText: "虚构账号。点击即可填入登录名和密码。",
+    demoNightly: "演示数据每晚莫斯科时间 4:00 重置——可以放心点击任何按钮。", demoText: "虚构账号。点击即可填入登录名和密码。",
     demoStudent: "{name}，{faculty}，{course}年级",
     demoWithExtra: "{base}，{extra}",
     demoMilitary: "军事训练",

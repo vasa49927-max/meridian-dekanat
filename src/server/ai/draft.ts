@@ -24,6 +24,13 @@ const SYSTEM = `Ты помогаешь методисту студенческ�
 Не выдумывай сроки, суммы, номера кабинетов и документы, которых нет во входных данных. Если чего-то не знаешь — поставь заметку в квадратных скобках, например [уточните причину], чтобы методист дописал.
 Ссылайся на пункт Положения, если он дан, в виде [п. 6.3]. Верни только текст комментария.`;
 
+/** Чистка ответа модели: кавычки, приветствия в начале, разметка. Экспортирована для unit-теста. */
+export function cleanDraft(raw: string) {
+  return raw.trim().replace(/^["«]|["»]$/g, "")
+    .replace(/^(?:(?:здравствуйте|добрый (?:день|вечер)|уважаем(?:ый|ая)[^!.,]*|дорог(?:ой|ая)[^!.,]*|[А-ЯЁ][а-яё]+, здравствуйте)[!.,]?\s*)+/i, "")
+    .replace(/\*\*/g, "").trim().slice(0, 800);
+}
+
 function offline(r: NonNullable<Awaited<ReturnType<typeof staffGetRequest>>>, status: DraftStatus, office: string): string {
   const type = r.type.title;
   const ref = r.type.regulationRef ? ` [${r.type.regulationRef}]` : "";
@@ -63,7 +70,9 @@ export async function draftReply(v: StaffViewer, requestId: string, status: Draf
       `Где выдают документы: студенческий офис, ${office}, будни 10:00–17:00.`,
       point && `Положение [п. ${point.id}] ${point.section}: ${point.text}`,
     ].filter(Boolean).join("\n");
-    const out = (await gigachat([{ role: "system", content: SYSTEM }, { role: "user", content: input }])).trim().replace(/^["«]|["»]$/g, "").slice(0, 800);
+    // Раунд 9 (аудит «жюри»): модель иногда здоровается сама («Уважаемый студент!»), хотя промпт просит без приветствия —
+    // вырезаем приветствия в начале, обращение по имени добавляет сервер.
+    const out = cleanDraft(await gigachat([{ role: "system", content: SYSTEM }, { role: "user", content: input }]));
     if (!out) throw new Error("пустой ответ");
     return { text: `${greet} ${out}`.slice(0, 800), mode: "llm" };
   } catch (e) {

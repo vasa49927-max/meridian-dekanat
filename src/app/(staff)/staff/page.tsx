@@ -61,13 +61,16 @@ export default async function StaffQueuePage({ searchParams }: { searchParams: P
           </Link>
         ))}
       </nav>
-      <form className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_0.8fr_0.6fr_auto]" role="search" aria-label="Фильтры очереди">
+      {/* Раунд 9 (аудит UX): на телефоне фильтры занимали весь первый экран — теперь поиск с кнопкой в строку и три списка в одну строку */}
+      <form className="mb-4 grid grid-cols-[1fr_auto] gap-2 lg:grid-cols-[1.4fr_1fr_0.8fr_0.6fr_auto]" role="search" aria-label="Фильтры очереди">
         {status !== "active" && <input type="hidden" name="status" value={status} />}
-        <label className="relative"><span className="sr-only">Поиск</span><Search className="absolute left-3 top-3 h-5 w-5 text-muted" aria-hidden /><input name="q" defaultValue={sp.q} placeholder="Фамилия, № заявки, зачётка" className="h-11 w-full control rounded-xl border border-line bg-surface pl-10 pr-3 text-[15px] placeholder:text-muted focus:border-primary focus:outline-none" /></label>
-        <label><span className="sr-only">Вид</span><Select name="type" defaultValue={sp.type ?? ""}><option value="">Все виды</option>{types.map((t) => <option key={t.code} value={t.code}>{t.title}</option>)}</Select></label>
-        <label><span className="sr-only">Факультет</span><Select name="faculty" defaultValue={sp.faculty ?? ""}><option value="">Все факультеты</option>{["МЭО", "МП", "ФЛМК"].map((f) => <option key={f}>{f}</option>)}</Select></label>
-        <label><span className="sr-only">Курс</span><Select name="course" defaultValue={sp.course ?? ""}><option value="">Курс</option>{[1, 2, 3, 4].map((c) => <option key={c} value={c}>{c} курс</option>)}</Select></label>
-        <Button type="submit" variant="secondary">Применить</Button>
+        <label className="relative min-w-0"><span className="sr-only">Поиск</span><Search className="absolute left-3 top-3 h-5 w-5 text-muted" aria-hidden /><input name="q" defaultValue={sp.q} placeholder="Фамилия, № заявки, зачётка" className="h-11 w-full control rounded-xl border border-line bg-surface pl-10 pr-3 text-[15px] placeholder:text-muted focus:border-primary focus:outline-none" /></label>
+        <div className="order-3 col-span-2 grid grid-cols-3 gap-2 lg:contents">
+        <label><span className="sr-only">Вид</span><Select className="max-lg:px-2.5 max-lg:pr-7 max-lg:text-sm" name="type" defaultValue={sp.type ?? ""}><option value="">Все виды</option>{types.map((t) => <option key={t.code} value={t.code}>{t.title}</option>)}</Select></label>
+        <label><span className="sr-only">Факультет</span><Select className="max-lg:px-2.5 max-lg:pr-7 max-lg:text-sm" name="faculty" defaultValue={sp.faculty ?? ""}><option value="">Все факультеты</option>{["МЭО", "МП", "ФЛМК"].map((f) => <option key={f}>{f}</option>)}</Select></label>
+        <label><span className="sr-only">Курс</span><Select className="max-lg:px-2.5 max-lg:pr-7 max-lg:text-sm" name="course" defaultValue={sp.course ?? ""}><option value="">Курс</option>{[1, 2, 3, 4].map((c) => <option key={c} value={c}>{c} курс</option>)}</Select></label>
+        </div>
+        <Button type="submit" variant="secondary" className="order-2 lg:order-none">Применить</Button>
       </form>
       {items.length ? (
         <Card className="p-0 lg:p-0">

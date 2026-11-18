@@ -133,6 +133,7 @@ const requests: Shape<typeof ru> = {
     chooseOption: "Choisissez une option dans la liste",
     required: "Remplissez le champ « {label} »",
     noType: "Ce type de demande n’existe pas",
+    dailyLimit: "20 demandes par jour au maximum — pour plus, prenez rendez-vous avec un conseiller",
     checkFields: "Vérifiez les champs du formulaire",
     createFailed: "Impossible de créer la demande",
     replyNotAllowed: "Vous pouvez répondre uniquement lorsque le décanat demande un complément",

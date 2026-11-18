@@ -6,6 +6,7 @@ import { db, schema } from "@/server/db";
 import { seedDemo } from "@/server/seed/seed";
 import { loadExtraCaCertificates } from "@/server/certs";
 import { startMorningDigest } from "@/server/morning";
+import { markSeeded, resetIfStale, startNightlyReset } from "@/server/demo-reset";
 
 /** Старт сервера: применяем миграции; если база пустая (первый деплой) — заполняем демо-данными. */
 export async function runStartup() {
@@ -15,7 +16,11 @@ export async function runStartup() {
   if ((r?.n ?? 0) === 0) {
     console.log("[startup] пустая база — создаём демо-данные");
     await seedDemo(db, { log: (m) => console.log("[seed]", m) });
+    await markSeeded();
+  } else {
+    try { await resetIfStale(); } catch (e) { console.error("[demo-reset] не удалось:", e); }
   }
   startMorningDigest();
+  startNightlyReset();
   console.log("[startup] готово");
 }

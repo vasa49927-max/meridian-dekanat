@@ -120,7 +120,7 @@ async function offlineAnswer(v: StudentViewer, question: string, found: RegPoint
     const near = g.current.filter((d) => !d.summary.auto?.achieved && d.summary.auto?.possible).map((d) => `${d.short} — ещё ${d.summary.auto!.need} б.`);
     const text = [
       auto.length ? `Автомат уже есть: ${auto.join(", ")}.` : "Автоматов пока нет.",
-      near.length ? `Близко к автомату: ${near.join("; ")}.` : "",
+      near.length ? `Близко к автомату: ${near.join("; ").replace(/\.$/, "")}.` : "", // без «б..» (аудит UX)
       risk.length ? `Под риском: ${risk.map((r) => `${r.short} (${r.summary.riskReason})`).join("; ")}.` : "Рисков не вижу.",
       "Зачёт автоматом — от 42 баллов текущего контроля [п. 4.5], «отлично» автоматом по экзамену — от 54 [п. 4.6]. Подробности и калькулятор «что, если» — в разделе «Успеваемость».",
     ].filter(Boolean).join(" ");
@@ -176,6 +176,12 @@ export async function askAssistant(v: StudentViewer, history: ChatMsg[], locale:
     const m = content.match(/ДЕЙСТВИЕ:\s*(\{[\s\S]*\})\s*$/);
     let action: AssistantAction | null = null;
     if (m) { try { action = await validateAction(JSON.parse(m[1])); } catch { action = null; } }
+    // Раунд 9 (аудит «жюри»): модель не всегда дописывает ДЕЙСТВИЕ — тогда кнопку «Заполнить заявку» берём из офлайн-подсказок
+    // (тот же словарь REQUEST_HINTS, что работает без ИИ). Иначе на «какую справку взять для визы?» кнопки не было.
+    if (!action) {
+      const fb = await offlineAnswer(v, question, points);
+      if (fb.action) action = fb.action;
+    }
     const text = content.replace(/ДЕЙСТВИЕ:[\s\S]*$/, "").trim();
     const cited = [...text.matchAll(/п\.\s?(\d+\.\d+)/g)].map((x) => x[1]);
     const sources = REGULATION.filter((p) => cited.includes(p.id)).map((p) => ({ id: p.id, section: p.section }));

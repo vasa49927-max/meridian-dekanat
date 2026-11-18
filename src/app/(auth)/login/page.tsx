@@ -44,6 +44,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </div>
         </div>
         <div className="mx-auto my-auto w-full max-w-md py-8 lg:py-3">
+          {/* Раунд 9 (аудит «жюри»): на телефоне пометка «концепт» видна сразу, а не только внизу после прокрутки */}
+          <Disclaimer className="mb-4 px-3 py-2 text-left lg:hidden" />
           <h1 className="font-serif text-3xl">{t("auth.login.heading")}</h1>
           <p className="mb-5 mt-1.5 text-muted lg:mb-4">{t("auth.login.subtitle")}</p>
           {reset && <p role="status" className="mb-4 rounded-xl bg-ok-bg px-3.5 py-2.5 text-sm font-medium text-ok">{t("auth.login.reset")}</p>}
@@ -51,7 +53,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           {/* Обзор раунда 2: не было подсказки, что делать, если пароль забыт */}
           <p className="mt-3 text-[13px] text-muted">{t("auth.login.forgot")}</p>
         </div>
-        <Disclaimer className="mx-auto w-full max-w-md lg:hidden" />
       </main>
     </div>
   );
