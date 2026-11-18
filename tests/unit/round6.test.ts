@@ -226,3 +226,20 @@ describe("Раунд 9: чистка ИИ-черновика", () => {
     expect(cleanDraft("Заявку взяли в работу.")).toBe("Заявку взяли в работу.");
   });
 });
+
+describe("Раунд 10: помощник и сессия", () => {
+  it("контекст для модели говорит, что сессия ещё не началась, и сколько нужно на экзамене", async () => {
+    const { studentContext } = await import("@/server/ai/assistant");
+    const ctx = await studentContext(anna);
+    expect(ctx).toMatch(/Сессия ещё НЕ началась: первая аттестация \d+ (декабря|января)/);
+    expect(ctx).toMatch(/Пересдач и долгов по сессии пока нет/);
+    expect(ctx).toMatch(/на «удовлетворительно» — (\d+(\.\d)?|недостижимо)/);
+  });
+  it("офлайн-ответ на «что у меня с сессией?» называет дату начала сессии", async () => {
+    const { askAssistant } = await import("@/server/ai/assistant");
+    const r = await askAssistant(anna, [{ role: "user", content: "Что у меня с сессией?" }]);
+    expect(r.mode).toBe("offline");
+    expect(r.text).toMatch(/^Сессия начнётся \d+ (декабря|января) \(через \d+ дн\.\)/);
+  });
+});
+

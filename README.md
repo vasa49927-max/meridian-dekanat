@@ -49,7 +49,7 @@ npm run dev                     # http://localhost:3000
 ## Проверки
 ```bash
 npm run typecheck && npm run lint
-npm test                        # Vitest: 61 тест, в т.ч. изоляция данных на уровне БД
+npm test                        # Vitest: 63 теста, в т.ч. изоляция данных на уровне БД
 npm run test:e2e                # Playwright: 79 сценариев, компьютер и телефон 360 px
 npm run build && npm run check:bundle   # секретов в клиентской сборке нет
 ```
