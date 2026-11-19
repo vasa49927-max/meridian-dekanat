@@ -59,7 +59,9 @@ export function NextLessonCard(p: Props) {
       <h2 className="font-serif text-[26px] leading-[1.15] lg:text-[32px]">{p.title}</h2>
 
       {/* Плитка «День» шире остальных: дата «28 сентября» должна влезать без переноса посреди слова */}
-      <dl className="mt-4 grid grid-cols-[1.4fr_1fr_1fr] gap-1.5 sm:grid-cols-3 sm:gap-3 lg:mt-auto lg:pt-5">
+      {/* Правка капитана (финал): на компьютере карточка пары во всю ширину — три плитки и преподаватель в одну строку */}
+      <div className="lg:mt-auto lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-stretch lg:gap-3 lg:pt-5">
+      <dl className="mt-4 grid grid-cols-[1.4fr_1fr_1fr] gap-1.5 sm:grid-cols-3 sm:gap-3 lg:mt-0">
         {tiles.map(([k, val, sub]) => (
           <div key={k} className="hero-tile min-w-0 rounded-xl px-2.5 py-2.5 sm:px-3">
             <dt className="text-[10px] font-semibold uppercase tracking-wider text-hero-muted sm:text-[11px]">{k}</dt>
@@ -70,7 +72,7 @@ export function NextLessonCard(p: Props) {
       </dl>
         {/* Правка капитана (раунд 4): плашка с должностью и ФИО преподавателя — на всю ширину под тремя плитками */}
         {p.teacherFull && (
-          <div className="hero-tile mt-1.5 flex sm:mt-3 min-w-0 items-center gap-3 rounded-xl px-2.5 py-2.5 sm:px-3">
+          <div className="hero-tile mt-1.5 flex sm:mt-3 min-w-0 items-center gap-3 rounded-xl px-2.5 py-2.5 sm:px-3 lg:mt-0 lg:px-4">
             <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-hero/60 text-accent" aria-hidden><UserRound className="h-5 w-5" /></span>
             <div className="min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-hero-muted sm:text-[11px]">{t("today.next.teacher")}</p>
@@ -79,6 +81,7 @@ export function NextLessonCard(p: Props) {
             </div>
           </div>
         )}
+      </div>
 
       {p.moved && p.prevText && (
         <p className="mt-3 flex flex-wrap items-center gap-2 text-sm">

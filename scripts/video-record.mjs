@@ -85,8 +85,10 @@ await scene("s1-login", DESK, async (p) => {
   await tap(p, p.getByRole("button", { name: "Войти" }), 0);
   await p.waitForURL((u) => !u.pathname.startsWith("/login"));
   await w(p, 2500);
-  await p.mouse.move(600, 330, { steps: 25 }); await w(p, 1800);
-  await p.mouse.move(1220, 330, { steps: 25 }); await w(p, 1800);
+  await p.mouse.move(640, 300, { steps: 25 }); await w(p, 1800);
+  await p.mouse.move(1150, 360, { steps: 25 }); await w(p, 1500);
+  await p.mouse.move(470, 525, { steps: 25 }); await w(p, 1400);
+  await p.mouse.move(760, 525, { steps: 20 }); await w(p, 1200);
   await scrollBy(p, 520); await w(p, 2200);
   await scrollBy(p, 400); await w(p, 2000);
   await scrollBy(p, -920, 80); await w(p, 800);

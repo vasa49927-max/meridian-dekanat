@@ -88,7 +88,8 @@ export default async function TodayPage() {
       </div>
 
       <div className="stagger grid gap-3 lg:grid-cols-3 lg:gap-4">
-        <div className="lg:col-span-2">
+        {/* Правка капитана (финал): на компьютере карточка пары — во всю ширину; «Как дела с учёбой» остаётся на телефоне и в «Успеваемости» */}
+        <div className="lg:col-span-3">
           {next ? (
             <NextLessonCard
               title={tr("subjects", next.title)} type={t(`common.lessonType.${next.type}`)} startsAt={next.startsAt.toISOString()} endsAt={next.endsAt.toISOString()}
@@ -101,7 +102,7 @@ export default async function TodayPage() {
           )}
         </div>
 
-        <Card aria-labelledby="grades-h" className="max-lg:order-3 lg:row-span-1">
+        <Card aria-labelledby="grades-h" className="max-lg:order-3 lg:hidden">
           <CardTitle id="grades-h" action={<Link href="/grades" className="tap text-sm font-semibold text-primary hover:underline dark:text-accent-text">{t("common.actions.more")}</Link>}>{t("today.grades.title")}</CardTitle>
           <div className="flex items-end gap-3">
             <p className="font-serif text-[44px] leading-none tabular">{pace !== null ? `${pace}%` : "—"}</p>
@@ -144,8 +145,9 @@ export default async function TodayPage() {
               { href: next ? mapHref(next.room, next.buildingCode) : "/map", icon: MapPinned, label: t("today.quick.map") },
             ].map((q) => (
               <li key={q.href}>
-                <Link href={q.href} className="quick-tile group flex h-full items-center gap-2.5 card rounded-2xl border border-line bg-surface px-3 py-2.5 text-[13.5px] font-semibold leading-tight lg:px-4 lg:py-3 lg:text-sm">
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-110 dark:text-accent-text" aria-hidden><q.icon className="h-[18px] w-[18px]" /></span>
+                {/* Правка капитана (финал): на компьютере быстрые действия крупнее, чтобы сразу бросались в глаза; на телефоне — прежний размер (2 в ряд) */}
+                <Link href={q.href} className="quick-tile group flex h-full items-center gap-2.5 card rounded-2xl border border-line bg-surface px-3 py-2.5 text-[13.5px] font-semibold leading-tight sm:gap-3 sm:px-4 sm:py-4 sm:text-[15px] lg:gap-4 lg:px-5 lg:py-5 lg:text-[17px]">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-110 dark:text-accent-text sm:h-11 sm:w-11 lg:h-14 lg:w-14 lg:rounded-2xl" aria-hidden><q.icon className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px] lg:h-7 lg:w-7" /></span>
                   <span className="min-w-0">{q.label}</span>
                 </Link>
               </li>

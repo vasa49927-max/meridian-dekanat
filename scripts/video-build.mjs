@@ -32,7 +32,7 @@ const SCENES = [
      <div style="position:absolute;left:80px;top:300px;width:1100px"><p class="k">Конкурс МГИМО по ИИ · «Цифровой деканат будущего»</p>
      <h1 style="font-size:96px;margin-top:20px">Меридиан</h1><p style="font-size:40px;color:#c9c3b4;margin:18px 0 0">личный кабинет студента и деканата — демонстрация за 4 минуты</p></div>
      <div class="disc">${DISC}</div>` },
-  { id: "s1-login", kind: "desk", dur: 27, title: "Вход и главный экран «Сегодня»", sub: "следующая пара, аудитория и преподаватель · баллы по сегодняшним предметам · изменения недели" },
+  { id: "s1-login", kind: "desk", dur: 27, title: "Вход и главный экран «Сегодня»", sub: "следующая пара, аудитория и преподаватель · быстрые действия · изменения недели" },
   { id: "s2-today", kind: "phone", dur: 16, title: "Сначала — телефон", bullets: ["73 % однокурсников заходят с телефона", "экран 360 px и нижнее меню", "сроки, заявки, объявления — одной лентой"] },
   { id: "s3-schedule", kind: "phone", dur: 17, title: "Расписание", bullets: ["день · неделя · сессия", "отмены и переносы подсвечены", "и сразу приходят уведомлением", "подписка в календарь телефона"] },
   { id: "s4-grades", kind: "phone", dur: 19, title: "Успеваемость: что мне сделать", bullets: ["сколько баллов до автомата", "какой нужен темп", "калькулятор «что, если»", "прогноз стипендии"] },
@@ -45,7 +45,7 @@ const SCENES = [
   { id: "c11-process", kind: "card", dur: 21, html: `<div class="brand">${LOGO}Меридиан</div>
      <div style="position:absolute;left:80px;top:200px;width:1760px"><p class="k">Как это сделано</p><h1 style="font-size:66px;margin-top:14px">Код, тесты и документы написал ИИ.<br>Задачи, решения и проверку — человек.</h1>
      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:70px">
-     ${[["27", "этапов в журнале процесса"], ["15+", "запусков субагентов: безопасность, UX, QA, «жюри»"], ["50", "ошибок ИИ записаны и превращены в правила"], ["142", "автотеста, включая телефон 360 px"]].map(([n, t]) => `<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:22px;padding:28px 30px"><div style="font-family:S;font-size:76px;color:#fff">${n}</div><div style="font-size:26px;color:#c9c3b4;margin-top:8px;line-height:1.3">${t}</div></div>`).join("")}</div>
+     ${[["27", "этапов в журнале процесса"], ["15+", "запусков субагентов: безопасность, UX, QA, «жюри»"], ["50", "ошибок ИИ записаны и превращены в правила"], ["143", "автотеста, включая телефон 360 px"]].map(([n, t]) => `<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:22px;padding:28px 30px"><div style="font-family:S;font-size:76px;color:#fff">${n}</div><div style="font-size:26px;color:#c9c3b4;margin-top:8px;line-height:1.3">${t}</div></div>`).join("")}</div>
      <p style="font-size:26px;color:#c9c3b4;margin-top:50px">Claude (Anthropic) с субагентами · GigaChat внутри продукта · подробно — в PDF «Описание процесса создания»</p></div>
      <div class="disc">${DISC}</div>` },
   { id: "c12-end", kind: "card", dur: 9, html: `<div class="brand">${LOGO}Меридиан</div>

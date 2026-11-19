@@ -52,7 +52,7 @@ npm run dev                     # http://localhost:3000
 ```bash
 npm run typecheck && npm run lint
 npm test                        # Vitest: 63 теста, в т.ч. изоляция данных на уровне БД
-npm run test:e2e                # Playwright: 79 сценариев, компьютер и телефон 360 px
+npm run test:e2e                # Playwright: 80 сценариев, компьютер и телефон 360 px
 npm run build && npm run check:bundle   # секретов в клиентской сборке нет
 ```
 Lighthouse: доступность 100 на всех страницах; скорость на компьютере 98–100, на телефоне с медленным 4G 80–94. Нагрузка: одна копия на 2 ядрах — ~50–70 страниц кабинета в секунду без ошибок. Подробно — [`docs/research/LOAD_TEST.md`](docs/research/LOAD_TEST.md).

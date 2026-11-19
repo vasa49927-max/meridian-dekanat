@@ -50,6 +50,15 @@ test("вход: на 360 px нет горизонтального скролла
   await expectNoHorizontalScroll(page, "/login");
 });
 
+test("на телефоне «Сегодня» показывает «Как дела с учёбой»", async ({ page }) => {
+  await login(page, "anna");
+  await page.goto("/");
+  const study = page.getByRole("region", { name: "Как дела с учёбой" });
+  await expect(study.getByText("Риск:")).toBeVisible();
+  await expect(study).toContainText("Статистика");
+  await expect(study.getByRole("link", { name: "Подробнее" })).toHaveAttribute("href", "/grades");
+});
+
 test("нижний таб-бар ведёт в разделы", async ({ page }) => {
   await login(page, "anna");
   await page.goto("/");

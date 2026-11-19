@@ -48,10 +48,11 @@ test.describe("Сегодня", () => {
     // (staff.spec может добавить ещё один перенос «Макроэкономики» — поэтому фильтр по дате)
     await expect(banner.getByRole("listitem").filter({ hasText: "Макроэкономика" }).filter({ hasText: "16 ноября (пн) · 09:00" })).toContainText("пары не будет");
 
-    const study = page.getByRole("region", { name: "Как дела с учёбой" });
-    await expect(study.getByText("Риск:")).toBeVisible();
-    await expect(study).toContainText("Статистика");
-    await expect(study.getByRole("link", { name: "Подробнее" })).toHaveAttribute("href", "/grades");
+    // Правка капитана (финал): на компьютере блок «Как дела с учёбой» убран — карточка пары во всю ширину.
+    // На телефоне блок остаётся (tests/e2e/mobile.spec.ts), подробности — в «Успеваемости».
+    await expect(page.getByRole("region", { name: "Как дела с учёбой" })).toBeHidden();
+    const quick = page.getByRole("navigation", { name: "Быстрые действия" });
+    await expect(quick.getByRole("link", { name: "Заказать справку" })).toBeVisible();
   });
 });
 
