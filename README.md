@@ -6,6 +6,8 @@
 
 **Демо:** https://meridian-iwkag.msk1.amvera.tech · **Тестовые аккаунты и маршрут для жюри за 5 минут:** [`docs/TEST_ACCOUNTS.md`](docs/TEST_ACCOUNTS.md)
 
+**Для жюри:** описание процесса создания — [`docs/process/Meridian-process.pdf`](docs/process/Meridian-process.pdf) · соответствие ТЗ — [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md) · журнал этапов и 50 ошибок ИИ — [`docs/PROCESS_LOG.md`](docs/PROCESS_LOG.md) · сценарий видео — [`docs/video/VOICEOVER.md`](docs/video/VOICEOVER.md)
+
 | Логин | Пароль | Кто |
 |---|---|---|
 | `sokolova` | `Demo-2026-anna` | студентка, МЭО, 2 курс |
