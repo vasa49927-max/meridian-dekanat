@@ -207,7 +207,8 @@ export async function askAssistant(v: StudentViewer, history: ChatMsg[], locale:
       const fb = await offlineAnswer(v, question, points);
       if (fb.action) action = fb.action;
     }
-    const text = content.replace(/ДЕЙСТВИЕ:[\s\S]*$/, "").trim();
+    // Раунд 10: модель иногда ссылается на несуществующий пункт («[п. 4]») — такие ссылки убираем, настоящие оставляем
+    const text = content.replace(/ДЕЙСТВИЕ:[\s\S]*$/, "").replace(/\s*\[п\.\s?([\d.]+)\]/g, (m, id: string) => (REGULATION.some((p) => p.id === id) ? m : "")).trim();
     const cited = [...text.matchAll(/п\.\s?(\d+\.\d+)/g)].map((x) => x[1]);
     const sources = REGULATION.filter((p) => cited.includes(p.id)).map((p) => ({ id: p.id, section: p.section }));
     return { text, sources, action, mode: "llm" };
