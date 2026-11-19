@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>«Меридиан» — описание процесса создания</title>
+<style>
+@font-face { font-family: "Golos"; font-weight: 400 900; src: url("file:///home/claude/dekanat/node_modules/@fontsource-variable/golos-text/files/golos-text-cyrillic-wght-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "Golos"; font-weight: 400 900; src: url("file:///home/claude/dekanat/node_modules/@fontsource-variable/golos-text/files/golos-text-latin-wght-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2190-2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "PT Serif"; font-weight: 700; src: url("file:///home/claude/dekanat/node_modules/@fontsource/pt-serif/files/pt-serif-cyrillic-700-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "PT Serif"; font-weight: 700; src: url("file:///home/claude/dekanat/node_modules/@fontsource/pt-serif/files/pt-serif-latin-700-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: "PT Serif"; font-weight: 400; src: url("file:///home/claude/dekanat/node_modules/@fontsource/pt-serif/files/pt-serif-cyrillic-400-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "PT Serif"; font-weight: 400; src: url("file:///home/claude/dekanat/node_modules/@fontsource/pt-serif/files/pt-serif-latin-400-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+2000-206F; }
+
+:root {
+  --bg: #f6f3ec; --surface: #fffdf8; --surface-2: #f0ebdf; --fg: #141b2d; --muted: #565c6b; --line: #e2dbcb;
+  --primary: #14244b; --primary-soft: #e6e9f2; --accent: #b8892f; --accent-text: #7a5a1c;
+  --ok: #1e6b3a; --ok-bg: #e5f2e8; --danger: #b3261e; --danger-bg: #fbe9e7; --warn: #7a4e00; --warn-bg: #fff6e3;
+}
+@page { size: A4; margin: 15mm 15mm 17mm 15mm; }
+@page :first { margin: 0; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font-family: "Golos", system-ui, sans-serif; font-size: 9.6pt; line-height: 1.5; color: var(--fg); background: #fff; }
+h1, h2, h3 { font-family: "PT Serif", Georgia, serif; font-weight: 700; color: var(--primary); line-height: 1.2; margin: 0; }
+h2 { font-size: 20pt; margin: 0 0 3mm; padding-top: 1mm; }
+h2 .n { color: var(--accent); margin-right: 3mm; }
+h3 { font-size: 12.5pt; margin: 5mm 0 2mm; }
+p { margin: 0 0 2.4mm; }
+.kicker { font-size: 7.6pt; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-text); }
+.lead { font-size: 10.8pt; color: var(--fg); }
+.muted { color: var(--muted); }
+.small { font-size: 8.2pt; }
+.rule { width: 16mm; height: 1.2mm; background: var(--accent); border-radius: 1mm; margin: 0 0 4mm; }
+section { break-before: page; }
+section.nobreak { break-before: auto; }
+code, .code { font-family: "Golos", monospace; font-size: 8.4pt; background: var(--surface-2); padding: 0 1.2mm; border-radius: 1mm; color: var(--primary); }
+a { color: var(--primary); text-decoration: none; border-bottom: .2mm solid var(--accent); }
+ul, ol { margin: 0 0 2.4mm; padding-left: 5mm; }
+li { margin: .6mm 0; }
+b, strong { font-weight: 650; }
+
+table { width: 100%; border-collapse: collapse; margin: 1mm 0 4mm; font-size: 8.6pt; break-inside: auto; }
+th { text-align: left; font-size: 7.2pt; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; border-bottom: .5mm solid var(--primary); padding: 1.6mm 2mm; }
+td { border-bottom: .2mm solid var(--line); padding: 1.8mm 2mm; vertical-align: top; }
+tr { break-inside: avoid; }
+td.k { font-weight: 650; color: var(--primary); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.card { background: var(--surface); border: .25mm solid var(--line); border-radius: 3mm; padding: 4mm 4.5mm; break-inside: avoid; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3.5mm; }
+.stat { background: var(--surface); border: .25mm solid var(--line); border-radius: 3mm; padding: 3mm 3.5mm; }
+.stat b { display: block; font-family: "PT Serif", serif; font-size: 19pt; color: var(--primary); line-height: 1.1; }
+.stat span { font-size: 8pt; color: var(--muted); line-height: 1.3; display: block; margin-top: 1mm; }
+.quote { border-left: 1.2mm solid var(--accent); background: var(--surface); padding: 3mm 4mm; margin: 2mm 0 4mm; border-radius: 0 2mm 2mm 0; font-family: "PT Serif", serif; font-size: 9.6pt; break-inside: avoid; }
+.quote .who { display: block; font-family: "Golos", sans-serif; font-size: 7.6pt; color: var(--muted); margin-top: 1.5mm; }
+.note { background: var(--warn-bg); border: .25mm solid #ebcf92; border-radius: 2.5mm; padding: 3mm 4mm; font-size: 8.8pt; break-inside: avoid; margin: 2mm 0 4mm; }
+.okbox { background: var(--ok-bg); border: .25mm solid #b9dcc4; border-radius: 2.5mm; padding: 3mm 4mm; font-size: 8.8pt; break-inside: avoid; margin: 2mm 0 4mm; }
+
+figure { margin: 0 0 4mm; break-inside: avoid; }
+figure img { display: block; width: 100%; border-radius: 2.5mm; border: .25mm solid var(--line); }
+figcaption { font-size: 7.8pt; color: var(--muted); margin-top: 1.5mm; line-height: 1.35; }
+figcaption b { color: var(--fg); }
+.phones { display: grid; gap: 4mm; }
+.phones.c3 { grid-template-columns: repeat(3, 1fr); }
+.phones.c4 { grid-template-columns: repeat(4, 1fr); }
+.phones.c2 { grid-template-columns: repeat(2, 1fr); }
+.tag { display: inline-block; font-size: 7pt; font-weight: 700; padding: .4mm 2mm; border-radius: 10mm; letter-spacing: .03em; vertical-align: .3mm; }
+.tag.ok { background: var(--ok-bg); color: var(--ok); }
+.tag.bad { background: var(--danger-bg); color: var(--danger); }
+.tag.mid { background: var(--warn-bg); color: var(--warn); }
+.tag.pri { background: var(--primary-soft); color: var(--primary); }
+
+/* Обложка */
+.cover { height: 297mm; width: 210mm; break-after: page; position: relative; overflow: hidden; color: #f8f4ea;
+  background: radial-gradient(120% 90% at 100% 0%, #2c4485 0%, rgba(44,68,133,0) 55%), radial-gradient(90% 80% at 0% 100%, rgba(184,137,47,.16) 0%, rgba(184,137,47,0) 50%), linear-gradient(135deg, #172a57 0%, #0f1c3f 100%); }
+.cover .in { position: absolute; inset: 18mm 17mm; display: flex; flex-direction: column; }
+.cover .brand { display: flex; align-items: center; gap: 3mm; font-family: "PT Serif", serif; font-weight: 700; font-size: 17pt; }
+.cover h1 { color: #f8f4ea; font-size: 34pt; line-height: 1.08; margin-top: 22mm; }
+.cover .sub { font-size: 13pt; color: #c9c3b4; margin-top: 4mm; max-width: 140mm; }
+.cover .kicker { color: #e0b65c; margin-top: 14mm; }
+.cover .phones { margin-top: 10mm; grid-template-columns: repeat(3, 1fr); gap: 5mm; }
+.cover .phones img { display: block; width: 100%; height: 88mm; object-fit: cover; object-position: top; border: none; border-radius: 4mm; box-shadow: 0 6mm 12mm -6mm rgba(0,0,0,.6); }
+.cover .meta { margin-top: auto; display: grid; grid-template-columns: 1.2fr 1fr; gap: 6mm; font-size: 9pt; color: #dcd6c8; }
+.cover .meta b { color: #fff; }
+.cover .disc { margin-top: 6mm; border: .3mm dashed rgba(248,244,234,.35); border-radius: 2.5mm; padding: 2.5mm 4mm; font-size: 8.4pt; color: #dcd6c8; }
+.cover a { color: #fff; border-bottom-color: #e0b65c; }
+
+/* Схемы */
+svg text { font-family: "Golos", sans-serif; }
+.diagram { break-inside: avoid; margin: 2mm 0 4mm; }
+.toc { columns: 2; column-gap: 8mm; font-size: 9.4pt; }
+.toc div { break-inside: avoid; padding: 1.2mm 0; border-bottom: .2mm solid var(--line); display: flex; gap: 3mm; }
+.toc .n { color: var(--accent-text); font-weight: 700; width: 5mm; }
+.bar { height: 3.4mm; border-radius: 0 1mm 1mm 0; background: var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- ============ ОБЛОЖКА ============ -->
+<div class="cover">
+  <div class="in">
+    <div class="brand">
+      <svg viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M20 3c-6.5 4.5-9.5 10.2-9.5 17s3 12.5 9.5 17M20 3c6.5 4.5 9.5 10.2 9.5 17s-3 12.5-9.5 17" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M5 26h30" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M31.5 4.5l1.4 3.6 3.6 1.4-3.6 1.4-1.4 3.6-1.4-3.6-3.6-1.4 3.6-1.4z" fill="#e0b65c"/></svg>
+      Меридиан
+    </div>
+    <p class="kicker">Конкурс МГИМО по ИИ · «Цифровой деканат будущего»</p>
+    <h1 style="margin-top:4mm">Описание процесса создания</h1>
+    <p class="sub">Как студент, который не умеет программировать, вместе с ИИ за две недели сделал работающий личный кабинет студента — с исследованием, независимыми проверками, честным списком ошибок ИИ и тем, что пришлось делать руками.</p>
+    <div class="phones">
+      <img src="jpg/f-today-360.jpg" alt="Главный экран «Сегодня»">
+      <img src="jpg/f-grades-360.jpg" alt="Успеваемость">
+      <img src="jpg/f-request-360.jpg" alt="Заявка со статусом">
+    </div>
+    <div class="meta">
+      <div>
+        <p><b>Прототип:</b> <a href="https://meridian-iwkag.msk1.amvera.tech">meridian-iwkag.msk1.amvera.tech</a></p>
+        <p><b>Код:</b> <a href="https://github.com/vasa49927-max/meridian-dekanat">github.com/vasa49927-max/meridian-dekanat</a></p>
+        <p><b>Аккаунты:</b> sokolova / Demo-2026-anna · galiev / Demo-2026-timur · lin / Demo-2026-mei · деканат: belova / Demo-2026-staff</p>
+      </div>
+      <div>
+        <p><b>Команда:</b> Родион Ивакин (капитан) и Claude (Anthropic) с субагентами</p>
+        <p><b>Сроки:</b> 6–22 ноября 2026</p>
+        <p><b>Версия документа:</b> 18 ноября 2026</p>
+      </div>
+    </div>
+    <div class="disc"><b>Концепт для конкурса МГИМО по ИИ. Не является официальным сервисом МГИМО.</b> Все люди, оценки и документы в прототипе вымышлены.</div>
+  </div>
+</div>
+
+<!-- ============ КОРОТКО ============ -->
+<section class="nobreak" style="break-before: page">
+  <p class="kicker">Коротко</p>
+  <h2>Что получилось и как это читать</h2>
+  <div class="rule"></div>
+  <p class="lead">«Меридиан» — кабинет, в котором студент утром за одно касание видит пару, аудиторию, переносы, свои баллы и статус справки. А деканат обрабатывает заявки без очереди у двери. Код, тесты и документацию писал ИИ. Капитан ставил задачи, принимал решения, проверял результат руками и делал то, что ИИ сделать не может.</p>
+  <div class="grid4" style="margin:4mm 0 5mm">
+    <div class="stat"><b>27</b><span>этапов работы, каждый записан в журнал</span></div>
+    <div class="stat"><b>15+</b><span>запусков субагентов для независимых проверок и параллельной работы</span></div>
+    <div class="stat"><b>50</b><span>ошибок ИИ записаны: как заметили, как исправили, какое правило добавили</span></div>
+    <div class="stat"><b>142</b><span>автотеста: 63 модульных и 79 сценариев в браузере (компьютер и телефон 360 px)</span></div>
+    <div class="stat"><b>11</b><span>однокурсников ответили на опрос — выводы изменили главный экран</span></div>
+    <div class="stat"><b>4</b><span>языка: русский, английский, китайский, французский</span></div>
+    <div class="stat"><b>0</b><span>нарушений доступности (axe, WCAG 2 AA) на всех страницах в двух темах</span></div>
+    <div class="stat"><b>100</b><span>баллов доступности в Lighthouse; скорость на компьютере 98–100</span></div>
+  </div>
+  <h3>Содержание</h3>
+  <div class="toc">
+    <div><span class="n">1</span>Проблема, опрос и выбор разделов</div>
+    <div><span class="n">2</span>ИИ-инструменты, среда и сервисы</div>
+    <div><span class="n">3</span>Как мы работали с ИИ</div>
+    <div><span class="n">4</span>Ключевые промпты по этапам</div>
+    <div><span class="n">5</span>От идеи до кабинета: скриншоты</div>
+    <div><span class="n">6</span>Ошибки ИИ и как мы их ловили</div>
+    <div><span class="n">7</span>Вход, хранение и защита — простыми словами</div>
+    <div><span class="n">8</span>Качество: тесты, доступность, скорость</div>
+    <div><span class="n">9</span>Что сделано вручную</div>
+    <div><span class="n">10</span>Где что лежит в репозитории</div>
+  </div>
+  <div class="note" style="margin-top:5mm"><b>Всё, что здесь описано, можно проверить.</b> Журнал этапов с дословными промптами — <code>docs/PROCESS_LOG.md</code>. Промпты — <code>docs/prompts/</code>. Решения — <code>docs/DECISIONS.md</code>. Правила для ИИ-агентов — <code>AGENTS.md</code> и <code>CLAUDE.md</code>. Соответствие ТЗ с инструкцией «как проверить за минуту» — <code>docs/COMPLIANCE.md</code>.</div>
+</section>
+
+<!-- ============ 1. ПРОБЛЕМА ============ -->
+<section>
+  <p class="kicker">Раздел 1</p>
+  <h2><span class="n">1</span>Проблема, опрос и выбор разделов</h2>
+  <div class="rule"></div>
+  <p class="lead">Учебная жизнь студента разбросана по чатам групп, старостам, почте и очереди у деканата. О переносе пары узнают из чата. Не очень понятно, что нужно, чтобы получить «автомат». За справкой приходится ходить ногами.</p>
+  <h3>Опрос однокурсников (Яндекс Формы, 7 ноября, 11 ответов)</h3>
+  <p>Анкету из 10 вопросов составил ИИ, капитан провёл опрос. Выгрузку ИИ посчитал программно, свободные ответы сгруппировал, капитан проверил группировку. Выборка маленькая и из одного курса — для нас это сигнал для дизайна, а не статистика.</p>
+  <table>
+    <tr><th>Вопрос</th><th>Что ответили</th></tr>
+    <tr><td>Где узнаёшь о переносе или отмене пары</td><td><b>11 из 11 — из чата группы или от старосты.</b> Официального канала нет</td></tr>
+    <tr><td>Пропускал(а) важное объявление</td><td><b>6 из 11</b> хотя бы раз</td></tr>
+    <tr><td>Насколько понятно, что нужно для «автомата» (1–5)</td><td><b>3,2 в среднем</b>; 4 человека поставили 1–2</td></tr>
+    <tr><td>Сколько ждали справку</td><td><b>4 из 9</b> заказывавших ждали 3 дня и дольше, 2 — больше недели</td></tr>
+    <tr><td>С чего заходишь в учебные сервисы</td><td><b>С телефона — 8 из 11 (73 %)</b></td></tr>
+    <tr><td>Спросил(а) бы ИИ-помощника о правилах и своих данных</td><td><b>8 из 11</b> — «да» или «скорее да»</td></tr>
+    <tr><td>Что нужно на экране утром</td><td>Расписание с аудиторией и преподавателем — 9; баллы по сегодняшним предметам — 3; объявления — 3</td></tr>
+  </table>
+  <h3>Что изменили по итогам опроса</h3>
+  <table>
+    <tr><th style="width:42%">Вывод</th><th>Решение в «Меридиане»</th></tr>
+    <tr><td>О переносах узнают из чатов, больше половины пропускали важное</td><td>Переносы и отмены — на главном экране и в расписании с метками «Отмена / Перенос / Новая аудитория». У каждого изменения есть уведомление, на телефон тоже</td></tr>
+    <tr><td>Утром главное — расписание, аудитория и преподаватель</td><td>Карточка «Следующая пара»: крупно предмет, день, время и аудитория; кнопка «Как пройти»</td></tr>
+    <tr><td>Понятность баллов — 3,2 из 5</td><td>«Успеваемость» отвечает на вопрос «что мне сделать»: сколько до автомата, какой нужен темп, калькулятор «что, если», прогноз стипендии. На главной — <b>«Баллы по сегодняшним предметам»</b> (идея одного из респондентов)</td></tr>
+    <tr><td>Справки ждут днями, в деканат «не дописаться»</td><td>Заявки онлайн со сроком и трекером статусов, вложения, электронная справка с QR-проверкой, запись к методисту вместо очереди</td></tr>
+    <tr><td>73 % — с телефона</td><td>Сначала проектируем экран 360 px; нижнее меню. Каждый тест проверяет, что на 360 px нет горизонтальной прокрутки</td></tr>
+    <tr><td>73 % готовы спросить ИИ</td><td>Помощник по вымышленному Положению и данным студента. Он ссылается на пункты, честно говорит «не знаю» и никогда не отправляет заявку сам</td></tr>
+  </table>
+  <h3>Для кого делали</h3>
+  <table>
+    <tr><th>Персона</th><th>Главная задача</th></tr>
+    <tr><td class="k">Анна, 2 курс МЭО</td><td>не пропустить перенос, понимать свои баллы — всё с телефона</td></tr>
+    <tr><td class="k">Тимур, 4 курс МП, ВУЦ</td><td>быстро получить справку для военкомата и работодателя, совмещая учёбу и стажировку</td></tr>
+    <tr><td class="k">Мэй, 1 курс ФЛМК</td><td>иностранная студентка: понять правила, найти аудиторию, получить справку на английском для визы</td></tr>
+    <tr><td class="k">Ирина Павловна, методист</td><td>200+ заявок в месяц: обработать без очереди, адресно оповестить группы</td></tr>
+  </table>
+  <h3>Разделы</h3>
+  <p><b>Обязательное ядро ТЗ</b> сделано полностью и связно: вход и профиль, расписание (сегодня, неделя, сессия, переносы), успеваемость, заявки и справки со статусами, уведомления. Плюс кабинет деканата, чтобы жюри прошло цикл «студент подал → деканат обработал → студент увидел».</p>
+  <p><b>Смелые идеи</b> выбирал капитан из предложенных ИИ. Порядок ниже — по раундам.</p>
+  <ul>
+    <li>Главный экран «Сегодня» и быстрые действия.</li>
+    <li>ИИ-помощник по Положению, который сам заполняет форму заявки.</li>
+    <li>Калькулятор «что, если» по баллам.</li>
+    <li>Запись к методисту.</li>
+    <li>Поиск Ctrl+K.</li>
+    <li>Справка с QR-проверкой подлинности.</li>
+    <li>Подписка на расписание в календаре телефона.</li>
+    <li>Уведомления на телефон.</li>
+    <li>Четыре языка.</li>
+    <li>Панель руководителя.</li>
+    <li>Раннее предупреждение о студентах с риском.</li>
+    <li>ИИ-черновик ответа методиста.</li>
+    <li>Схема «Как пройти».</li>
+    <li>Анонимный опрос о курсах.</li>
+    <li>Портфолио и резюме.</li>
+    <li>Курсы по выбору с листом ожидания.</li>
+    <li>Прогноз стипендии.</li>
+    <li>Чек-лист первокурсника.</li>
+  </ul>
+</section>
+
+<!-- ============ 2. ИНСТРУМЕНТЫ ============ -->
+<section>
+  <p class="kicker">Раздел 2</p>
+  <h2><span class="n">2</span>ИИ-инструменты, среда и сервисы</h2>
+  <div class="rule"></div>
+  <h3>Искусственный интеллект</h3>
+  <table>
+    <tr><th style="width:32%">Инструмент</th><th>Для чего</th></tr>
+    <tr><td class="k">Claude (Anthropic) — приложение Claude, режим Cowork, модель Claude Opus</td><td><b>Главный исполнитель («оркестратор»).</b> Продакт, UX/UI-дизайнер, разработчик, специалист по безопасности, тестировщик и техписатель в одном лице. Работает в облачной песочнице: пишет и запускает код, тесты, браузер, делает скриншоты и готовит документы. Задаёт капитану вопросы в контрольных точках</td></tr>
+    <tr><td class="k">Субагенты Claude (Agent tool)</td><td><b>Независимые проверки и параллельная работа</b> со свежим контекстом: такой агент не «защищает» уже написанный код. Исследователь, аудитор безопасности, UX-ревьюер, тестировщик, 4 переводчика параллельно, 4 роли финального аудита, поиск по документации (цены Amvera, API мессенджера MAX). Всего больше 15 запусков</td></tr>
+    <tr><td class="k">Claude (отдельный чат) и проект Claude «MGIMO AI»</td><td>Капитан заранее, итеративно, составил мастер-промпт: «сначала ТЗ → роли → ограничения → процесс». В проекте хранятся ТЗ, мастер-промпт и сводка прогресса — новая сессия продолжает с того же места</td></tr>
+    <tr><td class="k">Веб-поиск и чтение страниц (инструменты Claude)</td><td>Исследование: 12 продуктов-аналогов, боли студентов, тарифы хостинга, документация API</td></tr>
+    <tr><td class="k">GigaChat API (Сбер)</td><td><b>ИИ внутри продукта:</b> «Помощник деканата» для студента и «Черновик ИИ» ответа для методиста. Ключ только на сервере. Без ключа помощник работает в офлайн-режиме (поиск по Положению)</td></tr>
+  </table>
+  <h3>Среда разработки и проверки</h3>
+  <table>
+    <tr><th style="width:32%">Инструмент</th><th>Для чего</th></tr>
+    <tr><td class="k">Облачная песочница Claude (терминал, редактор файлов)</td><td>Отдельной IDE не было: код писал, запускал и проверял Claude в своей среде (Linux, Node.js, PostgreSQL). Результат — git-репозиторий, который капитан получал архивом</td></tr>
+    <tr><td class="k">Playwright</td><td>Сценарии в браузере (e2e), скриншоты 360 и 1440 px, контактные листы всех экранов, замер путей пользователя, запись видео</td></tr>
+    <tr><td class="k">Vitest</td><td>Модульные тесты: изоляция данных на уровне базы, расчёт баллов, гонки за последнее место, анонимность опроса</td></tr>
+    <tr><td class="k">axe-core</td><td>Автоматическая проверка доступности (WCAG 2 A/AA) всех страниц в светлой и тёмной теме</td></tr>
+    <tr><td class="k">Lighthouse, autocannon</td><td>Скорость страниц и нагрузочный тест</td></tr>
+    <tr><td class="k">pandas, openpyxl, fontTools</td><td>Подсчёт опроса; метрики шрифтов для страницы без «прыжков»</td></tr>
+    <tr><td class="k">GitHub + GitHub Desktop</td><td>Репозиторий. Капитан публикует каждую версию кнопкой Push</td></tr>
+    <tr><td class="k">Amvera</td><td>Российский хостинг: приложение и PostgreSQL, открывается без VPN</td></tr>
+    <tr><td class="k">Яндекс Формы</td><td>Опрос однокурсников (не ИИ)</td></tr>
+  </table>
+  <h3>Стек прототипа</h3>
+  <p>Next.js 16 (App Router, серверные компоненты) · TypeScript · Tailwind CSS 4 · Drizzle ORM + PostgreSQL 16 · zod · argon2id · lucide-иконки · шрифты Golos Text и PT Serif. Шрифты собираются в проект — без внешних CDN, чтобы всё быстро грузилось в России. Сторонний код — только с разрешающими лицензиями (MIT, Apache-2.0, ISC, OFL), список — в <code>docs/LICENSES.md</code>.</p>
+</section>
+
+<!-- ============ 3. ПРОЦЕСС ============ -->
+<section>
+  <p class="kicker">Раздел 3</p>
+  <h2><span class="n">3</span>Как мы работали с ИИ</h2>
+  <div class="rule"></div>
+  <p class="lead">Сначала правила — потом код. До первой строки кода ИИ написал «конституцию» проекта: <code>AGENTS.md</code> для любых ИИ-агентов и <code>CLAUDE.md</code> для Claude. В ней стек, структура, 9 правил безопасности, стиль кода и «готово, когда…». Каждая найденная ошибка ИИ превращалась в новое правило там же.</p>
+  <div class="diagram">
+  <svg viewBox="0 0 720 300" width="100%">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#14244b"/></marker></defs>
+    <!-- капитан -->
+    <rect x="10" y="20" width="190" height="112" rx="12" fill="#fffdf8" stroke="#b8892f" stroke-width="1.5"/>
+    <text x="24" y="44" font-size="13" font-weight="700" fill="#14244b">Капитан (человек)</text>
+    <text x="24" y="64" font-size="10.5" fill="#141b2d">• ставит задачи, отвечает</text>
+    <text x="24" y="80" font-size="10.5" fill="#141b2d">  на вопросы ИИ</text>
+    <text x="24" y="96" font-size="10.5" fill="#141b2d">• решает в контрольных точках</text>
+    <text x="24" y="112" font-size="10.5" fill="#141b2d">• проверяет руками, публикует</text>
+    <!-- оркестратор -->
+    <rect x="265" y="20" width="200" height="112" rx="12" fill="#14244b"/>
+    <text x="280" y="44" font-size="13" font-weight="700" fill="#f8f4ea">Claude — оркестратор</text>
+    <text x="280" y="64" font-size="10.5" fill="#c9c3b4">продакт · дизайн · код</text>
+    <text x="280" y="80" font-size="10.5" fill="#c9c3b4">безопасность · тесты</text>
+    <text x="280" y="96" font-size="10.5" fill="#c9c3b4">документы · журнал</text>
+    <text x="280" y="116" font-size="10.5" fill="#e0b65c">читает AGENTS.md перед работой</text>
+    <!-- субагенты -->
+    <rect x="530" y="20" width="180" height="200" rx="12" fill="#fffdf8" stroke="#e2dbcb" stroke-width="1.5"/>
+    <text x="544" y="44" font-size="13" font-weight="700" fill="#14244b">Субагенты</text>
+    <text x="544" y="60" font-size="9.5" fill="#565c6b">свежий контекст, не видели,</text>
+    <text x="544" y="73" font-size="9.5" fill="#565c6b">как писался код</text>
+    <text x="544" y="96" font-size="10.5" fill="#141b2d">• исследователь</text>
+    <text x="544" y="113" font-size="10.5" fill="#141b2d">• аудитор безопасности</text>
+    <text x="544" y="130" font-size="10.5" fill="#141b2d">• UX / доступность</text>
+    <text x="544" y="147" font-size="10.5" fill="#141b2d">• тестировщик (QA)</text>
+    <text x="544" y="164" font-size="10.5" fill="#141b2d">• 4 переводчика параллельно</text>
+    <text x="544" y="181" font-size="10.5" fill="#141b2d">• финальный аудит: 4 роли,</text>
+    <text x="544" y="197" font-size="10.5" fill="#141b2d">  включая «жюри»</text>
+    <!-- стрелки -->
+    <line x1="202" y1="62" x2="262" y2="62" stroke="#14244b" stroke-width="1.6" marker-end="url(#ar)"/>
+    <line x1="263" y1="92" x2="203" y2="92" stroke="#14244b" stroke-width="1.6" marker-end="url(#ar)"/>
+    <text x="207" y="56" font-size="9" fill="#565c6b">задача</text>
+    <text x="207" y="106" font-size="9" fill="#565c6b">вопросы,</text>
+    <text x="207" y="118" font-size="9" fill="#565c6b">результат</text>
+    <line x1="467" y1="62" x2="527" y2="62" stroke="#14244b" stroke-width="1.6" marker-end="url(#ar)"/>
+    <line x1="528" y1="92" x2="468" y2="92" stroke="#14244b" stroke-width="1.6" marker-end="url(#ar)"/>
+    <text x="471" y="56" font-size="9" fill="#565c6b">промпт</text>
+    <text x="471" y="106" font-size="9" fill="#565c6b">отчёт</text>
+    <!-- цикл -->
+    <rect x="10" y="168" width="508" height="120" rx="12" fill="#f0ebdf"/>
+    <text x="24" y="190" font-size="12" font-weight="700" fill="#14244b">Цикл каждого этапа</text>
+    <g font-size="10.5" fill="#141b2d">
+      <rect x="24" y="204" width="84" height="30" rx="7" fill="#fffdf8" stroke="#e2dbcb"/><text x="36" y="223">задача</text>
+      <rect x="120" y="204" width="84" height="30" rx="7" fill="#fffdf8" stroke="#e2dbcb"/><text x="132" y="223">код + тесты</text>
+      <rect x="216" y="204" width="84" height="30" rx="7" fill="#fffdf8" stroke="#e2dbcb"/><text x="228" y="223">скриншоты</text>
+      <rect x="312" y="204" width="84" height="30" rx="7" fill="#fffdf8" stroke="#e2dbcb"/><text x="322" y="223">проверка</text>
+      <rect x="406" y="204" width="100" height="30" rx="7" fill="#14244b"/><text x="456" y="223" fill="#f8f4ea" font-size="9.5" text-anchor="middle">коммит + журнал</text>
+      <line x1="108" y1="219" x2="118" y2="219" stroke="#14244b" stroke-width="1.4" marker-end="url(#ar)"/>
+      <line x1="204" y1="219" x2="214" y2="219" stroke="#14244b" stroke-width="1.4" marker-end="url(#ar)"/>
+      <line x1="300" y1="219" x2="310" y2="219" stroke="#14244b" stroke-width="1.4" marker-end="url(#ar)"/>
+      <line x1="396" y1="219" x2="406" y2="219" stroke="#14244b" stroke-width="1.4" marker-end="url(#ar)"/>
+      <path d="M354 236 C354 270, 160 270, 160 238" fill="none" stroke="#b3261e" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <text x="196" y="270" font-size="9.5" fill="#b3261e">ошибка ИИ → исправление → новое правило в AGENTS.md</text>
+    </g>
+    <text x="530" y="250" font-size="10.5" font-weight="700" fill="#14244b">Контрольные точки капитана</text>
+    <text x="530" y="267" font-size="10" fill="#141b2d">(а) концепция и дизайн · (б) деплой</text>
+    <text x="530" y="283" font-size="10" fill="#141b2d">(в) сдача · + правки после проверки</text>
+  </svg>
+  </div>
+  <h3>Документы для ИИ-агентов</h3>
+  <table>
+    <tr><th style="width:26%">Файл</th><th>Что в нём и зачем</th></tr>
+    <tr><td class="k">AGENTS.md</td><td>Правила для любого ИИ-ассистента (Claude Code, Cursor, Copilot, GigaCode…): стек, структура, <b>9 правил безопасности</b> (владелец данных — только из сессии, 404 вместо 403, секреты только в env…), стиль кода, команды, Definition of Done. Сюда же попадают уроки из ошибок ИИ: «не добавляй loading.tsx над страницами с id», «время — только через lib/time.ts»</td></tr>
+    <tr><td class="k">CLAUDE.md</td><td>Как ведём работу: роли, контрольные точки, когда запускать каких субагентов, обязательная запись ошибок ИИ</td></tr>
+    <tr><td class="k">docs/DECISIONS.md</td><td>52 решения: кто принял (капитан или ИИ), почему и какие были альтернативы</td></tr>
+    <tr><td class="k">docs/PROCESS_LOG.md</td><td>Журнал этапов: задача → промпт → что выдал ИИ → что пошло не так → как исправили → что сделал человек; таблица из 50 ошибок ИИ</td></tr>
+    <tr><td class="k">docs/prompts/</td><td>Дословные постановки задач: мастер-промпт, субагенты, системные инструкции GigaChat</td></tr>
+    <tr><td class="k">PRD, ARCHITECTURE, SECURITY, DESIGN</td><td>Продукт, устройство, безопасность простыми словами, дизайн-система «Посольство»</td></tr>
+  </table>
+  <h3>Субагенты: кто и что нашёл</h3>
+  <table>
+    <tr><th>Роль</th><th>Когда</th><th>Результат</th></tr>
+    <tr><td class="k">Исследователь</td><td>до концепции</td><td>12 продуктов-аналогов, топ-10 болей студентов, 10 идей; 107 обращений к вебу. Честно отметил, что mgimo.ru ему недоступен</td></tr>
+    <tr><td class="k">Аудитор безопасности</td><td>после ядра</td><td>Критичных 0, средних 3, низких 3: подделка IP для лимитов, блокировка чужого логина перебором, open redirect. Всё исправлено</td></tr>
+    <tr><td class="k">UX/a11y-ревьюер</td><td>после разделов</td><td>Оценка 7/10, 22 проблемы, 29 скриншотов: наложения в недельной сетке, контраст, фокус</td></tr>
+    <tr><td class="k">Тестировщик</td><td>после разделов</td><td>+21 сценарий e2e и 3 бага: помощник на «справку для военкомата» отвечал про ВУЦ; «просрочки» считались по реальным часам, а не по демо-времени</td></tr>
+    <tr><td class="k">4 переводчика</td><td>языки</td><td>~590 ключей × 3 языка параллельно, каждый на своих разделах</td></tr>
+    <tr><td class="k">Финальный аудит: безопасность, UX, QA, «жюри»</td><td>перед сдачей</td><td>Главное — блокировка демо-аккаунта жюри с нескольких адресов и связь голоса и ответа в «анонимном» опросе через служебное поле базы. «Жюри» оценило проект ≈ 8,3/10 и дало топ-5 улучшений — сделаны</td></tr>
+  </table>
+</section>
+
+<!-- ============ 4. ПРОМПТЫ ============ -->
+<section>
+  <p class="kicker">Раздел 4</p>
+  <h2><span class="n">4</span>Ключевые промпты по этапам</h2>
+  <div class="rule"></div>
+  <p>Ниже — фрагменты. Полные дословные тексты лежат в <code>docs/prompts/</code>, остальные постановки цитируются в <code>docs/PROCESS_LOG.md</code>.</p>
+  <table>
+    <tr><th style="width:15%">Этап</th><th style="width:27%">Промпт</th><th>Что получилось</th></tr>
+    <tr><td>0 · 06.11</td><td><code>00-master-prompt.md</code> — мастер-промпт капитана (~1 800 слов + ТЗ)</td><td>ИИ не бросился писать код, а задал 4 вопроса одним окном (хостинг, ключ ИИ, Git, дедлайн) и завёл план по этапам</td></tr>
+    <tr><td>3 · 06.11</td><td><code>03-research-agent.md</code> — субагент-исследователь</td><td><code>docs/research/RESEARCH.md</code>: аналоги, боли, идеи</td></tr>
+    <tr><td>4–5 · 06.11</td><td>«Покажи 2–3 варианта главного экрана на 360 px и на десктопе»</td><td>Один генератор строит одинаковый контент в трёх стилях — сравнивается стиль, а не наполнение</td></tr>
+    <tr><td>10 · 07.11</td><td><code>10-security-audit.md</code> — независимый аудит</td><td>6 находок, все закрыты, на каждую — тест</td></tr>
+    <tr><td>11 · 07.11</td><td><code>11-ux-review.md</code>, <code>11-qa-e2e.md</code></td><td>22 UX-проблемы, +21 e2e-сценарий, 3 бага</td></tr>
+    <tr><td>14 · 07.11</td><td>Правки капитана после ручного теста + выгрузка опроса</td><td>11 правок в таблице «правка → что сделано», блок «Баллы по сегодняшним предметам»</td></tr>
+    <tr><td>18 · 11.11</td><td><code>12-i18n-agents.md</code> — 4 переводчика</td><td>Английский, китайский, французский; TypeScript не даёт пропустить ключ</td></tr>
+    <tr><td>22 · 11.11</td><td><code>13-draft-reply.md</code> — системная инструкция GigaChat для черновика методиста</td><td>В модель не уходят ФИО и зачётка; пометку «[уточните…]» сервер не пропустит к студенту</td></tr>
+    <tr><td>23 · 11.11</td><td><code>14-ux-audit.md</code> — аудит удобства и стиль</td><td>Замер 13 задач скриптом: на телефоне −19 % времени; «Посольство 2.0»</td></tr>
+    <tr><td>26 · 18.11</td><td><code>15-final-audit.md</code> — 4 роли финального аудита</td><td>23 находки, исправлены до сдачи</td></tr>
+    <tr><td>27 · 18.11</td><td><code>16-assistant-system.md</code> — инструкция «Помощника деканата» и история её правок</td><td>Правила против выдумок модели по ответам на живом сайте</td></tr>
+  </table>
+  <div class="quote">«Ты — вся моя команда: продакт, UX/UI-дизайнер, фулстек-разработчик, специалист по безопасности, QA и технический писатель. Я — Родион… Программировать я не умею: моя роль — ставить задачи, принимать ключевые решения, проверять результат и делать то, что ты физически не можешь… Держи перед глазами критерии оценки: каждое решение принимай с оглядкой на 4 критерия по 10 баллов».<span class="who">Мастер-промпт капитана, этап 0. Почему такой длинный: чтобы ИИ с первого сообщения сам следил за безопасностью, процессом и документацией, а не ждал напоминаний</span></div>
+  <div class="quote">«Ты — независимый аудитор безопасности веб-приложений (уровень OWASP ASVS L2)… Найди способы увидеть чужие данные: подмена id в URL, формах, Server Actions…»<span class="who">Постановка субагенту-аудитору, этап 10. Отдельный агент со свежим контекстом не «защищает» свой код</span></div>
+  <div class="quote">«Визуально ты обновил только некоторые разделы, а остальные оставил неизменными. Нужно сделать остальное под один стиль, сейчас всё выглядит максимально разнородно».<span class="who">Правка капитана со скриншотом, этап 24. ИИ проверял новый стиль на 3–4 страницах. Исправили в базовых компонентах, и теперь проверяем контактным листом всех 28 экранов (ошибка ИИ №40)</span></div>
+  <div class="quote">«Не выдумывайте: каждую находку проверьте… Живой сайт берегите: не больше 2 неверных входов на аккаунт (иначе сработает блокировка, и жюри не войдёт)».<span class="who">Общие условия для четырёх субагентов финального аудита, этап 26</span></div>
+</section>
+
+<!-- ============ 5. СКРИНШОТЫ ============ -->
+<section>
+  <p class="kicker">Раздел 5</p>
+  <h2><span class="n">5</span>От идеи до кабинета</h2>
+  <div class="rule"></div>
+  <h3>Контрольная точка (а): три направления дизайна</h3>
+  <p>ИИ сделал один генератор и собрал в нём одинаковый контент в трёх визуальных стилях. Капитан выбрал «Посольство»: слоновая кость, глубокий синий, латунь, антиква PT Serif. Название — «Меридиан», логотип — глобус с меридианами и звездой-ориентиром, без копирования эмблемы вуза.</p>
+  <div class="phones c3">
+    <figure><img src="jpg/concept-a.jpg" alt=""><figcaption><b>A «Посольство»</b> <span class="tag ok">выбран</span></figcaption></figure>
+    <figure><img src="jpg/concept-b.jpg" alt=""><figcaption><b>B «Кампус»</b> — светлый bento, кобальт</figcaption></figure>
+    <figure><img src="jpg/concept-c.jpg" alt=""><figcaption><b>C «Ночная библиотека»</b> — тёмная, лайм</figcaption></figure>
+  </div>
+  <figure><img src="jpg/fail-banner.jpg" alt=""><figcaption><span class="tag bad">неудачный вариант</span> <b>Вариант B на компьютере, первая версия:</b> плашка «Перенос пары» растянулась на высоту соседней карточки помощника — пустой жёлтый блок. ИИ заметил это сам на своём скриншоте и вынес плашку в отдельную строку. С тех пор правило — смотреть каждый макет скриншотом на 360 и 1440 px до показа (ошибка ИИ №3).</figcaption></figure>
+</section>
+
+<section>
+  <h3 style="margin-top:0">После ручной проверки капитана: правки и новая ошибка</h3>
+  <p>Капитан прошёл кабинет на проде и прислал 7 правок. Одна из них: «в карточке пары главное — предмет, день, время, аудитория». ИИ переделал карточку, но на телефоне плитки начали обрезаться («Сег…»). Это исправление обрезки переносом посреди слова дало новую ошибку («Понедельн/ик»), которую нашёл уже капитан. Окончательно — дата числом.</p>
+  <div class="phones c3">
+    <figure><img src="jpg/r1-before.jpg" alt=""><figcaption><span class="tag mid">до</span> карточка пары — строкой текста</figcaption></figure>
+    <figure><img src="jpg/r1-after-bug.jpg" alt=""><figcaption><span class="tag bad">после, с ошибкой</span> плитки «День / Начало / Аудитория» обрезаются: «Сег…», «Главный …» (ошибка ИИ №14)</figcaption></figure>
+    <figure><img src="jpg/f-today-360.jpg" alt=""><figcaption><span class="tag ok">сейчас</span> дата числом, преподаватель отдельной плашкой, быстрые действия</figcaption></figure>
+  </div>
+  <h3>Аудит удобства: сколько секунд до нужного раздела</h3>
+  <p>Скрипт прошёл 13 задач студента реальными кликами на телефоне и посчитал время по модели KLM (нажатия, прокрутки, чтение). Ниже — задачи, которые ускорились. Сумма по всем 13 задачам — <b>85,6 → 69,2 с (−19 %)</b>.</p>
+  <div class="diagram">
+  <svg viewBox="0 0 720 196" width="100%">
+    <g font-size="10.5" fill="#141b2d">
+      <rect x="440" y="2" width="12" height="9" rx="2" fill="#c9c3b4"/><text x="457" y="11" font-size="9.5" fill="#565c6b">до (раунд 6)</text>
+      <rect x="540" y="2" width="12" height="9" rx="2" fill="#14244b"/><text x="557" y="11" font-size="9.5" fill="#565c6b">после (раунд 7), секунд</text>
+    </g>
+    <!-- scale: 1 c = 26 px, start x=210 -->
+    <g font-size="10.5">
+      <text x="200" y="36" text-anchor="end" fill="#141b2d">Сменить язык</text>
+      <rect x="210" y="24" width="278" height="9" rx="2" fill="#c9c3b4"/><text x="494" y="32" font-size="9" fill="#565c6b">10,7</text>
+      <rect x="210" y="35" width="130" height="9" rx="2" fill="#14244b"/><text x="346" y="43" font-size="9" fill="#141b2d" font-weight="700">5,0</text>
+
+      <text x="200" y="72" text-anchor="end" fill="#141b2d">Заказать справку</text>
+      <rect x="210" y="60" width="278" height="9" rx="2" fill="#c9c3b4"/><text x="494" y="68" font-size="9" fill="#565c6b">10,7</text>
+      <rect x="210" y="71" width="200" height="9" rx="2" fill="#14244b"/><text x="416" y="79" font-size="9" fill="#141b2d" font-weight="700">7,7</text>
+
+      <text x="200" y="108" text-anchor="end" fill="#141b2d">Расписание на неделю</text>
+      <rect x="210" y="96" width="208" height="9" rx="2" fill="#c9c3b4"/><text x="424" y="104" font-size="9" fill="#565c6b">8,0</text>
+      <rect x="210" y="107" width="130" height="9" rx="2" fill="#14244b"/><text x="346" y="115" font-size="9" fill="#141b2d" font-weight="700">5,0</text>
+
+      <text x="200" y="144" text-anchor="end" fill="#141b2d">Статус своей заявки</text>
+      <rect x="210" y="132" width="208" height="9" rx="2" fill="#c9c3b4"/><text x="424" y="140" font-size="9" fill="#565c6b">8,0</text>
+      <rect x="210" y="143" width="156" height="9" rx="2" fill="#14244b"/><text x="372" y="151" font-size="9" fill="#141b2d" font-weight="700">6,0</text>
+
+      <text x="200" y="180" text-anchor="end" fill="#141b2d">Записаться к методисту</text>
+      <rect x="210" y="168" width="174" height="9" rx="2" fill="#c9c3b4"/><text x="390" y="176" font-size="9" fill="#565c6b">6,7</text>
+      <rect x="210" y="179" width="104" height="9" rx="2" fill="#14244b"/><text x="320" y="187" font-size="9" fill="#141b2d" font-weight="700">4,0</text>
+    </g>
+    <line x1="210" y1="18" x2="210" y2="192" stroke="#565c6b" stroke-width="1"/>
+  </svg>
+  </div>
+  <div class="phones c2" style="grid-template-columns: 1fr 1fr; width: 70%; margin: 0 auto;">
+    <figure><img src="jpg/ux-before.jpg" alt=""><figcaption><span class="tag mid">до</span> на телефоне за картой пары сразу шли изменения — чтобы заказать справку, нужно было листать</figcaption></figure>
+    <figure><img src="jpg/ux-after.jpg" alt=""><figcaption><span class="tag ok">после</span> четыре быстрых действия под картой пары, «Посольство 2.0»: глубина, стекло, латунь</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h3 style="margin-top:0">«Всё выглядит разнородно» → единый стиль на всех 28 экранах</h3>
+  <p>После жалобы капитана стиль перенесли в базовые компоненты и общие классы. Скрипт-кодмод перевёл ~45 «ручных» блоков в 28 файлах. Проверку теперь делаем контактным листом всех экранов, а не выборкой.</p>
+  <figure><img src="jpg/sheet-light.jpg" alt=""><figcaption><b>Контактный лист</b> (часть) — все экраны студента в светлой теме, <code>scripts/ux-sheet.mjs</code></figcaption></figure>
+  <figure><img src="jpg/sheet-dark.jpg" alt=""><figcaption>То же в тёмной теме</figcaption></figure>
+</section>
+
+<section>
+  <h3 style="margin-top:0">Готовый кабинет студента (телефон, 360 px)</h3>
+  <div class="phones c4">
+    <figure><img src="jpg/f-login-360.jpg" alt=""><figcaption><b>Вход.</b> Пометка «концепт» сразу видна; кнопки демо-аккаунтов для жюри</figcaption></figure>
+    <figure><img src="jpg/f-today-360.jpg" alt=""><figcaption><b>Сегодня.</b> Следующая пара, «Как пройти», быстрые действия, баллы по сегодняшним предметам</figcaption></figure>
+    <figure><img src="jpg/f-schedule-360.jpg" alt=""><figcaption><b>Расписание.</b> День / неделя / сессия; изменения подсвечены и продублированы уведомлениями</figcaption></figure>
+    <figure><img src="jpg/f-grades-360.jpg" alt=""><figcaption><b>Успеваемость.</b> «Требуют внимания», прогноз стипендии, план по каждому предмету</figcaption></figure>
+    <figure><img src="jpg/f-electives-360.jpg" alt=""><figcaption><b>Курсы по выбору.</b> Лимит мест, лист ожидания, автозачисление</figcaption></figure>
+    <figure><img src="jpg/f-request-360.jpg" alt=""><figcaption><b>Заявка.</b> Трекер статусов, кто ведёт, срок</figcaption></figure>
+    <figure><img src="jpg/f-assistant-360.jpg" alt=""><figcaption><b>Помощник.</b> Ответ со ссылкой на пункт Положения и кнопкой «Заполнить» (на скриншоте — офлайн-режим)</figcaption></figure>
+    <figure><img src="jpg/f-today-dark-360.jpg" alt=""><figcaption><b>Тёмная тема</b> в той же палитре</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h3 style="margin-top:0">Кабинет деканата и компьютер</h3>
+  <figure><img src="jpg/f-staff-1440.jpg" alt=""><figcaption><b>Очередь заявок.</b> Сначала те, что требуют действия. «Взять себе», фильтры, оценка работы офиса студентами. Смена статуса сразу отправляет студенту уведомление, а готовая справка уходит с QR-кодом</figcaption></figure>
+  <div class="grid2">
+    <figure><img src="jpg/analytics.jpg" alt=""><figcaption><b>Панель руководителя.</b> Поток заявок, сроки, нагрузка методистов, подсказки «что стоит сделать» — только агрегаты, без ФИО</figcaption></figure>
+    <figure><img src="jpg/f-risks-1440.jpg" alt=""><figcaption><b>Раннее предупреждение.</b> Студенты с риском по баллам (тот же расчёт, что студент видит у себя) и кнопка «Пригласить на консультацию»</figcaption></figure>
+  </div>
+  <figure><img src="jpg/f-today-1440.jpg" alt=""><figcaption><b>«Сегодня» на компьютере</b> — боковое меню с группами «Учёба / Деканат / Моё»</figcaption></figure>
+</section>
+
+<!-- ============ 6. ОШИБКИ ИИ ============ -->
+<section>
+  <p class="kicker">Раздел 6</p>
+  <h2><span class="n">6</span>Ошибки ИИ и как мы их ловили</h2>
+  <div class="rule"></div>
+  <p class="lead">ИИ ошибается — важно, чтобы ошибки ловились до жюри и не повторялись. Каждую мы записывали в таблицу: что произошло, как заметили, как исправили, какое правило добавили. Всего <b>50</b>, полный список — в конце <code>docs/PROCESS_LOG.md</code>.</p>
+  <div class="diagram">
+  <svg viewBox="0 0 720 128" width="100%">
+    <text x="0" y="12" font-size="11" font-weight="700" fill="#14244b">Кто заметил ошибку (из 50)</text>
+    <!-- scale 1 = 22px, x0=250 -->
+    <g font-size="10.5" fill="#141b2d">
+      <text x="240" y="38" text-anchor="end">Сам ИИ: свои скриншоты, логи, самопроверка</text>
+      <rect x="250" y="28" width="400" height="13" rx="2" fill="#14244b"/><text x="656" y="39" font-weight="700">20</text>
+      <text x="240" y="63" text-anchor="end">Автотесты и проверочные скрипты</text>
+      <rect x="250" y="53" width="380" height="13" rx="2" fill="#14244b"/><text x="636" y="64" font-weight="700">19</text>
+      <text x="240" y="88" text-anchor="end">Субагенты (независимые проверки)</text>
+      <rect x="250" y="78" width="120" height="13" rx="2" fill="#14244b"/><text x="376" y="89" font-weight="700">6</text>
+      <text x="240" y="113" text-anchor="end">Капитан при ручной проверке</text>
+      <rect x="250" y="103" width="100" height="13" rx="2" fill="#14244b"/><text x="356" y="114" font-weight="700">5</text>
+    </g>
+  </svg>
+  </div>
+  <table>
+    <tr><th style="width:5%">№</th><th style="width:38%">Что произошло</th><th style="width:20%">Как заметили</th><th>Исправление и правило на будущее</th></tr>
+    <tr><td class="num">4</td><td>ИИ выбрал Prisma, не проверив, что её движок скачивается в среде разработки</td><td>Ошибка при первой миграции</td><td>Переход на Drizzle. <b>Правило:</b> проверять сетевые зависимости инструмента до выбора</td></tr>
+    <tr><td class="num">7, 43</td><td>Чужая заявка показывала «не найдено», но со статусом 200 вместо 404: потоковая отдача страницы. <b>Повторилась</b> через две недели в новом коде</td><td>e2e-тесты изоляции — оба раза</td><td>Убрали обёртку загрузки над страницами с id. <b>Правило в AGENTS.md:</b> не добавлять <code>loading.tsx</code> над маршрутами с <code>[id]</code></td></tr>
+    <tr><td class="num">14, 19</td><td>Плитки карточки пары обрезались; исправление переносом посреди слова дало «Понедельн/ик»</td><td>ИИ на скриншоте, потом капитан на проде</td><td>Дата числом. <b>Правило:</b> проверять самое длинное значение, не чинить обрезку переносом посреди слова</td></tr>
+    <tr><td class="num">29</td><td>Перевели «интерфейс», а объявления, сроки и уведомления на английской версии остались русскими</td><td>Капитан на проде</td><td>Скрипт ищет кириллицу в видимом тексте всех страниц; переводчик содержимого. <b>Правило:</b> проверять то, что видит пользователь, а не код</td></tr>
+    <tr><td class="num">31</td><td>Исправлен симптом (цвет пунктов списка в тёмной теме), а не причина (прозрачный фон из-за склейки классов) — то же всплыло в других списках</td><td>Капитан на проде</td><td>Исправление в базовом компоненте и тест на все списки. <b>Правило:</b> чинить в основе и искать все места проявления</td></tr>
+    <tr><td class="num">36</td><td>Номер заявки — 5 случайных цифр без проверки; сброс демо-данных падал примерно в 5 % случаев</td><td>Плавающее падение теста</td><td>Уникальные номера, повтор по коду ошибки базы. <b>Правило:</b> обработку ошибок БД проверять на реальной ошибке</td></tr>
+    <tr><td class="num">40</td><td>Новый стиль применён точечно; проверка была скриншотами 3–4 страниц</td><td>Капитан: «всё выглядит разнородно»</td><td>Стиль — в базовых компонентах; <b>правило:</b> контактный лист ВСЕХ страниц</td></tr>
+    <tr><td class="num">42</td><td>Сессия ИИ прервалась посреди правки CSS: сайт отдавал ошибку 500, 38 файлов не закоммичены</td><td>Следующая сессия</td><td>Разобрана вся незавершённая работа. <b>Правило:</b> коммитить частями после каждой зелёной проверки</td></tr>
+    <tr><td class="num">45</td><td>Время новых уведомлений бралось из часов базы, а список фильтрует по часам приложения (демо-время). Пока реальная дата была раньше демо-даты, всё работало</td><td>5 e2e-тестов упали без изменений в коде</td><td>Время — только через функцию приложения, и для значений по умолчанию в БД тоже</td></tr>
+    <tr><td class="num">47</td><td>«Анонимный» опрос: голос и ответ писались в одной транзакции — их можно было связать по служебному полю PostgreSQL, а документация утверждала обратное</td><td>Субагент-аудитор проверил атакой на копии БД</td><td>Разные транзакции, честная формулировка. <b>Правило:</b> обещания анонимности проверять атакой, а не по схеме</td></tr>
+    <tr><td class="num">49</td><td>Значок сайта без входа перенаправлялся на страницу входа — вкладка жюри была без значка. Ни тесты, ни три аудита не заметили</td><td>Ошибка в консоли в отчёте Lighthouse</td><td>Значки исключены из проверки входа, тест. <b>Правило:</b> каждый публичный файл проверять запросом без cookie</td></tr>
+    <tr><td class="num">50</td><td>Живой GigaChat на вопрос из ТЗ «Что у меня с сессией?» ответил: «сессия наступила, нужны пересдачи». На самом деле до сессии месяц. Ещё «34 балла из 30 возможных»</td><td>Проверка живого сайта при подготовке этого документа</td><td>Даты сессии и «сколько нужно на экзамене» — в данные для модели; правила против выдумок в инструкции. <b>Правило:</b> примеры вопросов из ТЗ проверять на настоящей модели</td></tr>
+  </table>
+</section>
+
+<!-- ============ 7. БЕЗОПАСНОСТЬ ============ -->
+<section>
+  <p class="kicker">Раздел 7</p>
+  <h2><span class="n">7</span>Вход, хранение и защита — простыми словами</h2>
+  <div class="rule"></div>
+  <div class="grid2" style="margin-bottom:4mm">
+    <div class="card"><b>Каждый видит только своё.</b> Сервер определяет «кто вы» только по сессии, а не по номеру в адресной строке. Подставьте в адрес чужую заявку — получите «Страница не найдена» (404). Это тот же ответ, что и для несуществующей заявки: мы даже не подтверждаем, что она есть.</div>
+    <div class="card"><b>Паролей нет в базе.</b> Хранится только «отпечаток» пароля (хэш argon2id). Даже администратор базы пароль не узнает. Поэтому в профиле пароль нельзя «показать» — только сменить.</div>
+    <div class="card"><b>Ключи — только на сервере.</b> Ключ GigaChat и пароль базы лежат в переменных окружения хостинга. В коде и в браузере их нет: это проверяет скрипт на каждой сборке.</div>
+    <div class="card"><b>Все данные вымышлены.</b> ФИО, оценки, номера зачёток, «Положение о деканате» и схема кампуса — придуманы. На каждой странице есть пометка «концепт».</div>
+  </div>
+  <h3>Как устроен вход</h3>
+  <div class="diagram">
+  <svg viewBox="0 0 720 200" width="100%">
+    <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="#14244b"/></marker></defs>
+    <g font-size="11.5" font-weight="700" fill="#f8f4ea">
+      <rect x="10" y="6" width="150" height="30" rx="8" fill="#14244b"/><text x="85" y="26" text-anchor="middle">Браузер</text>
+      <rect x="285" y="6" width="150" height="30" rx="8" fill="#14244b"/><text x="360" y="26" text-anchor="middle">Сервер</text>
+      <rect x="560" y="6" width="150" height="30" rx="8" fill="#14244b"/><text x="635" y="26" text-anchor="middle">База данных</text>
+    </g>
+    <g stroke="#c9c3b4" stroke-dasharray="3 3"><line x1="85" y1="36" x2="85" y2="196"/><line x1="360" y1="36" x2="360" y2="196"/><line x1="635" y1="36" x2="635" y2="196"/></g>
+    <g font-size="10" fill="#141b2d" stroke-width="1.5">
+      <line x1="85" y1="56" x2="356" y2="56" stroke="#14244b" marker-end="url(#ar2)"/><text x="96" y="51">1. логин и пароль по HTTPS</text>
+      <line x1="360" y1="80" x2="631" y2="80" stroke="#14244b" marker-end="url(#ar2)"/><text x="372" y="75">2. не слишком ли много попыток?</text>
+      <line x1="360" y1="104" x2="631" y2="104" stroke="#14244b" marker-end="url(#ar2)"/><text x="372" y="99">3. сверить пароль с хэшем argon2id</text>
+      <line x1="360" y1="128" x2="631" y2="128" stroke="#14244b" marker-end="url(#ar2)"/><text x="372" y="123">4. сохранить отпечаток нового токена</text>
+      <line x1="356" y1="152" x2="89" y2="152" stroke="#b8892f" marker-end="url(#ar2)"/><text x="96" y="147">5. cookie с токеном: HttpOnly, Secure</text>
+      <line x1="85" y1="182" x2="356" y2="182" stroke="#14244b" marker-end="url(#ar2)"/><text x="96" y="177">6. каждый запрос — с cookie</text>
+      <line x1="360" y1="182" x2="631" y2="182" stroke="#14244b" marker-end="url(#ar2)"/><text x="372" y="177">7. найти сессию, проверить срок и роль</text>
+    </g>
+  </svg>
+  </div>
+  <ul>
+    <li><b>Ошибка входа всегда одна:</b> «Неверный логин или пароль». По ней нельзя понять, существует ли логин.</li>
+    <li><b>Перебор паролей блокируется.</b> Лимит — 5 неудач на «логин + адрес». Счётчики хранятся в базе, поэтому работают и на нескольких серверах. Для демо-аккаунтов жюри отключён общий лимит со всех адресов: иначе один член жюри мог бы случайно заблокировать вход остальным.</li>
+    <li><b>«Выйти» удаляет сессию в базе.</b> Кнопка «Назад» в браузере в кабинет не вернёт. В профиле видны активные устройства.</li>
+    <li><b>Роль проверяется на сервере дважды:</b> при открытии раздела и в каждом действии. Действие можно вызвать в обход страницы, поэтому одной проверки мало.</li>
+    <li><b>ИИ-помощник видит только данные текущего студента</b> и ничего не делает сам: максимум открывает форму с заполненными полями, а отправляет студент. В черновик методиста ФИО и номер зачётки не передаются.</li>
+    <li><b>Справку не подделать:</b> QR-код ведёт на страницу проверки с данными из базы. Код случайный (96 бит), а не номер записи, — подобрать его нельзя.</li>
+    <li><b>Вложения</b> — только PDF, JPG, PNG, DOCX. Тип проверяется по содержимому файла: переименованный <code>.exe</code> не пройдёт. Скачать файл может только автор заявки или деканат.</li>
+  </ul>
+  <h3>Проверьте сами за 2 минуты</h3>
+  <table>
+    <tr><th style="width:36%">Что проверить</th><th>Как</th></tr>
+    <tr><td>Чужая заявка не открывается</td><td>Войдите как <code>sokolova</code>, откройте заявку, скопируйте адрес. Войдите как <code>galiev</code> и вставьте адрес → «Страница не найдена»</td></tr>
+    <tr><td>Студент не попадает к деканату</td><td>Под студентом откройте <code>/staff</code> → вернёт на главную</td></tr>
+    <tr><td>Справка проверяется по QR</td><td>Под <code>galiev</code> откройте готовую справку для военкомата → QR → страница проверки</td></tr>
+  </table>
+  <p class="small muted">Автотесты безопасности: <code>tests/e2e/isolation.spec.ts</code>, <code>tests/unit/dal-isolation.test.ts</code> и другие. Подробно и честно об ограничениях прототипа — <code>docs/SECURITY.md</code>.</p>
+</section>
+
+<!-- ============ 8. КАЧЕСТВО ============ -->
+<section>
+  <p class="kicker">Раздел 8</p>
+  <h2><span class="n">8</span>Качество: тесты, доступность, скорость</h2>
+  <div class="rule"></div>
+  <div class="grid3" style="margin-bottom:4mm">
+    <div class="stat"><b>63 + 79</b><span>модульных тестов и сценариев в браузере, включая телефон 360 px; все зелёные перед каждой версией</span></div>
+    <div class="stat"><b>0</b><span>нарушений axe (WCAG 2 A/AA) на всех страницах студента и деканата, в двух темах и двух ширинах</span></div>
+    <div class="stat"><b>0 ошибок</b><span>под нагрузкой: ~50–70 страниц кабинета в секунду на одной копии сервера (2 ядра)</span></div>
+  </div>
+  <h3>Lighthouse (production-сборка)</h3>
+  <table>
+    <tr><th>Страница</th><th class="num">Скорость, телефон</th><th class="num">Скорость, компьютер</th><th class="num">Доступность</th></tr>
+    <tr><td>Вход</td><td class="num">88</td><td class="num">100</td><td class="num">100</td></tr>
+    <tr><td>Сегодня</td><td class="num">89</td><td class="num">100</td><td class="num">100</td></tr>
+    <tr><td>Расписание</td><td class="num">90</td><td class="num">100</td><td class="num">100</td></tr>
+    <tr><td>Успеваемость</td><td class="num">83</td><td class="num">100</td><td class="num">100</td></tr>
+    <tr><td>Курсы по выбору</td><td class="num">92</td><td class="num">100</td><td class="num">100</td></tr>
+    <tr><td>Заявки</td><td class="num">89</td><td class="num">100</td><td class="num">100</td></tr>
+    <tr><td>Портфолио</td><td class="num">94</td><td class="num">99</td><td class="num">100</td></tr>
+    <tr><td>Как пройти</td><td class="num">85</td><td class="num">100</td><td class="num">100</td></tr>
+  </table>
+  <p class="small muted">Профиль «телефон» — медленный 4G и процессор, замедленный в 4 раза; оценка колеблется на ±5 от запуска к запуску. Честно: после добавления новых разделов скорость на телефоне упала с 90–98 до 79–86. Разбор отчёта показал, что «главным элементом» каждой страницы было окно подсказок. Исправили — стало 83–94. Остаток — базовый JavaScript фреймворка.</p>
+  <h3>Что ещё проверяем</h3>
+  <ul>
+    <li><b>Ширина 360 px</b> — каждая страница, в каждом языке, без горизонтальной прокрутки (тест).</li>
+    <li><b>Состояния:</b> скелетоны при загрузке, иллюстрации для пустых списков, ошибки, 404 и офлайн-экран — в стиле «Посольства».</li>
+    <li><b>Клавиатура:</b> видимый фокус, фокус на первое неверное поле формы, подписи для экранных читалок, контраст AA в обеих темах.</li>
+    <li><b>Жюри не помешают друг другу:</b> демо-данные сами возвращаются в исходное состояние каждую ночь в 4:00 по Москве. Деканат может сбросить их вручную не чаще раза в 30 минут.</li>
+    <li><b>Живой сайт под присмотром до 28.11:</b> каждый день в 10:23 по Москве задача по расписанию проверяет сайт. Она входит всеми демо-аккаунтами, открывает 28 страниц и задаёт помощнику вопрос из ТЗ. Если что-то сломалось, капитану приходит уведомление с инструкцией (<code>scripts/smoke-live.mjs</code>, только чтение).</li>
+    <li><b>Масштабирование:</b> приложение не хранит состояние в памяти, всё в PostgreSQL — копии сервера можно добавлять. Подробно — <code>docs/ARCHITECTURE.md</code> и <code>docs/research/LOAD_TEST.md</code>.</li>
+  </ul>
+</section>
+
+<!-- ============ 9. ВРУЧНУЮ ============ -->
+<section>
+  <p class="kicker">Раздел 9</p>
+  <h2><span class="n">9</span>Что сделано вручную</h2>
+  <div class="rule"></div>
+  <p>Всё, что требует аккаунта, решения, телефона или голоса человека, делал капитан. ИИ для каждого такого шага готовил пошаговую инструкцию (<code>docs/manual/</code>).</p>
+  <table>
+    <tr><th style="width:20%">Когда</th><th>Что сделал капитан</th></tr>
+    <tr><td>До старта</td><td>Составил мастер-промпт в отдельном чате с Claude и сохранил ТЗ и промпт в проект Claude</td></tr>
+    <tr><td>Этап 0</td><td>Ответил на вопросы ИИ: хостинг Amvera, ИИ в продукте — GigaChat, GitHub, свой дедлайн 22.11</td></tr>
+    <tr><td>КТ (а)</td><td>Выбрал стиль «Посольство», название «Меридиан» и смелые идеи</td></tr>
+    <tr><td>Опрос</td><td>Создал анкету в Яндекс Формах, разослал однокурсникам, собрал 11 ответов и прислал выгрузку</td></tr>
+    <tr><td>Регистрации</td><td>Создал репозиторий GitHub, проект и базу PostgreSQL на Amvera, получил ключ GigaChat; задал переменные окружения; добавил сертификаты НУЦ Минцифры для GigaChat</td></tr>
+    <tr><td>Каждая версия</td><td>Распаковывал архив репозитория от ИИ, публиковал кнопкой Push в GitHub Desktop и пересобирал приложение на Amvera</td></tr>
+    <tr><td>Проверка</td><td>Проходил кабинет на проде с компьютера и телефона без VPN. Прислал 5 раундов правок со скриншотами: формат карточки пары, «слишком едкий красный» у отмены, непереведённые тексты, белые списки в тёмной теме, разнородный стиль</td></tr>
+    <tr><td>Выбор улучшений</td><td>Из списков предложений ИИ выбирал, что делать (раунды 3, 6, 8), и доверял ИИ порядок</td></tr>
+    <tr><td>Доступы</td><td>Разрешил облачной среде Claude обращаться к домену сайта — для проверок живого сайта</td></tr>
+    <tr><td>Видео и сдача</td><td>Озвучка видео по сценарию ИИ, загрузка видео, отправка работы в форме конкурса</td></tr>
+  </table>
+  <div class="okbox"><b>Чего капитан не делал:</b> не писал и не правил код. Каждая строка кода, тесты, скрипты и документация — от ИИ. Решения, проверка и всё, что «по ту сторону экрана», — от человека.</div>
+</section>
+
+<!-- ============ 10. ГДЕ ЧТО ============ -->
+<section class="nobreak" style="break-before: auto; margin-top: 6mm">
+  <p class="kicker">Раздел 10</p>
+  <h2><span class="n">10</span>Где что лежит в репозитории</h2>
+  <div class="rule"></div>
+  <table>
+    <tr><th style="width:36%">Путь</th><th>Что там</th></tr>
+    <tr><td><code>README.md</code></td><td>Что внутри, аккаунты, как запустить</td></tr>
+    <tr><td><code>docs/TEST_ACCOUNTS.md</code></td><td>Аккаунты и «маршрут для жюри за 5 минут»</td></tr>
+    <tr><td><code>docs/COMPLIANCE.md</code></td><td>Каждое требование ТЗ → где сделано → как проверить</td></tr>
+    <tr><td><code>AGENTS.md</code>, <code>CLAUDE.md</code></td><td>Правила для ИИ-агентов</td></tr>
+    <tr><td><code>docs/PROCESS_LOG.md</code></td><td>Журнал 27 этапов и 50 ошибок ИИ</td></tr>
+    <tr><td><code>docs/prompts/</code></td><td>Дословные промпты</td></tr>
+    <tr><td><code>docs/DECISIONS.md</code></td><td>52 решения с причинами</td></tr>
+    <tr><td><code>docs/research/</code></td><td>Исследование, опрос, обзоры, аудиты, нагрузка</td></tr>
+    <tr><td><code>docs/screenshots/</code></td><td>Скриншоты всех этапов, включая неудачные варианты</td></tr>
+    <tr><td><code>src/server/dal/</code></td><td>Единственное место, где код читает данные студента (фильтр по сессии)</td></tr>
+    <tr><td><code>tests/</code></td><td>63 модульных теста и 79 сценариев в браузере</td></tr>
+  </table>
+  <p class="small muted" style="margin-top:6mm">Концепт для конкурса МГИМО по ИИ. Не является официальным сервисом МГИМО. Все люди и данные вымышлены. Логотип «Меридиан» — собственный.</p>
+</section>
+
+</body>
+</html>
