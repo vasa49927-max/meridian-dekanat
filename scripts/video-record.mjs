@@ -180,7 +180,7 @@ await scene("s7-staff", { ...DESK, storageState: staff }, async (p) => {
 });
 
 // 8. Телефон: студент видит статус, уведомление и справку с QR
-await scene("s8-result", { ...PHONE, storageState: anna }, async (p, ctx) => {
+await scene("s8-result", { ...PHONE, storageState: anna }, async (p) => {
   await p.goto(LOCAL + "/"); await w(p, 1500);
   await tap(p, p.locator('header a[href="/notifications"]').first(), 2600);
   await p.goto(LOCAL + requestPath); await w(p, 1800);
